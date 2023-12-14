@@ -1,6 +1,7 @@
 body {
     font-family: sans-serif;
     background-color: #fff;
+    margin-top: 50px;
   }
   
   .contenedor {
@@ -9,6 +10,7 @@ body {
     display: flex;
     justify-content: flex-end;
     align-items: stretch;
+    border: #666060 solid;
   }
   
   .cabecera {
@@ -72,9 +74,7 @@ body {
   img {
     float: left;
     width: 300px;
-    height: auto;
-    margin-right: 20px;
-    order: -1;
+    height:100% ;
   }
   
   p {

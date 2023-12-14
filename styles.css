@@ -1,0 +1,67 @@
+body {
+    font-family: sans-serif;
+    background-color: #fff;
+  }
+  
+  .contenedor {
+    width: 500px;
+    margin: 0 auto;
+  }
+  
+  .cabecera {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .formulario {
+    padding: 20px;
+    border: 1px solid #ccc;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
+  
+  input[type="submit"] {
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .opciones {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+/*Button google*/
+
+.google-login {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .google-login a {
+    color: #fff;
+    background-color: #000;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .google-login a:hover {
+    background-color: #111;
+  }
+  

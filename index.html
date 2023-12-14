@@ -1,26 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión</title>
-    <!-- Puedes enlazar aquí tus estilos CSS si los tienes -->
+  <meta charset="UTF-8">
+  <title>Inicio de sesión</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <h2>Iniciar Sesión</h2>
-
-    <form action="procesar_login.php" method="post">
-        <label for="usuario">Usuario:</label>
-        <input type="text" id="usuario" name="usuario" required>
-
-        <label for="contrasena">Contraseña:</label>
-        <input type="password" id="contrasena" name="contrasena" required>
-
-        <button type="submit">Iniciar Sesión</button>
-    </form>
-
-    <!-- Puedes enlazar aquí tus scripts JavaScript si los tienes -->
-
+  <div class="contenedor">
+    <div class="cabecera">
+      <h1>Bienvenido de vuelta</h1>
+    </div>
+    <div class="formulario">
+      <form action="/login" method="post">
+        <input type="email" name="email" placeholder="Correo electrónico">
+        <input type="password" name="password" placeholder="Contraseña">
+        <input type="submit" value="Iniciar sesión">
+      </form>
+    </div>
+    
+    <div class="google-login">
+        <a href="#">Iniciar sesión con Google</a>
+      </div>
+      
+    <div class="opciones">
+      <a href="#">¿Olvidó su contraseña?</a>
+      <a href="#">Crear una cuenta</a>
+    </div>
+  </div>
 </body>
 </html>

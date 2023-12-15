@@ -115,6 +115,17 @@ p.pass {
   text-align: left;
   margin-left: 28px; /* Puedes ajustar este valor según tus preferencias */
 }
+/* Para pantallas más pequeñas que 600px */
+@media (max-width: 600px) {
+  .contenedor {
+    height: 90vh; /* Ajusta la altura al 90% de la altura de la ventana (viewport height) */
+  }
 
+  img {
+    width: 100%;
+    float: none;
+    margin-bottom: 20px;
+  }
+}
 
 

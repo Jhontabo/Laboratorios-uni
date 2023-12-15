@@ -1,3 +1,10 @@
+:root {
+  --max-width: 310px;
+  --button-width: 100%;
+  --button-max-width: var(--max-width);
+  --input-width: calc(100% - 20px);
+}
+
 body {
   font-family: sans-serif;
   background-color: #fff;
@@ -12,6 +19,7 @@ body {
   flex-direction: row;
   justify-content: center;
   align-items: stretch;
+  margin-top: 100px;
 }
 
 .login {
@@ -22,15 +30,15 @@ body {
 }
 
 .formulario {
-  width: 100%;
+
   padding: 20px;
   text-align: center;
   box-sizing: border-box;
 }
 
 input {
-  width: calc(100% - 20px);
-  max-width: 310px; /* Tamaño máximo de 310px */
+  width: var(--input-width);
+  max-width: var(--max-width);
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
@@ -45,8 +53,8 @@ input[type="password"] {
 
 .inicio_sesion button,
 .google-login button {
-  width: 100%;
-  max-width: 310px; /* Tamaño máximo de 310px */
+  width: var(--button-width);
+  max-width: var(--button-max-width);
   font-size: 15px;
   font-weight: bold;
   padding: 8px;
@@ -93,10 +101,9 @@ p.pass {
   text-align: left;
 }
 
-
 #login_form {
-  width: 100%; /* Ajusta el ancho al 100% del contenedor */
-  max-width: 800px; /* Puedes ajustar el ancho máximo según tus necesidades */
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -110,10 +117,7 @@ p.pass {
     padding: 10px;
   }
 
-  .seccion-login h2 {
-    font-size: 18px;
-  }
-
+  .seccion-login h2,
   .seccion-login p {
     font-size: 12px;
   }
@@ -129,60 +133,13 @@ p.pass {
     width: 100%;
     max-width: none; /* Elimina el tamaño máximo para pantallas pequeñas */
   }
-}
-/* Media Queries para pantallas medianas (601px a 768px) */
-
-@media (min-width: 421px) and (max-width: 500px){
-  .formulario {
-    padding: 40px;
-  }
-
-  input,
-  input[type="password"] {
-    width: calc(70% - 20px);
-    max-width: 310px;
-    margin-bottom: 25px;
-  }
-
-  .inicio_sesion button,
-  .google-login button {
-    width: 100%; /* Cambiado a 100% para que coincida con los campos de entrada */
-    max-width: 310px;
-    margin-bottom: 40px;
-  }
-
-  p.correo,
-  p.pass {
-    text-align: left;
-    margin-bottom: 20px;
-    margin-left: 100px;
-  }
+  
 }
 
-/* Media Queries para pantallas grandes (769px en adelante) */
+/* Media Queries para pantallas muy grandes (800px en adelante) */
 @media (min-width: 800px) {
-  .formulario {
-    padding: 40px;
-  }
-
-  input,
-  input[type="password"] {
-    width: calc(70% - 20px);
-    max-width: 310px;
-    margin-bottom: 25px;
-  }
-
-  .inicio_sesion button,
-  .google-login button {
-    width: 100%; /* Cambiado a 100% para que coincida con los campos de entrada */
-    max-width: 310px;
-    margin-bottom: 40px;
-  }
-
   p.correo,
   p.pass {
-    text-align: left;
-    margin-bottom: 20px;
-    margin-left: 200px;
+    margin-left: 15px;
   }
 }

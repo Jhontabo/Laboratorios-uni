@@ -5,85 +5,61 @@ body {
 }
 
 .contenedor {
-  width: 800px;
-  height: 500px;
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto;
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: stretch;
 }
 
 .formulario {
-  flex: 2;
+  width: 100%;
   padding: 20px;
   border: 1px solid #ccc;
   text-align: center;
+  box-sizing: border-box;
 }
 
 input {
-  width: 280px;
+  width: 100%;
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   outline: none;
   border-radius: 30px;
+  box-sizing: border-box;
 }
 
 input[type="password"] {
-  width: 280px;
-  padding: 10px;
-  margin-bottom: 45px;
-  border: 1px solid #ccc;
-  outline: none;
-  border-radius: 30px;
+  margin-bottom: 20px;
 }
 
-.inicio_sesion button {
+.inicio_sesion button,
+.google-login button {
+  width: 100%;
   font-size: 15px;
-  width: 300px;
   font-weight: bold;
   padding: 8px;
   border-radius: 30px;
-  background-color: rgb(46, 74, 227);
-  color: #fff;
   cursor: pointer;
   border: 1px solid #ccc;
   margin-bottom: 20px;
 }
 
-.inicio_sesion button:hover {
+.inicio_sesion button:hover,
+.google-login button:hover {
   background-color: #7287e1;
 }
 
-/*Google*/
-
 .icono-google {
-  background: url('/Icons/Google.png') no-repeat; /* Reemplaza 'ruta_del_icono_local.png' con la ruta de tu icono local */
-  background-size: contain; /* Ajusta el tamaño del fondo para que se adapte al contenedor sin distorsionar */
-  width: 20px; /* Ancho del contenedor del icono */
-  height: 20px; /* Altura del contenedor del icono */
+  background: url('/Icons/Google.png') no-repeat;
+  background-size: contain;
+  width: 20px;
+  height: 20px;
   display: inline-block;
-  margin-right: 8px; /* Ajusta el margen derecho según sea necesario */
-}
-
-
-.google-login button {
-  font-size: 15px;
-  width: 300px;
-  font-weight: bold;
-  padding: 8px;
-  border-radius: 30px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  margin-bottom: 20px;
-}
-
-.google-login button i {
   margin-right: 8px;
-}
-
-.google-login button:hover {
-  background-color: #cbc7c7;
 }
 
 .opciones {
@@ -100,12 +76,6 @@ a:hover {
   text-decoration: underline;
 }
 
-img {
-  float: left;
-  width: 400px;
-  height: 100%;
-}
-
 p.correo,
 p.pass {
   color: #000;
@@ -113,19 +83,39 @@ p.pass {
   margin-bottom: 10px;
   font-size: 14px;
   text-align: left;
-  margin-left: 28px; /* Puedes ajustar este valor según tus preferencias */
 }
-/* Para pantallas más pequeñas que 600px */
+
+/* Estilos para pantallas pequeñas (hasta 600px) */
 @media (max-width: 600px) {
   .contenedor {
-    height: 90vh; /* Ajusta la altura al 90% de la altura de la ventana (viewport height) */
+    flex-direction: column; /* Cambia a una disposición de columna en pantallas pequeñas */
   }
 
-  img {
-    width: 100%;
-    float: none;
-    margin-bottom: 20px;
+  .img {
+    display: none; /* Oculta la imagen en pantallas pequeñas */
+  }
+
+  .formulario {
+    padding: 10px; /* Ajusta el relleno para pantallas pequeñas */
+  }
+
+  input, input[type="password"] {
+    margin-bottom: 15px; /* Ajusta los márgenes de los campos de entrada */
+  }
+
+  .inicio_sesion button,
+  .google-login button {
+    width: 100%; /* Ocupa el 100% del ancho en pantallas pequeñas */
   }
 }
 
+/* Estilos para pantallas medianas (de 601px a 768px) */
+@media (min-width: 601px) and (max-width: 768px) {
+  /* Agrega estilos específicos para pantallas medianas según sea necesario */
+}
+
+/* Estilos para pantallas más grandes (de 769px en adelante) */
+@media (min-width: 769px) {
+  /* Agrega estilos específicos para pantallas más grandes según sea necesario */
+}
 

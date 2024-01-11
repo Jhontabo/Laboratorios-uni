@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
+          Jhontabo esta programando en reactjs
         </a>
       </header>
     </div>

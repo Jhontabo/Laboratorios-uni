@@ -1,13 +1,22 @@
-import React from 'react';
+import { Calendar, dayjsLocalizer } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import dayjs from 'dayjs';
 
+function Calendario() {
+  const localizer = dayjsLocalizer(dayjs)
+  return (
+    <div style={{
+      height:'90vh',
+      width:'70vw'
 
-const Reservations = () => {
+    }}>
+      <Calendar
+      localizer={localizer}
+      
+    />
+    </div>
+  );
+}
 
-  return(<div>
-    <h2>Reservas</h2>
-  </div>)
-  
-};
+export default Calendario;
 
-
-export default Reservations;

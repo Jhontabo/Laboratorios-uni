@@ -1,0 +1,74 @@
+.navbar {
+  width: 250px;
+  background-color: #0043A8;
+  color: white;
+  height: 100vh;
+
+}
+
+.navbar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar li {
+  margin: 15px;
+}
+
+li a {
+  text-decoration: none;
+  color: white;
+}
+
+.navbarItems {
+  padding: 15px;
+}
+
+svg {
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.navbarItems svg {
+  margin-right: 10px;
+}
+
+.navbar-logo {
+  padding: 10px;
+  font-size: 20px; /* Tamaño del texto del logo */
+  font-weight: bold; /* Negrita */
+  text-decoration: none;
+  color: white;
+}
+
+.navbar-logo:hover {
+  color: #FFD700; /* Cambia el color al pasar el mouse sobre el logo */
+}
+
+.navbar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar-item svg {
+  margin-right: 10px;
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.navbar-nav li {
+  padding: 10px;
+  border-bottom: 1px solid #0043A8;
+}
+
+.navbar-nav li:last-child {
+  border-bottom: none;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: white;
+}
+

@@ -1,32 +1,28 @@
 import React from 'react';
-import './App.css';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faCalendar, faClipboard, faComment, faTools, faDoorClosed, faDoorOpen } from '@fortawesome/free-solid-svg-icons';
-import NavbarItem from './components/navbarItem.jsx';
-import DataNavbarItems from './components/dataNavbarItems.jsx';
-
-library.add(faHome, faCalendar, faClipboard, faComment, faTools, faDoorClosed, faDoorOpen);
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Navbar from './components/navbar.jsx';
+import Home from './components/home.jsx';
+import Schedule from './components/schedule.jsx';
+import Reservations from './components/reservations.jsx';
+import Equipos from './components/equipos.jsx';
+import Chat from './components/chat.jsx';
+import Logout from './components/logout.jsx';
+import './App.css'
 
 const App = () => {
   return (
-    <nav className="navbar">
-      <div className="navbarItems">
-        <div className="navbar-logo">
-          <a href="#" className="navbar-link">
-            <FontAwesomeIcon icon="door-open" />
-            Bienvenido nombre usuario
-          </a>
-        </div>
-
-        <ul className="navbar-nav">
-          {DataNavbarItems.map((item, index) => (
-            <NavbarItem key={index} {...item} />
-          ))}
-        </ul>
-      </div>
-    </nav>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/Schedule" element={<Schedule />} />
+        <Route path="/Reservations" element={<Reservations />} />
+        <Route path="/Equipos" element={<Equipos />} />
+        <Route path="/Chat" element={<Chat />} />
+        <Route path="/Logout" element={<Logout />} />
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

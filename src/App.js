@@ -1,23 +1,37 @@
-import logo from './logo.svg';
+// App.js
+import React from 'react';
 import './App.css';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome, faCalendar, faClipboard, faComment, faTools, faDoorClosed, faDoorOpen } from '@fortawesome/free-solid-svg-icons';
+import SidebarItem from './components/sidebarItems.jsx';
+import dataSidebarItems from './components/dataSidebarItems';
 
-function App() {
+library.add(faHome, faCalendar, faClipboard, faComment, faTools, faDoorClosed, faDoorOpen);
+
+const App = () => {
   return (
+
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Jhontabo esta programando en reactjs
-        </a>
-      </header>
+
+      <section className="wrapper row">
+        <aside className="sidebar">
+          <div className="sidebarItems">
+            <div className="sidebar-logo">
+              <a href="#" className="sidebar-link">
+                <FontAwesomeIcon icon="door-open" />
+              Bienvenido nombre usuario
+              </a>
+            </div>
+
+            <ul className="sidebar-nav">
+            {dataSidebarItems.map((testimonio, index) => (
+              <SidebarItem key={index} {...testimonio} />))}
+            </ul>
+
+          </div>
+        </aside>
+      </section>
     </div>
   );
 }

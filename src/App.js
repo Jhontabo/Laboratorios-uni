@@ -8,16 +8,15 @@ import Equipos from './components/equipos.jsx';
 import Chat from './components/chat.jsx';
 import Logout from './components/logout.jsx';
 import Settings from './components/settings.jsx';
+import Index from './components/login.jsx'; 
 import './App.css'
 import '../src/styleSheets/contenidoPagina.css'
 
 const App = () => {
   return (
     <BrowserRouter>
-    <div className='contenedor-principal'>
-      <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Index />} />
         <Route path="/Schedule" element={<Schedule />} />
         <Route path="/Reservations" element={<Reservations />} />
         <Route path="/Equipos" element={<Equipos />} />
@@ -25,7 +24,6 @@ const App = () => {
         <Route path="/Logout" element={<Logout />} />
         <Route path="/Settings" element={<Settings />} />
       </Routes>
-    </div>
     </BrowserRouter>
     
   );

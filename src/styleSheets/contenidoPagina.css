@@ -1,0 +1,13 @@
+.contenido-pagina {
+    margin: 0;
+    padding: 0;
+    grid-column: 2; /* El otro contenido ocupa la segunda columna */
+    
+  }
+
+  .calendario{
+    margin-top: 20px;
+    margin-left: 20px;
+    background-color: bisque;
+  }
+  

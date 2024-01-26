@@ -8,10 +8,12 @@ import Equipos from './components/equipos.jsx';
 import Chat from './components/chat.jsx';
 import Logout from './components/logout.jsx';
 import './App.css'
+import '../src/styleSheets/contenidoPagina.css'
 
 const App = () => {
   return (
     <BrowserRouter>
+    <div className='contenedor-principal'>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -21,7 +23,9 @@ const App = () => {
         <Route path="/Chat" element={<Chat />} />
         <Route path="/Logout" element={<Logout />} />
       </Routes>
+    </div>
     </BrowserRouter>
+    
   );
 };
 

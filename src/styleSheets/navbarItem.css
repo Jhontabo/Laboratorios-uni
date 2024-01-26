@@ -1,8 +1,9 @@
 .navbar {
-  width: 250px;
+  width: 220px;
   background-color: #0043A8;
   color: white;
   height: 100vh;
+  grid-column: 1;
 
 }
 
@@ -21,6 +22,10 @@ li a {
   color: white;
 }
 
+li a:hover {
+
+  color: rgb(247, 214, 79);
+}
 .navbarItems {
   padding: 15px;
 }
@@ -34,9 +39,12 @@ svg {
   margin-right: 10px;
 }
 
-.navbar-logo {
-  padding: 10px;
+.navbar-logo-link {
+  padding: 15px;
   font-size: 20px; /* Tamaño del texto del logo */
+
+}
+.navbar-logo{
   font-weight: bold; /* Negrita */
   text-decoration: none;
   color: white;
@@ -63,6 +71,8 @@ svg {
   border-bottom: 1px solid #0043A8;
 }
 
+
+
 .navbar-nav li:last-child {
   border-bottom: none;
 }
@@ -70,5 +80,11 @@ svg {
 .navbar-link {
   text-decoration: none;
   color: white;
+}
+
+.contenedor-principal {
+  display: grid;
+  grid-template-columns: 230px 1fr; /* Dos columnas, una de 250px para el navbar y otra que ocupa el resto del espacio */
+  gap: 10px; /* Espacio entre las columnas */
 }
 

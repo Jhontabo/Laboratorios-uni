@@ -5,7 +5,8 @@ import dayjs from 'dayjs';
 function Calendario() {
   const localizer = dayjsLocalizer(dayjs)
   return (
-    <div style={{
+    <div className='contenido-pagina'>
+      <div className='calendario' style={{
       height:'90vh',
       width:'70vw'
 
@@ -15,6 +16,8 @@ function Calendario() {
       
     />
     </div>
+    </div>
+    
   );
 }
 

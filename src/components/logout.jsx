@@ -3,7 +3,7 @@ import React from 'react';
 
 const Logout = () => {
 
-  return(<div>
+  return(<div className='contenido-pagina'>
     <h2>Cerrar Sesion</h2>
   </div>)
   

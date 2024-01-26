@@ -7,6 +7,7 @@ import Reservations from './components/reservations.jsx';
 import Equipos from './components/equipos.jsx';
 import Chat from './components/chat.jsx';
 import Logout from './components/logout.jsx';
+import Settings from './components/settings.jsx';
 import './App.css'
 import '../src/styleSheets/contenidoPagina.css'
 
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/Equipos" element={<Equipos />} />
         <Route path="/Chat" element={<Chat />} />
         <Route path="/Logout" element={<Logout />} />
+        <Route path="/Settings" element={<Settings />} />
       </Routes>
     </div>
     </BrowserRouter>

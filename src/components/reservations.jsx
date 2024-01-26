@@ -17,14 +17,14 @@ function Calendario() {
       title:'reunion docentes'
     },
     {
-      start:dayjs('2024-01-25T14:00:00').toDate(),
-      end:dayjs('2024-01-25T16:00:00').toDate(),
+      start:dayjs('2024-01-26T14:00:00').toDate(),
+      end:dayjs('2024-01-26T16:00:00').toDate(),
       title:'entregar reporte'
     },
 
     {
-      start:dayjs('2024-01-25T17:00:00').toDate(),
-      end:dayjs('2024-01-25T20:00:00').toDate(),
+      start:dayjs('2024-01-29T17:00:00').toDate(),
+      end:dayjs('2024-01-29T20:00:00').toDate(),
       title:'clase fisica salon 602'
     }
   ]

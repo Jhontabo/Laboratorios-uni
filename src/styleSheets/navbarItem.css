@@ -1,3 +1,10 @@
+
+.principal {
+  display: grid;
+  grid-template-columns: 230px 1fr; /* Dos columnas, una de 250px para el navbar y otra que ocupa el resto del espacio */
+  gap: 10px; /* Espacio entre las columnas */
+}
+
 .navbar {
   width: 220px;
   background-color: #0043A8;
@@ -80,11 +87,5 @@ svg {
 .navbar-link {
   text-decoration: none;
   color: white;
-}
-
-.contenedor-principal {
-  display: grid;
-  grid-template-columns: 230px 1fr; /* Dos columnas, una de 250px para el navbar y otra que ocupa el resto del espacio */
-  gap: 10px; /* Espacio entre las columnas */
 }
 

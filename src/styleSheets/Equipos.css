@@ -1,0 +1,15 @@
+.tabla-equipos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.tabla-equipos th, .tabla-equipos td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.tabla-equipos th {
+  background-color: #f2f2f2;
+}

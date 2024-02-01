@@ -26,7 +26,7 @@ const Navbar = () => {
         <li><Link className='menu-a' to="/schedule">{renderIcon("calendar")} Horarios</Link></li>
         <li><Link className='menu-a' to="/reservations">{renderIcon("clipboard")} Reservas</Link></li>
         <li><Link className='menu-a' to="/equipos">{renderIcon("tools")} Equipos</Link></li>
-        <li><a className='menu-a' href="https://wa.me/+573235937501" target="_blank" rel="noreferrer">{renderIcon("comment")} Chat</a></li>
+        <li><Link className='menu-a' to="/chat">{renderIcon("comment")} Chat</Link></li>
         <li><Link className='menu-a' to="/settings">{renderIcon("settings")} Ajustes</Link></li>
         <li><Link className='menu-a' to="/logout">{renderIcon("door-closed")} Cerrar sesión</Link></li>
 

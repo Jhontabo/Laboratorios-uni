@@ -1,15 +1,15 @@
 
 .principal {
   display: grid;
-  grid-template-columns: 230px 1fr; /* Dos columnas, una de 250px para el navbar y otra que ocupa el resto del espacio */
+  grid-template-columns: 230px 1000px; /* Dos columnas, una de 250px para el navbar y otra que ocupa el resto del espacio */
   gap: 10px; /* Espacio entre las columnas */
+  height: 100vh;
 }
 
 .navbar {
   width: 220px;
   background-color: #0043A8;
   color: white;
-  height: 100vh;
   grid-column: 1;
 
 }

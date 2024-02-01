@@ -1,3 +1,4 @@
+// App.js
 import React, { useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import Navbar from './components/navbar.jsx';
@@ -9,6 +10,7 @@ import Chat from './components/chat.jsx';
 import Logout from './components/logout.jsx';
 import Settings from './components/settings.jsx';
 import { Login } from './components/login.jsx';
+import Footer from './components/footer.jsx';  // Asegúrate de importar el componente Footer
 import './App.css';
 import '../src/styleSheets/contenidoPagina.css';
 
@@ -36,6 +38,8 @@ const App = () => {
           <Route path="/logout" element={<Logout onLogout={() => setIsLoggedIn(false)} />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
+
+        {isLoggedIn && <Footer />} {/* Renderiza el Footer solo si el usuario está autenticado */}
       </div>
     </BrowserRouter>
   );

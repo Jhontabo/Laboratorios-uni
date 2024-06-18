@@ -34,7 +34,7 @@ const Sidebar = () => {
             >
                 <div>
                     <h1 className="text-center text-2xl font-bold text-black mb-10">
-                        Admin<span className="text-primary text-4xl">.</span>
+                        Dashboard<span className="text-primary text-4xl">.</span>
                     </h1>
 
                     <ul>

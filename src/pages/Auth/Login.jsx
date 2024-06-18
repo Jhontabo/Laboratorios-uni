@@ -1,9 +1,9 @@
 // src/components/SignIn.jsx
 import { useEffect } from "react";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import React from 'react';
-import googleLogo from '../assets/google.svg';
+import googleLogo from '../../assets/google.svg';
 
 const Login = () => {
     const navigate = useNavigate();

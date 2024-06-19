@@ -7,7 +7,7 @@ import Home from "../pages/admin/Home";
 import Profile from "../pages/admin/Profile";
 import Communication from "../pages/admin/Communication";
 import Error404 from "../pages/Errorpage";
-import Calendar from "../pages/admin/Calendar";
+import MiCalendario from "../pages/admin/Calendario";
 
 
 export function MyRoutes() {
@@ -24,7 +24,7 @@ export function MyRoutes() {
                 <Route index element={<Home />} />
                 <Route path="perfil" element={<Profile />} />
                 <Route path="communication" element={<Communication />} />
-                <Route path="calendario" element={<Calendar />} />
+                <Route path="calendario" element={<MiCalendario />} />
 
             </Route>
             <Route path="*" element={<Error404 />} />

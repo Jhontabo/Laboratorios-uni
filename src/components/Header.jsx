@@ -7,6 +7,7 @@ import {
   RiThumbUpLine,
   RiChat3Line,
 } from "react-icons/ri";
+
 import { Menu, MenuItem, MenuButton } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
@@ -52,12 +53,12 @@ const Header = () => {
               className="text-gray-700 flex flex-1 items-center gap-4 py-2 px-4 hover:bg-gray-200 transition-colors rounded-lg"
             >
               <img
-                src="https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg"
+                src={user.photoUR}
                 className="w-8 h-8 object-cover rounded-full"
               />
               <div className="text-sm flex flex-col">
                 <div className="flex items-center justify-between gap-4">
-                  <span>Jorge Luis Trejo</span>{" "}
+                  <span>Juan Tajumbina</span>{" "}
                   <span className="text-[8px]">21/10/2022</span>
                 </div>
                 <p className="text-gray-600 text-xs">

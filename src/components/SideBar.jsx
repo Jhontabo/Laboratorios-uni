@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
-// Icons
 import {
     RiBarChart2Line,
     RiEarthLine,
@@ -11,12 +10,19 @@ import {
     RiArrowRightSLine,
     RiMenu3Line,
     RiCloseLine,
+    RiFlaskLine,
+    RiToolsLine,
+    RiUserLine,
+    RiFileListLine,
+    RiNotificationLine,
+    RiSettings3Line,
+    RiMessage3Line
 } from "react-icons/ri";
 
 const Sidebar = () => {
     const { user, logOut } = UserAuth();
 
-    const cerrarSesión = async () => {
+    const cerrarSesion = async () => {
         try {
             await logOut();
         } catch (error) {
@@ -26,6 +32,7 @@ const Sidebar = () => {
 
     const [showMenu, setShowMenu] = useState(false);
     const [showSubmenu, setShowSubmenu] = useState(false);
+
     return (
         <>
             <div
@@ -34,7 +41,7 @@ const Sidebar = () => {
             >
                 <div>
                     <h1 className="text-center text-2xl font-bold text-white mb-10">
-                        Dashboard<span className="text-primary text-4xl">.</span>
+                        Admin<span className="text-primary text-4xl">.</span>
                     </h1>
 
                     <ul>
@@ -43,75 +50,89 @@ const Sidebar = () => {
                                 to="/"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
-                                <RiBarChart2Line className="text-white" /> Analíticas
+                                <RiBarChart2Line className="text-white" /> Dashboard
                             </Link>
                         </li>
-                        <li>
-                            <button
-                                onClick={() => setShowSubmenu(!showSubmenu)}
-                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
-                            >
-                                <span className="flex items-center gap-4">
-                                    <RiEarthLine className="text-white" /> Redes sociales
-                                </span>
-                                <RiArrowRightSLine
-                                    className={`mt-1 ${showSubmenu && "rotate-90"
-                                        } transition-all text-white`}
-                                />
-                            </button>
-                            <ul
-                                className={` ${showSubmenu ? "h-[130px]" : "h-0"
-                                    } overflow-y-hidden transition-all`}
-                            >
-                                <li>
-                                    <Link
-                                        to="/"
-                                        className="py-2 px-4 border-l border-gray-600 ml-6 block relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-gray-800 hover:text-white transition-colors text-gray-400"
-                                    >
-                                        Post red social
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to="/"
-                                        className="py-2 px-4 border-l border-gray-600 ml-6 block relative before:w-3 before:h-3 before:absolute before:bg-gray-600 before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-gray-800 hover:text-white transition-colors text-gray-400"
-                                    >
-                                        Estadisticas
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to="/"
-                                        className="py-2 px-4 border-l border-gray-600 ml-6 block relative before:w-3 before:h-3 before:absolute before:bg-gray-600 before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-gray-800 hover:text-white transition-colors text-gray-400"
-                                    >
-                                        Perfiles
-                                    </Link>
-                                </li>
-                            </ul>
-                        </li>
+
                         <li>
                             <Link
-                                to="/chat"
-                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
-                            >
-                                <RiCustomerService2Line className="text-white" /> Soporte
-                                técnico
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/calendario"
+                                to="/"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
                                 <RiCalendarTodoLine className="text-white" /> Calendario
                             </Link>
                         </li>
-                    </ul>
+                        <li>
+                            <Link
+                                to="/"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiFlaskLine className="text-white" /> Laboratorios
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiToolsLine className="text-white" /> Equipos
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiCalendarTodoLine className="text-white" /> Reservas
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiUserLine className="text-white" /> Usuarios
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiFileListLine className="text-white" /> Reportes
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiNotificationLine className="text-white" /> Notificaciones
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to="/"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiToolsLine className="text-white" /> Mantenimiento
+                            </Link>
+                        </li>
 
+                        <li>
+                            <Link
+                                to="/communication"
+                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
+                            >
+                                <RiMessage3Line className="text-white" /> Comunicación
+                            </Link>
+                        </li>
+
+                    </ul>
                 </div>
 
                 <button
-                    onClick={cerrarSesión} className="flex items-center gap-4 py-2 px-4 rounded-lg transition-colors hover:bg-gray-700 text-white"
+                    onClick={cerrarSesion} className="flex items-center gap-4 py-2 px-4 rounded-lg transition-colors hover:bg-gray-700 text-white"
                 >
                     <RiLogoutCircleRLine className="text-red-500 " /> Cerrar sesión
                 </button>

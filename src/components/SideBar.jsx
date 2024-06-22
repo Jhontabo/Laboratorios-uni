@@ -64,7 +64,7 @@ const Sidebar = () => {
                         </li>
                         <li>
                             <Link
-                                to="/"
+                                to="/laboratorios"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
                                 <RiFlaskLine className="text-white" /> Laboratorios
@@ -72,7 +72,7 @@ const Sidebar = () => {
                         </li>
                         <li>
                             <Link
-                                to="/"
+                                to="/equipos"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
                                 <RiToolsLine className="text-white" /> Equipos
@@ -80,7 +80,7 @@ const Sidebar = () => {
                         </li>
                         <li>
                             <Link
-                                to="/"
+                                to="/reservas"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
                                 <RiCalendarTodoLine className="text-white" /> Reservas
@@ -88,7 +88,7 @@ const Sidebar = () => {
                         </li>
                         <li>
                             <Link
-                                to="/"
+                                to="/usuarios"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
                                 <RiUserLine className="text-white" /> Usuarios
@@ -96,23 +96,16 @@ const Sidebar = () => {
                         </li>
                         <li>
                             <Link
-                                to="/"
+                                to="/reportes"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
                                 <RiFileListLine className="text-white" /> Reportes
                             </Link>
                         </li>
+
                         <li>
                             <Link
-                                to="/"
-                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
-                            >
-                                <RiNotificationLine className="text-white" /> Notificaciones
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/"
+                                to="/mantenimiento"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
                                 <RiToolsLine className="text-white" /> Mantenimiento

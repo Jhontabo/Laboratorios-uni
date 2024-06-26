@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
-import LayoutAuth from "../layouts/layoutAuth";
+import LayoutAuth from "../layouts/layoutUser";
 import LayoutAdmin from "../layouts/layoutAdmin";
 import Login from "../pages/Auth/Login";
 import Dashboard from "../pages/admin/Dashboard";

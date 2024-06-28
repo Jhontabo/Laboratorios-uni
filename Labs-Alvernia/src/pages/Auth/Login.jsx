@@ -6,11 +6,19 @@ import googleLogo from '../../assets/google.svg';
 
 const Login = () => {
 
+    //Esta funcion , usa un hook , para el cambio de tema
     const [isDarkMode, setIsDarkMode] = useState(true);
 
-    const navigate = useNavigate();
+    // 
+    const toggleDarkMode = () => {
+        setIsDarkMode(!isDarkMode);
+    }
 
+    //Esta funcion nos sirve para poder nevegar entre diferentes paginas de la app
+    const navigate = useNavigate();
+    //Esta funcion nos sirve para poder acceder a los datos del usuario
     const { user, googleSignIn } = UserAuth();
+
     const iniciarSesion = async () => {
         try {
             await googleSignIn();
@@ -25,9 +33,19 @@ const Login = () => {
     }, [user])
 
 
-    const toggleDarkMode = () => {
-        setIsDarkMode(!isDarkMode);
-    }
+    // Es la funcion que permite enviar los datos del formulario
+    const handleSubmit = (e) => {
+        e.preventDefault(); //Esto hace que la pagina se recargue cuando demos click en el boton
+
+        const email = e.target.email.value; //Captura el valor del campo del formulario
+        const password = e.target.password.value;
+        //Imprime en consola el valor de los datos capturados
+        console.log('Email:', email);
+        console.log('Password:', password);
+    };
+
+
+    //Formulario Login
 
     return (
         <div className={`flex justify-center items-center min-h-screen ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
@@ -35,11 +53,26 @@ const Login = () => {
                 <div className="flex flex-col text-center my-5">
                     <header className={`font-poppins text-2xl mb-1 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Hola, bienvenido a CAMPUS VIRTUAL UMARIANA</header>
                 </div>
+                <form className="relative w-full" onSubmit={handleSubmit}>
+                    <div className="relative w-full mb-6">
+                        <input type="text" id="email" className={`w-full h-12 pl-4 mb-6 border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-100 border-gray-300 text-gray-800'} rounded-md outline-none focus:border-purple-600`} autoComplete="off" required />
+                        <label htmlFor="email" className={`absolute top-3 left-4 transition-transform duration-150 transform-gpu scale-75 -translate-y-6 px-1 ${isDarkMode ? 'text-gray-300 bg-gray-700' : 'text-gray-600 bg-gray-100'}`}>Correo</label>
+                    </div>
+                    <div className="relative w-full mb-6">
+                        <input type="password" id="password" className={`w-full h-12 pl-4 mb-2 border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-100 border-gray-300 text-gray-800'} rounded-md outline-none focus:border-purple-600`} autoComplete="off" required />
+                        <label htmlFor="password" className={`absolute top-3 left-4 transition-transform duration-150 transform-gpu scale-75 -translate-y-6 px-1 ${isDarkMode ? 'text-gray-300 bg-gray-700' : 'text-gray-600 bg-gray-100'}`}>Contraseña</label>
+                    </div>
+                    <div className="flex justify-between mb-6">
+                        {/* Aquí podrías agregar más contenido */}
+                    </div>
+                    <div className="relative w-full mb-6">
+                        <input type="submit" className={`font-poppins text-white text-lg ${isDarkMode ? 'bg-purple-500' : 'bg-purple-500'} border-none rounded-md cursor-pointer py-2 w-full`} value="Iniciar sesión" />
+                    </div>
+                </form>
                 <div className="relative w-full my-8">
                     <hr className={`border-t ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`} />
                     <p className={`absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2 ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>O</p>
                 </div>
-
                 <div className="flex gap-4">
                     <button onClick={iniciarSesion} className={`flex items-center justify-between w-full h-12 px-6 ${isDarkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-800'} border ${isDarkMode ? 'border-gray-500' : 'border-gray-400'} rounded-md hover:opacity-90`}>
                         <img src={googleLogo} alt="Google Logo" className="w-6" />

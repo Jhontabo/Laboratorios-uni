@@ -1,16 +1,29 @@
 import pool from '../config/db.js';
 
-//modelo de sentencia para consulta asia la base de datos
+//modelo de sentencia para consulta hacia la base de datos
+
+//Funcion para obtener todos los usuarios
 export async function getUsuarios() {
-  const [rows] = await pool.query('SELECT * FROM usuarios');
-  return rows[0];
+
+  try {
+
+    const [rows] = await pool.query('SELECT * FROM usuarios');
+    return rows;
+
+  } catch (error) {
+    console.log(error);
+  }
 
 }
 
 export async function getUsuarioPorCorreo(correo) {
-  const [rows] = await pool.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
-  return rows[0];
+
+  try {
+    const [rows] = await pool.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
+    return rows[0];
+  } catch (error) {
+
+    console.log(error)
+  }
+
 }
-
-
-console.log(getUsuarios())

@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { UserAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import React from 'react';
 import googleLogo from '../../assets/google.svg';
 
 const Login = () => {
 
-    //Esta funcion , usa un hook , para el cambio de tema
     const [isDarkMode, setIsDarkMode] = useState(true);
 
     // 
@@ -14,40 +12,40 @@ const Login = () => {
         setIsDarkMode(!isDarkMode);
     }
 
-    //Esta funcion nos sirve para poder nevegar entre diferentes paginas de la app
-    const navigate = useNavigate();
-    //Esta funcion nos sirve para poder acceder a los datos del usuario
-    const { user, googleSignIn } = UserAuth();
-
-    const iniciarSesion = async () => {
-        try {
-            await googleSignIn();
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    useEffect(() => {
-        if (user != null) {
-            navigate("/")
-        }
-    }, [user])
 
 
 
-    const [email, setEmail] = useState('');
+
+
+    const [correo, setCorreo] = useState('');
     const [password, setPassword] = useState('');
 
     // Es la funcion que permite enviar los datos del formulario
     const handleSubmit = (e) => {
         e.preventDefault(); //Esto hace que la pagina se recargue cuando demos click en el boton
 
-        //Imprime en consola el valor de los datos capturados
-        console.log({
-            email: email,
+        const data = {
+            correo: correo,
             password: password
+        };
 
-        });
+        //Metodo fetch para enviar info al servidor
 
+        fetch('http:///localhost:3000/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+            })
+            .catch(error => {
+                console.log(error);
+            })
     };
 
 
@@ -64,7 +62,7 @@ const Login = () => {
                 <form className="relative w-full" onSubmit={handleSubmit}>
                     <div className="relative w-full mb-6">
 
-                        <input onChange={(event) => { setEmail(event.target.value) }} type="text" id="email" className={`w-full h-12 pl-4 mb-6 border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-100 border-gray-300 text-gray-800'} rounded-md outline-none focus:border-purple-600`} autoComplete="off" required />
+                        <input onChange={(event) => { setCorreo(event.target.value) }} type="text" id="email" className={`w-full h-12 pl-4 mb-6 border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-gray-100 border-gray-300 text-gray-800'} rounded-md outline-none focus:border-purple-600`} autoComplete="off" required />
 
                         <label htmlFor="email" className={`absolute top-3 left-4 transition-transform duration-150 transform-gpu scale-75 -translate-y-6 px-1 ${isDarkMode ? 'text-gray-300 bg-gray-700' : 'text-gray-600 bg-gray-100'}`}>Correo</label>
                     </div>
@@ -93,7 +91,7 @@ const Login = () => {
                     <p className={`absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-2 ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>O</p>
                 </div>
                 <div className="flex gap-4">
-                    <button onClick={iniciarSesion} className={`flex items-center justify-between w-full h-12 px-6 ${isDarkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-800'} border ${isDarkMode ? 'border-gray-500' : 'border-gray-400'} rounded-md hover:opacity-90`}>
+                    <button className={`flex items-center justify-between w-full h-12 px-6 ${isDarkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-800'} border ${isDarkMode ? 'border-gray-500' : 'border-gray-400'} rounded-md hover:opacity-90`}>
                         <img src={googleLogo} alt="Google Logo" className="w-6" />
                         <p className="font-poppins text-lg w-full text-center">Iniciar sesión con Google</p>
                     </button>

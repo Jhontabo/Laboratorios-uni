@@ -1,13 +1,12 @@
 
 import "../src/index.css";
-import { AuthContextProvider, UserAuth } from "./context/AuthContext";
 import { MyRoutes } from "./routers/routes";
 
 function App() {
   return (
-    <AuthContextProvider>
-      <MyRoutes />
-    </AuthContextProvider>
+
+    <MyRoutes />
+
   );
 }
 export default App;

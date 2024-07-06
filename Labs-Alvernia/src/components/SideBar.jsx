@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { UserAuth } from "../context/AuthContext";
 import {
     RiBarChart2Line,
     RiEarthLine,
@@ -20,15 +19,7 @@ import {
 } from "react-icons/ri";
 
 const Sidebar = () => {
-    const { user, logOut } = UserAuth();
 
-    const cerrarSesion = async () => {
-        try {
-            await logOut();
-        } catch (error) {
-            console.log(error);
-        }
-    };
 
     const [showMenu, setShowMenu] = useState(false);
     const [showSubmenu, setShowSubmenu] = useState(false);
@@ -125,7 +116,7 @@ const Sidebar = () => {
                 </div>
 
                 <button
-                    onClick={cerrarSesion} className="flex items-center gap-4 py-2 px-4 rounded-lg transition-colors hover:bg-gray-700 text-white"
+                    className="flex items-center gap-4 py-2 px-4 rounded-lg transition-colors hover:bg-gray-700 text-white"
                 >
                     <RiLogoutCircleRLine className="text-red-500 " /> Cerrar sesión
                 </button>

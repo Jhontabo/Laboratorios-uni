@@ -12,18 +12,10 @@ import { Menu, MenuItem, MenuButton } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import "@szhsin/react-menu/dist/transitions/slide.css";
 import { Link } from "react-router-dom";
-import { UserAuth } from "../context/AuthContext";
+
 
 const Header = () => {
-  const { user, logOut } = UserAuth();
 
-  const cerrarSesión = async () => {
-    try {
-      await logOut();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   return (
     <header className="h-[7vh] md:h-[10vh] border-b border-gray-300 p-8 flex items-center justify-end">
@@ -53,7 +45,7 @@ const Header = () => {
               className="text-gray-700 flex flex-1 items-center gap-4 py-2 px-4 hover:bg-gray-200 transition-colors rounded-lg"
             >
               <img
-                src={user.photoUR}
+                src={""}
                 className="w-8 h-8 object-cover rounded-full"
               />
               <div className="text-sm flex flex-col">
@@ -115,10 +107,10 @@ const Header = () => {
           menuButton={
             <MenuButton className="flex items-center gap-x-2 hover:bg-gray-200 p-2 rounded-lg transition-colors">
               <img
-                src={user.photoURL}
+                src={""}
                 className="w-6 h-6 object-cover rounded-full"
               />
-              <span>{user.displayName}</span>
+              <span>{""}</span>
               <RiArrowDownSLine />
             </MenuButton>
           }
@@ -134,11 +126,11 @@ const Header = () => {
               className="rounded-lg transition-colors text-gray-700 hover:bg-gray-200 flex items-center gap-x-4 py-2 px-6 flex-1"
             >
               <img
-                src={user.photoURL} className="w-8 h-8 object-cover rounded-full"
+                src={""} className="w-8 h-8 object-cover rounded-full"
               />
               <div className="flex flex-col text-sm">
-                <span className="text-sm">{user.displayName}</span>
-                <span className="text-xs text-gray-600">{user.email}</span>
+                <span className="text-sm">Jhontabo</span>
+                <span className="text-xs text-gray-600">jhonse.tajumbina@gmail.com</span>
               </div>
             </Link>
           </MenuItem>
@@ -155,7 +147,6 @@ const Header = () => {
 
           <MenuItem className="p-0 hover:bg-transparent">
             <button
-              onClick={cerrarSesión}
               className="rounded-lg transition-colors text-gray-700 hover:bg-gray-200 flex items-center gap-x-4 py-2 px-6 flex-1"
             >
               <RiLogoutCircleRLine /> Cerrar sesión

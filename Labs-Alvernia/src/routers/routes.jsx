@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LayoutAdmin from "../layouts/layoutAdmin";
-import LayoutStudent from "../layouts/layoutStudent";
+import LayoutStudent from "../layouts/layoutStudent"
+import LayoutMonitor from "../layouts/layoutMonitor";
+import LayoutProfessor from "../layouts/layoutProfessor";
 import Login from "../pages/Auth/Login";
 import Dashboard from "../pages/admin/Dashboard";
 import Profile from "../pages/admin/Profile";
@@ -23,7 +25,7 @@ export function MyRoutes() {
         <BrowserRouter>
             <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/" element={<LayoutAdmin />}>
+                <Route path="/" element={<LayoutStudent />}>
                     <Route index element={<Dashboard />} />
                     <Route path="perfil" element={<Profile />} />
                     <Route path="communication" element={<Communication />} />

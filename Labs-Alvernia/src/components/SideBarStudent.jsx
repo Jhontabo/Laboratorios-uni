@@ -18,7 +18,7 @@ import {
     RiMessage3Line
 } from "react-icons/ri";
 
-const Sidebar = () => {
+const SidebarStudent = () => {
 
 
     const [showMenu, setShowMenu] = useState(false);
@@ -32,7 +32,7 @@ const Sidebar = () => {
             >
                 <div>
                     <h1 className="text-center text-2xl font-bold text-white mb-10">
-                        Admin<span className="text-primary text-4xl">.</span>
+                        Estudiante<span className="text-primary text-4xl">.</span>
                     </h1>
 
                     <ul>
@@ -41,7 +41,7 @@ const Sidebar = () => {
                                 to="/"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
-                                <RiBarChart2Line className="text-white" /> Dashboard
+                                <RiBarChart2Line className="text-white text-2xl" /> Inicio
                             </Link>
                         </li>
 
@@ -50,7 +50,7 @@ const Sidebar = () => {
                                 to="/calendario"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
-                                <RiCalendarTodoLine className="text-white" /> Calendario
+                                <RiCalendarTodoLine className="text-white text-2xl" /> Calendario
                             </Link>
                         </li>
                         <li>
@@ -58,57 +58,26 @@ const Sidebar = () => {
                                 to="/laboratorios"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
-                                <RiFlaskLine className="text-white" /> Laboratorios
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/equipos"
-                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
-                            >
-                                <RiToolsLine className="text-white" /> Equipos
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/reservas"
-                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
-                            >
-                                <RiCalendarTodoLine className="text-white" /> Reservas
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/usuarios"
-                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
-                            >
-                                <RiUserLine className="text-white" /> Usuarios
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/reportes"
-                                className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
-                            >
-                                <RiFileListLine className="text-white" /> Reportes
+                                <RiFlaskLine className="text-white text-2xl" /> Laboratorios
                             </Link>
                         </li>
 
                         <li>
                             <Link
-                                to="/mantenimiento"
+                                to="/reservas"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
-                                <RiToolsLine className="text-white" /> Mantenimiento
+                                <RiCalendarTodoLine className="text-white text-2xl" /> Reservas
                             </Link>
                         </li>
+
 
                         <li>
                             <Link
                                 to="/communication"
                                 className="flex items-center gap-4 py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors text-white"
                             >
-                                <RiMessage3Line className="text-white" /> Comunicación
+                                <RiMessage3Line className="text-white text-2xl" /> Comunicación
                             </Link>
                         </li>
 
@@ -118,7 +87,7 @@ const Sidebar = () => {
                 <button
                     className="flex items-center gap-4 py-2 px-4 rounded-lg transition-colors hover:bg-gray-700 text-white"
                 >
-                    <RiLogoutCircleRLine className="text-red-500 " /> Cerrar sesión
+                    <RiLogoutCircleRLine className="text-red-500 text-2xl" /> Cerrar sesión
                 </button>
 
             </div>
@@ -133,4 +102,4 @@ const Sidebar = () => {
     );
 };
 
-export default Sidebar;
+export default SidebarStudent;

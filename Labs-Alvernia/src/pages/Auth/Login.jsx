@@ -13,17 +13,14 @@ const Login = () => {
     }
 
 
-
-
-
-
     const [correo, setCorreo] = useState('');
     const [password, setPassword] = useState('');
 
     // Es la funcion que permite enviar los datos del formulario
     const handleSubmit = (e) => {
-        e.preventDefault(); //Esto hace que la pagina se recargue cuando demos click en el boton
+        e.preventDefault(); //Esto evita que la pagina se recargue cuando se da en click en iniciar sesion
 
+        //Creamos un objeto , el cual tiene dos valores que son correo y la contrasena
         const data = {
             correo: correo,
             password: password

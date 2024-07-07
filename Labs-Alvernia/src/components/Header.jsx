@@ -20,10 +20,12 @@ const Header = () => {
   return (
     <header className="h-[7vh] md:h-[10vh] border-b border-gray-300 p-8 flex items-center justify-end">
       <nav className="flex items-center gap-2">
+
         <Menu
           menuButton={
             <MenuButton className="relative hover:bg-gray-200 p-2 rounded-lg transition-colors">
               <RiNotification3Line />
+
               <span className="absolute -top-0.5 right-0 bg-primary py-0.5 px-[5px] box-content text-black rounded-full text-[8px] font-bold">
                 2
               </span>
@@ -38,6 +40,7 @@ const Header = () => {
           <h1 className="text-gray-700 text-center font-medium">
             Notificaciones (2)
           </h1>
+
           <hr className="my-6 border-gray-300" />
           <MenuItem className="p-0 hover:bg-transparent">
             <Link
@@ -93,6 +96,7 @@ const Header = () => {
               </div>
             </Link>
           </MenuItem>
+
           <hr className="my-6 border-gray-300" />
           <MenuItem className="p-0 hover:bg-transparent flex justify-center cursor-default">
             <Link
@@ -103,6 +107,7 @@ const Header = () => {
             </Link>
           </MenuItem>
         </Menu>
+
         <Menu
           menuButton={
             <MenuButton className="flex items-center gap-x-2 hover:bg-gray-200 p-2 rounded-lg transition-colors">
@@ -110,7 +115,7 @@ const Header = () => {
                 src={""}
                 className="w-6 h-6 object-cover rounded-full"
               />
-              <span>{""}</span>
+              <span>Jhon Tajumbina</span>
               <RiArrowDownSLine />
             </MenuButton>
           }
@@ -129,7 +134,7 @@ const Header = () => {
                 src={""} className="w-8 h-8 object-cover rounded-full"
               />
               <div className="flex flex-col text-sm">
-                <span className="text-sm">Jhontabo</span>
+                <span className="text-sm">Jhon Tajumbina</span>
                 <span className="text-xs text-gray-600">jhonse.tajumbina@gmail.com</span>
               </div>
             </Link>

@@ -2,47 +2,33 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class Usuario extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    // Definir la tabla asociada
+    protected $table = 'usuarios';
+
+    // Definir la clave primaria
+    protected $primaryKey = 'id_usuario';
+
+    // Definir los atributos que pueden ser asignados masivamente
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'nombre',
+        'apellido',
+        'correo_electronico',
+        'telefono',
+        'Direccion',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    // Ocultar el remember_token para que no se exponga al serializar
     protected $hidden = [
-        'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    // Las marcas de tiempo están habilitadas, por lo que no necesitas agregar $timestamps = true, ya que es el comportamiento por defecto.
 }

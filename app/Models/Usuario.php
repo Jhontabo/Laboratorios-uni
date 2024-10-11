@@ -23,12 +23,15 @@ class Usuario extends Authenticatable
         'correo_electronico',
         'telefono',
         'Direccion',
+        'password', // Asegúrate de incluir la contraseña
     ];
 
     // Ocultar el remember_token para que no se exponga al serializar
     protected $hidden = [
+        'password',
         'remember_token',
     ];
 
-    // Las marcas de tiempo están habilitadas, por lo que no necesitas agregar $timestamps = true, ya que es el comportamiento por defecto.
+    // Asegúrate de que las marcas de tiempo estén activas si las usas
+    public $timestamps = true;
 }

@@ -19,7 +19,7 @@ class CreateFilamentAdmin extends Command
     {
         $name = $this->ask('¿Cuál es tu nombre, para admin?');
         $apellido = $this->ask('¿Cuál es tu apellido, para admin?');
-        $email = $this->ask('¿Cuál es tu email para admin?');
+        $email = $this->ask('¿Cuál es tu email para admin?'); 
         $telefono = $this->ask('¿Cuál es tu teléfono?'); 
         $direccion = $this->ask('¿Cuál es tu dirección?');
         

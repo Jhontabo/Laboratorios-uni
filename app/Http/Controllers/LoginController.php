@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Laravel\Socialite\Facades\Socialite;
-use App\Models\Usuario; // Importar tu modelo Usuario
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 
@@ -21,7 +21,7 @@ class LoginController extends Controller
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
 
-        // Buscar si ya existe el usuario en la tabla 'usuarios' usando tu modelo 'Usuario'
+        // Buscar si ya existe el usuario
         $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();
 
         if ($user) {
@@ -35,7 +35,7 @@ class LoginController extends Controller
                 ->danger()
                 ->body('El usuario no está autorizado para acceder.')
                 ->send();
-
+            
             return redirect()->route('login');  // Redirige de vuelta al login
         }
     }

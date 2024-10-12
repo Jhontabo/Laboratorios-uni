@@ -1,16 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\LoginController;
 
-// Ruta para la página de inicio (puedes cambiar esta a tu vista de login directamente si quieres)
+// Ruta para la página de inicio (redirige al login directamente)
 Route::get('/', function () {
-    return view('auth.login');  // Redirige a la página de login que creaste
+    return view('auth.login');  // Carga la vista de login que creaste previamente
 });
 
-// Ruta para mostrar la página de login
+// Ruta para mostrar la página de login (esta puede ser la misma que en el inicio)
 Route::get('login', function () {
-    return view('auth.login');  // Ruta para la vista de login
+    return view('auth.login');  // Vista de login
 })->name('login');
 
 // Ruta para la autenticación con Google
@@ -19,7 +19,7 @@ Route::get('auth/google', [LoginController::class, 'redirectToGoogle'])->name('a
 // Ruta de callback para Google
 Route::get('auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
 
-// Puedes agregar aquí rutas para cuando el usuario esté autenticado
+// Rutas protegidas para usuarios autenticados
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard'); // Ruta de ejemplo para un dashboard o vista protegida

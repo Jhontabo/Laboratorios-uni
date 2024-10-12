@@ -22,6 +22,7 @@ Route::get('auth/google/callback', [LoginController::class, 'handleGoogleCallbac
 // Rutas protegidas para usuarios autenticados
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard'); // Ruta de ejemplo para un dashboard o vista protegida
+        // Redirigir al panel de Filament
+        return redirect()->route('filament.admin.pages.dashboard');
     })->name('dashboard');
 });

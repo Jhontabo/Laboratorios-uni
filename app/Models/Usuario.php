@@ -1,42 +1,35 @@
 <?php
 
-namespace App\Http\Controllers;
+// app/Models/Usuario.php
 
-use App\Http\Controllers\Controller;
-use Laravel\Socialite\Facades\Socialite;
-use App\Models\Usuario; // Importar tu modelo Usuario
-use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification;
+namespace App\Models;
 
-class LoginController extends Controller
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class Usuario extends Authenticatable
 {
-    // Redirigir a Google
-    public function redirectToGoogle()
-    {
-        return Socialite::driver('google')->redirect();
-    }
+    use Notifiable;
 
-    // Manejar el callback de Google
-    public function handleGoogleCallback()
-    {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+    // Nombre de la tabla
+    protected $table = 'usuarios'; // Ya tienes la tabla correcta
 
-        // Buscar si ya existe el usuario en la tabla 'usuarios' usando tu modelo 'Usuario'
-        $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();
+    // Clave primaria
+    protected $primaryKey = 'id_usuario'; // Esto también ya lo has configurado
 
-        if ($user) {
-            // Si el usuario existe, lo autenticamos
-            Auth::login($user);
-            return redirect('/dashboard');  // Redirige al dashboard
-        } else {
-            // Si no existe, mostramos una notificación de acceso denegado
-            Notification::make()
-                ->title('Acceso denegado')
-                ->danger()
-                ->body('El usuario no está autorizado para acceder.')
-                ->send();
+    // Atributos asignables en masa
+    protected $fillable = [
+        'nombre',
+        'apellido',
+        'correo_electronico',
+        'telefono',
+        'Direccion',
+    ];
 
-            return redirect()->route('login');  // Redirige de vuelta al login
-        }
-    }
+    // Atributos ocultos
+    protected $hidden = [
+        'remember_token',
+    ];
+
+    public $timestamps = true;
 }

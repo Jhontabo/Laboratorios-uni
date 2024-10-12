@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Laravel\Socialite\Facades\Socialite;
-use App\Models\User;
+use App\Models\Usuario;  // Asegúrate de que estás importando tu modelo Usuario
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 
@@ -22,7 +22,7 @@ class LoginController extends Controller
         $googleUser = Socialite::driver('google')->stateless()->user();
 
         // Buscar si ya existe el usuario
-        $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();
+        $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();  // Ahora buscará en el modelo Usuario
 
         if ($user) {
             // Si el usuario existe, lo autenticamos

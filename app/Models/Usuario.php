@@ -32,4 +32,15 @@ class Usuario extends Authenticatable
     ];
 
     public $timestamps = true;
+
+    public function getUserName(): string
+{
+    $nombre = $this->nombre ?? '';  // Asegura que no sea null
+    $apellido = $this->apellido ?? '';  // Asegura que no sea null
+
+    $fullName = trim($nombre . ' ' . $apellido);
+
+    return $fullName !== '' ? $fullName : 'Invitado';  // Retorna 'Invitado' si no hay nombre
+}
+
 }

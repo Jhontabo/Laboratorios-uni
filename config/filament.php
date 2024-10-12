@@ -90,8 +90,8 @@ return [
 
     // ...
     'auth' => [
-        'guard' => 'web', // Asegúrate de que este guardia sea el correcto
-        'user' => App\Models\Usuario::class, // Asegúrate de que esté utilizando el modelo Usuario
+        'guard' => 'web',  // Usa el guardia correcto
+        'user' => App\Models\Usuario::class,  // Modelo correcto
     ],
 
 

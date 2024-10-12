@@ -18,22 +18,24 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class OtroPanelProvider extends PanelProvider
+class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->id('otro')
-            ->path('otro')
+            ->default()
+            ->id('admin')
+            ->path('admin')
+            ->login()
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Otro/Resources'), for: 'App\\Filament\\Otro\\Resources')
-            ->discoverPages(in: app_path('Filament/Otro/Pages'), for: 'App\\Filament\\Otro\\Pages')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Otro/Widgets'), for: 'App\\Filament\\Otro\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,

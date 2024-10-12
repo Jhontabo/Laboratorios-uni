@@ -7,6 +7,7 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\Usuario;  // Asegúrate de que estás importando tu modelo Usuario
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -20,23 +21,28 @@ class LoginController extends Controller
     public function handleGoogleCallback()
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
-
-        // Buscar si ya existe el usuario
-        $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();  // Ahora buscará en el modelo Usuario
-
+    
+        // Loguear los datos del usuario de Google
+        Log::info('Usuario autenticado con Google:', [
+            'email' => $googleUser->getEmail(),
+            'name' => $googleUser->getName(),
+            'avatar' => $googleUser->getAvatar(),
+            // Otros datos que quieras verificar
+        ]);
+    
+        $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();
+    
         if ($user) {
-            // Si el usuario existe, lo autenticamos
             Auth::login($user);
-            return redirect('/dashboard');  // Redirige al dashboard
+            return redirect('/dashboard');
         } else {
-            // Si no existe, mostramos una notificación de acceso denegado
             Notification::make()
                 ->title('Acceso denegado')
                 ->danger()
                 ->body('El usuario no está autorizado para acceder.')
                 ->send();
             
-            return redirect()->route('login');  // Redirige de vuelta al login
+            return redirect()->route('login');
         }
-    }
+}
 }

@@ -4,20 +4,20 @@
 return [
 
    
-
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',  // Aquí también asegúrate de apuntar al modelo 'usuarios' si estás usando este nombre
-        ],
+'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'usuarios',  // Asegúrate de que el provider sea el correcto
     ],
+],
 
-    'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Usuario::class,  // Usa tu modelo Usuario en lugar de User
-        ],
+'providers' => [
+    'usuarios' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Usuario::class,  // Modelo correcto
     ],
+],
+
 
 ];
 

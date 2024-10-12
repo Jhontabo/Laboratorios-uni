@@ -27,11 +27,9 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 });
 
-// Ruta protegida para verificar el usuario autenticado
 Route::middleware(['auth'])->get('/test-auth', function () {
-    // Mostrar información del usuario autenticado
     return response()->json([
-        'user' => auth()->user(),  // Devuelve el usuario autenticado
-        'name' => auth()->user()->getUserName(),  // Devuelve el nombre del usuario usando getUserName()
+        'user' => auth()->user(),
+        'name' => auth()->user()->getUserName(),
     ]);
 });

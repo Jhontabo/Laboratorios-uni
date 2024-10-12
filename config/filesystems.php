@@ -74,4 +74,10 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+
+    'auth' => [
+    'guard' => 'web',  // Usa el guardia correcto
+    'user' => App\Models\Usuario::class,  // Modelo correcto
+],
+
 ];

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Usuario; // Asegúrate de usar tu modelo
+use App\Models\Usuario;
 use Illuminate\Console\Command;
 
 class CreateFilamentAdmin extends Command
@@ -23,13 +23,14 @@ class CreateFilamentAdmin extends Command
         $telefono = $this->ask('¿Cuál es tu teléfono?'); 
         $direccion = $this->ask('¿Cuál es tu dirección?');
         
-        // Creación del administrador
+        // Creación del administrador con el campo `name` generado
         $admin = Usuario::create([
             'nombre' => $name,
             'apellido' => $apellido,
             'correo_electronico' => $email,
             'telefono' => $telefono,
             'Direccion' => $direccion,
+            'name' => $name . ' ' . $apellido, // Generar el campo `name`
         ]);
 
         $this->info("Admin creado exitosamente");

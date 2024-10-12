@@ -33,14 +33,10 @@ class Usuario extends Authenticatable
 
     public $timestamps = true;
 
-    public function getUserName(): string
+// Si no usas una columna virtual, agrega este accesorio
+public function getNameAttribute()
 {
-    $nombre = $this->nombre ?? '';  // Asegura que no sea null
-    $apellido = $this->apellido ?? '';  // Asegura que no sea null
-
-    $fullName = trim($nombre . ' ' . $apellido);
-
-    return $fullName !== '' ? $fullName : 'Invitado';  // Retorna 'Invitado' si no hay nombre
+    return $this->nombre . ' ' . $this->apellido;
 }
 
 }

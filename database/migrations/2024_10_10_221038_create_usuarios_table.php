@@ -9,15 +9,17 @@ return new class extends Migration
     public function up()
     {
         Schema::create('usuarios', function (Blueprint $table) {
-            $table->id('id_usuario'); // Clave primaria
+            $table->id('id_usuario'); 
             $table->string('nombre');
             $table->string('apellido');
             $table->string('correo_electronico')->unique();
             $table->string('telefono');
             $table->string('Direccion');
-            $table->rememberToken(); 
-            $table->timestamps();     // created_at y updated_at
+            $table->string('name')->virtualAs('CONCAT(nombre, " ", apellido)'); // Nuevo campo concatenado
+            $table->rememberToken();
+            $table->timestamps();
         });
+        
     }
     
     public function down()

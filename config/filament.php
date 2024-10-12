@@ -1,4 +1,5 @@
 <?php
+use Filament\Facades\Filament;
 
 return [
 
@@ -98,3 +99,7 @@ return [
 
 
 ];
+
+Filament::getUserAvatarProvider()->setNameUsing(function ($user) {
+    return $user->nombre . ' ' . $user->apellido;
+});

@@ -19,38 +19,24 @@ class LaboratorioResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
-                //
+                Forms\Components\TextInput::make('nombre')->required(),
+                Forms\Components\TextInput::make('ubicacion')->required(),
+                Forms\Components\TextInput::make('capacidad')->numeric(),
             ]);
     }
 
-    public static function table(Table $table): Table
+    public static function table(Tables\Table $table): Tables\Table
     {
         return $table
             ->columns([
-                //
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Columns\TextColumn::make('nombre'),
+                Tables\Columns\TextColumn::make('ubicacion'),
+                Tables\Columns\TextColumn::make('capacidad'),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
@@ -62,3 +48,4 @@ class LaboratorioResource extends Resource
         ];
     }
 }
+

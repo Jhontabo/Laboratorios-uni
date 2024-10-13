@@ -16,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\Categoria;  
 
 class ProductoResource extends Resource
 {
@@ -30,17 +31,29 @@ class ProductoResource extends Resource
                 TextInput::make('nombre')
                     ->required(),
                 TextInput::make('descripcion'),
+                Select::make('id_categorias')  // Aquí usas el campo id de la categoría
+                    ->label('Categoría')
+                    ->options(Categoria::all()->pluck('nombre_categoria', 'id_categorias'))
+                    ->required(),
+
                 TextInput::make('numero_serie')
-                    ->label('Número de serie'),
+                    ->label('Número de serie')
+                    ->required(),
                 TextInput::make('cantidad_disponible')
-                    ->numeric(),
-                TextInput::make('ubicacion'),
+                    ->numeric()
+                    ->required(),
+                    Select::make('id_laboratorio')
+                    ->label('Ubicación')
+                    ->relationship('laboratorio', 'nombre') // Relacionar con la tabla laboratorio
+                    ->searchable() // Opción para búsqueda rápida
+                    ->required(),
                 Select::make('Estado')
                     ->options([
                         'nuevo' => 'Nuevo',
                         'usado' => 'Usado',
                         'dañado' => 'Dañado',
-                    ]),
+                    ])
+                    ->required(),
             ]);
     }
 

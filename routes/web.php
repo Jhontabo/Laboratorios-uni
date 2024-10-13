@@ -26,10 +26,3 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('filament.admin.pages.dashboard');
     })->name('dashboard');
 });
-
-Route::middleware(['auth'])->get('/test-auth', function () {
-    return response()->json([
-        'user' => auth()->user(),
-        'name' => auth()->user()->getUserName(),
-    ]);
-});

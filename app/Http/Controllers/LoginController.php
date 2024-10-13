@@ -20,16 +20,17 @@ class LoginController extends Controller
     // Manejar el callback de Google
     public function handleGoogleCallback()
     {
+        // Este es el punto donde parece estar el problema. El método `stateless` debería funcionar aquí.
         $googleUser = Socialite::driver('google')->stateless()->user();
 
-        // Loguear los datos del usuario de Google
+        // Loguear los datos del usuario de Google para debug
         Log::info('Usuario autenticado con Google:', [
             'email' => $googleUser->getEmail(),
             'name' => $googleUser->getName(),
             'avatar' => $googleUser->getAvatar(),
-            // Otros datos que quieras verificar
         ]);
 
+        // Intentar encontrar al usuario en la base de datos
         $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();
 
         if ($user) {

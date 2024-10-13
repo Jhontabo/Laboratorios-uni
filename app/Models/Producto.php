@@ -10,7 +10,7 @@ class Producto extends Model
     use HasFactory;
 
     protected $table = 'productos';
-    
+
     protected $primaryKey = 'id_productos';
 
     protected $fillable = [
@@ -22,7 +22,6 @@ class Producto extends Model
         'numero_serie',
         'fecha_adicion',
         'costo_unitario',
-        'ubicacion',
         'estado'
     ];
 
@@ -35,5 +34,12 @@ class Producto extends Model
     public function categoria()
     {
         return $this->belongsTo(Categoria::class, 'id_categorias');
+    }
+
+    // Obtener la ubicación a través de la relación con laboratorio
+    public function getUbicacionAttribute()
+    {
+        // Verifica si el laboratorio está presente antes de intentar acceder a la ubicación
+        return $this->laboratorio ? $this->laboratorio->ubicacion : 'Ubicación no asignada';
     }
 }

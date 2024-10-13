@@ -16,7 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Models\Categoria;  
+use App\Models\Categoria;
 
 class ProductoResource extends Resource
 {
@@ -42,9 +42,9 @@ class ProductoResource extends Resource
                 TextInput::make('cantidad_disponible')
                     ->numeric()
                     ->required(),
-                    Select::make('id_laboratorio')
+                Select::make('id_laboratorio')
                     ->label('Ubicación')
-                    ->relationship('laboratorio', 'nombre') // Relacionar con la tabla laboratorio
+                    ->relationship('laboratorio', 'ubicacion') // Relacionar con la tabla laboratorio
                     ->searchable() // Opción para búsqueda rápida
                     ->required(),
                 Select::make('Estado')

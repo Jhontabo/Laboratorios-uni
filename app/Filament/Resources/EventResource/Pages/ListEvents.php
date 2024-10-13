@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\HorarioResource\Pages;
+namespace App\Filament\Resources\EventResource\Pages;
 
-use App\Filament\Resources\HorarioResource;
+use App\Filament\Resources\EventResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListHorarios extends ListRecords
+class ListEvents extends ListRecords
 {
-    protected static string $resource = HorarioResource::class;
+    protected static string $resource = EventResource::class;
 
     protected function getHeaderActions(): array
     {

@@ -21,7 +21,7 @@ class LoginController extends Controller
     public function handleGoogleCallback()
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
-    
+
         // Loguear los datos del usuario de Google
         Log::info('Usuario autenticado con Google:', [
             'email' => $googleUser->getEmail(),
@@ -29,9 +29,9 @@ class LoginController extends Controller
             'avatar' => $googleUser->getAvatar(),
             // Otros datos que quieras verificar
         ]);
-    
+
         $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();
-    
+
         if ($user) {
             Auth::login($user);
             return redirect('/dashboard');
@@ -41,8 +41,8 @@ class LoginController extends Controller
                 ->danger()
                 ->body('El usuario no está autorizado para acceder.')
                 ->send();
-            
-            return redirect()->route('login');
+
+            return redirect('/');
         }
-}
+    }
 }

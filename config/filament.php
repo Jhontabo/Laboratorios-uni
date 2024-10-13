@@ -1,4 +1,5 @@
 <?php
+
 use Filament\Facades\Filament;
 
 return [
@@ -86,14 +87,17 @@ return [
     */
 
     'livewire_loading_delay' => 'default',
-// config/filament.php
+    // config/filament.php
 
 
     // ...
     'auth' => [
         'guard' => 'web',  // Usa el guardia correcto
-        'user' => App\Models\Usuario::class,  // Modelo correcto
+        'user' => App\Models\Usuario::class,
+        'logout_redirect' => '/',  // Modelo correcto
     ],
+
+
 
 
 

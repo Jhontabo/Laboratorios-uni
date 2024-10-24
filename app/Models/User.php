@@ -6,10 +6,11 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
-class Usuario extends Authenticatable
+class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, HasRoles;
 
     // Nombre de la tabla
     protected $table = 'usuarios'; // Ya tienes la tabla correcta
@@ -33,10 +34,9 @@ class Usuario extends Authenticatable
 
     public $timestamps = true;
 
-// Si no usas una columna virtual, agrega este accesorio
-public function getNameAttribute()
-{
-    return $this->nombre . ' ' . $this->apellido;
-}
-
+    // Si no usas una columna virtual, agrega este accesorio
+    public function getNameAttribute()
+    {
+        return $this->nombre . ' ' . $this->apellido;
+    }
 }

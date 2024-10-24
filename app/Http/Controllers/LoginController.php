@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Laravel\Socialite\Facades\Socialite;
-use App\Models\Usuario;  // Asegúrate de que estás importando tu modelo Usuario
+use App\Models\User;  // Asegúrate de que estás importando tu modelo Usuario
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +23,7 @@ class LoginController extends Controller
         // Este es el punto donde parece estar el problema. El método `stateless` debería funcionar aquí.
         $googleUser = Socialite::driver('google')->user();
 
+
         // Loguear los datos del usuario de Google para debug
         Log::info('Usuario autenticado con Google:', [
             'email' => $googleUser->getEmail(),
@@ -31,7 +32,7 @@ class LoginController extends Controller
         ]);
 
         // Intentar encontrar al usuario en la base de datos
-        $user = Usuario::where('correo_electronico', $googleUser->getEmail())->first();
+        $user = User::where('correo_electronico', $googleUser->getEmail())->first();
 
         if ($user) {
             Auth::login($user);

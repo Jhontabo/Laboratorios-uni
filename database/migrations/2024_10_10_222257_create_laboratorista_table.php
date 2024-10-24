@@ -10,16 +10,15 @@ return new class extends Migration
     {
         Schema::create('laboratorista', function (Blueprint $table) {
             $table->id('id_laboratorista'); // Clave primaria de laboratorista
-            $table->foreignId('id_usuario')->constrained('usuarios', 'id_usuario')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('id_usuario')->constrained('users', 'id_usuario')->onDelete('cascade')->onUpdate('cascade');
             $table->string('estado')->nullable();
             $table->string('fecha_ingreso')->nullable();
             $table->timestamps();
         });
     }
-    
+
     public function down()
     {
         Schema::dropIfExists('laboratorista');
     }
-    
 };

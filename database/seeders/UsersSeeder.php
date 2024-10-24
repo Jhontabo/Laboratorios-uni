@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Database\Seeders\str_random;
 
 
-class UsuariosSeeder extends Seeder
+class UsersSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -18,7 +18,7 @@ class UsuariosSeeder extends Seeder
     {
         //
 
-        DB::table('usuarios')->insert([
+        DB::table('users')->insert([
             'nombre' => 'Jhon',
             'apellido' => 'Tajumbina',
             'correo_electronico' => 'jhonse.tajumbina@umariana.edu.co',

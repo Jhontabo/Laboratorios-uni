@@ -13,7 +13,7 @@ class User extends Authenticatable
     use Notifiable, HasRoles;
 
     // Nombre de la tabla
-    protected $table = 'usuarios'; // Ya tienes la tabla correcta
+    protected $table = 'users'; // Ya tienes la tabla correcta
 
     // Clave primaria
     protected $primaryKey = 'id_usuario'; // Esto también ya lo has configurado

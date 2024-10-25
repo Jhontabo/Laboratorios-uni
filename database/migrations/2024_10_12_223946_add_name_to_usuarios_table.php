@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
-{
-    Schema::table('usuarios', function (Blueprint $table) {
-        $table->string('name')->virtualAs('CONCAT(nombre, " ", apellido)'); // Nuevo campo virtual
-    });
-}
+    {
+        // Verificar si la columna 'name' ya existe antes de agregarla
+        Schema::table('usuarios', function (Blueprint $table) {
+            if (!Schema::hasColumn('usuarios', 'name')) {
+                $table->string('name')->virtualAs('CONCAT(nombre, " ", apellido)');
+            }
+        });
+    }
 
-public function down()
-{
-    Schema::table('usuarios', function (Blueprint $table) {
-        $table->dropColumn('name');
-    });
-}
-
+    public function down()
+    {
+        Schema::table('usuarios', function (Blueprint $table) {
+            $table->dropColumn('name');
+        });
+    }
 };

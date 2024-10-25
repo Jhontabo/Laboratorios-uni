@@ -3,6 +3,14 @@ use Filament\Facades\Filament;
 
 return [
 
+    'panels' => [
+        'admin' => [
+            'plugins' => [
+                Saade\FilamentFullCalendar\FilamentFullCalendarPlugin::make(),  // Registrar el plugin para el panel admin
+            ],
+        ],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Broadcasting

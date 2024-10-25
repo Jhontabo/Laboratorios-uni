@@ -14,7 +14,11 @@ class CategoriaResource extends Resource
 {
     protected static ?string $model = Categoria::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    public static function getPluralLabel(): string
+    {
+        return 'Categoria inventario'; 
+    }
     
     public static function form(Forms\Form $form): Forms\Form
     {

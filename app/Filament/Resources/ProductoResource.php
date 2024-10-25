@@ -17,12 +17,18 @@ use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Categoria;  
+use App\Models\Laboratorio;
 
 class ProductoResource extends Resource
 {
     protected static ?string $model = Producto::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-table-cells';
+
+    public static function getPluralLabel(): string
+    {
+        return 'Inventario'; 
+    }
 
     public static function form(Form $form): Form
     {
@@ -41,13 +47,16 @@ class ProductoResource extends Resource
                     ->required(),
                 TextInput::make('cantidad_disponible')
                     ->numeric()
+                    ->required()
+                    ->rules('gt:0')
+                    ->minValue(1),
+                    Select::make('id_laboratorio') 
+                    ->label('Ubicacion (Laboratorio)')
+                    ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio'))  
+                    ->searchable()
                     ->required(),
-                    Select::make('id_laboratorio')
-                    ->label('Ubicación')
-                    ->relationship('laboratorio', 'nombre') // Relacionar con la tabla laboratorio
-                    ->searchable() // Opción para búsqueda rápida
-                    ->required(),
-                Select::make('Estado')
+                Select::make('estado')
+                    ->label("Estado")
                     ->options([
                         'nuevo' => 'Nuevo',
                         'usado' => 'Usado',
@@ -78,9 +87,10 @@ class ProductoResource extends Resource
                         'warning' => 'usado',
                         'danger' => 'dañado',
                     ]),
-                TextColumn::make('ubicacion'),
+                TextColumn::make('laboratorio.ubicacion')->label('Ubicación'),
+
                 TextColumn::make('numero_serie'),
-                TextColumn::make('fecha_adicion')->date(),
+                TextColumn::make('created_at')->date(),
             ])
             ->filters([
                 // Agrega filtros si es necesario

@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -15,9 +16,24 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        DB::table('usuarios')->insert([
+            'nombre' => 'Jhon',
+            'apellido' => 'Tajumbina',
+            'correo_electronico' => 'jhonse.tajumbina@umariana.edu.co',
+            'telefono' => '123456789',
+            'Direccion' => 'Calle Falsa 123',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('usuarios')->insert([
+            'nombre' => 'Jonathan',
+            'apellido' => 'Burbano',
+            'correo_electronico' => 'jonathanc.burbano221@umariana.edu.co',
+            'telefono' => '987654321',
+            'Direccion' => 'Avenida Siempreviva 456',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }

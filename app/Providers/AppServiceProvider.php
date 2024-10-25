@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use App\Filament\Resources\ReservaResource\Widgets\CalendarWidget;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Registra el componente Livewire para el widget del calendario
-        Livewire::component('calendar-widget', \App\Filament\Resources\ReservaResource\Widgets\ReservaCalendarWidget::class);
+        
     }
 }

@@ -1,16 +1,13 @@
 <?php
 use Filament\Facades\Filament;
-
+use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
+use App\Filament\Widgets\CalendarWidget;
 return [
 
-    'panels' => [
-        'admin' => [
-            'plugins' => [
-                Saade\FilamentFullCalendar\FilamentFullCalendarPlugin::make(),  // Registrar el plugin para el panel admin
-            ],
-        ],
-    ],
 
+    'widgets' => [
+        CalendarWidget::class,
+    ],
     /*
     |--------------------------------------------------------------------------
     | Broadcasting

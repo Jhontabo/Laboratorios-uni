@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
 
-            ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
+            #->plugin(FilamentSpatieRolesPermissionsPlugin::make())
 
             ->plugin(
                 FilamentFullCalendarPlugin::make()

@@ -14,7 +14,7 @@ class ReservaResource extends Resource
 {
     protected static ?string $model = Reserva::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
 
     public static function getPages(): array
     {

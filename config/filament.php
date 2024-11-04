@@ -1,9 +1,14 @@
 <?php
 
 use Filament\Facades\Filament;
-
+use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
+use App\Filament\Widgets\CalendarWidget;
 return [
 
+
+    'widgets' => [
+        CalendarWidget::class,
+    ],
     /*
     |--------------------------------------------------------------------------
     | Broadcasting

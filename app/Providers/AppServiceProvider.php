@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Auth\Events\Logout;
-use Illuminate\Support\Facades\Event;
+use Livewire\Livewire;
+use App\Filament\Resources\ReservaResource\Widgets\CalendarWidget;
 use Illuminate\Support\Facades\Redirect;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,10 +20,5 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        Event::listen(Logout::class, function () {
-            Redirect::to('/')->send();
-        });
-    }
+    public function boot(): void {}
 }

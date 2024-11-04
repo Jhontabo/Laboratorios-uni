@@ -19,11 +19,9 @@ return new class extends Migration
             $table->foreignId('id_categorias')
                   ->constrained('categorias','id_categorias')
                   ->onDelete('cascade')->onUpdate('cascade');
-            $table->string('numero_serie')->nullable(); // Nuevo campo
-            $table->date('fecha_adicion')->nullable(); // Fecha de adición del producto
-            $table->decimal('costo_unitario', 8, 2)->nullable(); // Costo unitario del equipo o suministro
-            $table->string('ubicacion')->nullable(); // Ubicación del equipo o suministro
-            $table->enum('estado', ['nuevo', 'usado', 'dañado'])->default('nuevo'); // Estado del equipo o suministro
+            $table->string('numero_serie')->nullable(); 
+            $table->string('ubicacion')->nullable(); 
+            $table->enum('estado', ['nuevo', 'usado', 'dañado'])->default('nuevo'); 
             $table->timestamps();
         });
     }

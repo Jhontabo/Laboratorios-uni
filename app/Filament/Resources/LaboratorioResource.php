@@ -18,6 +18,10 @@ class LaboratorioResource extends Resource
     protected static ?string $model = Laboratorio::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    public static function getPluralLabel(): string
+    {
+        return 'Laboratorios'; 
+    }
 
     public static function form(Forms\Form $form): Forms\Form
     {
@@ -36,6 +40,9 @@ class LaboratorioResource extends Resource
                 Tables\Columns\TextColumn::make('nombre'),
                 Tables\Columns\TextColumn::make('ubicacion'),
                 Tables\Columns\TextColumn::make('capacidad'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
             ]);
     }
 

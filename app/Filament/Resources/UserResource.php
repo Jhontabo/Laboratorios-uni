@@ -38,10 +38,6 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                TextInput::make('contraseña')
-                    ->password()
-                    ->hiddenOn('edit')
-                    ->required(),
                 TextInput::make('Direccion')
                     ->required()
                     ->maxLength(255),
@@ -60,7 +56,14 @@ class UserResource extends Resource
                 TextColumn::make('nombre')->label('Nombre')->sortable()->searchable(),
                 TextColumn::make('apellido')->label('Apellido')->sortable()->searchable(),
                 TextColumn::make('correo_electronico')->label('Correo')->sortable()->searchable(),
-                Select::make('roles')->multiple()->relationship('roles', 'name')
+                TextColumn::make('roles.name')  // Usamos TextColumn para mostrar los nombres de los roles
+                    ->label('Roles')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        // Concatenar los roles si son múltiples
+                        return is_array($state) ? implode(', ', $state) : $state;
+                    })
             ])
             ->filters([
                 //
@@ -74,6 +77,7 @@ class UserResource extends Resource
                 ]),
             ]);
     }
+
 
     public static function getRelations(): array
     {

@@ -23,6 +23,8 @@ class PermissionResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
     protected static ?string $navigationGroup = 'Roles y Permisos';
     protected static ?string $navigationLabel = 'Permisos';
+    protected static ?string $pluralLabel = 'Permisos';
+
 
     public static function form(Form $form): Form
     {
@@ -54,8 +56,10 @@ class PermissionResource extends Resource
             ->filters([
                 //
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

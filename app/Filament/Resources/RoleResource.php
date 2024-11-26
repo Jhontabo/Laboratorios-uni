@@ -23,6 +23,7 @@ class RoleResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-key';
     protected static ?string $navigationGroup = 'Roles y Permisos';
     protected static ?string $navigationLabel = 'Roles';
+    protected static ?string $pluralLabel = 'Roles';
 
     public static function form(Form $form): Form
     {
@@ -61,6 +62,7 @@ class RoleResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

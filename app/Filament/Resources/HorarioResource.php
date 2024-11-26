@@ -67,7 +67,7 @@ class HorarioResource extends Resource
                         'info' => 'Miércoles',
                         'warning' => 'Jueves',
                         'danger' => 'Viernes',
-                        'secondary' => ['Sábado', 'Domingo'],
+                        'secondary' => ['Sábado'],
                     ]),
 
                 Tables\Columns\TextColumn::make('hora_inicio')
@@ -83,6 +83,11 @@ class HorarioResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
+
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+            ])
             ->filters([
                 Tables\Filters\SelectFilter::make('dia_semana')
                     ->label('Día de la semana')
@@ -94,7 +99,7 @@ class HorarioResource extends Resource
                         'Viernes' => 'Viernes',
                         'Sábado' => 'Sábado',
                         'Domingo' => 'Domingo',
-                    ]),
+                    ])
             ]);
     }
 

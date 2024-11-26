@@ -7,6 +7,7 @@ use Livewire\Livewire;
 use App\Filament\Resources\ReservaResource\Widgets\CalendarWidget;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\App;
+use Illuminate\Database\Eloquent\Model;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        Model::unguard();
         App::setLocale('es');
     }
 }

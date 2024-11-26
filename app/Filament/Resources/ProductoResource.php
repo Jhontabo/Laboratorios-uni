@@ -44,7 +44,9 @@ class ProductoResource extends Resource
                             ->schema([
                                 TextInput::make('nombre')
                                     ->label('Nombre del producto')
-                                    ->required(),
+                                    ->required()
+                                    ->maxLength('255')
+                                    ->helperText('Máximo 255 caracteres'),
                                 Textarea::make('descripcion')
                                     ->label('Descripción del producto')
                                     ->maxLength(500)
@@ -55,17 +57,21 @@ class ProductoResource extends Resource
                     ]),
                 Section::make('Detalles del Producto')
                     ->schema([
-                        Grid::make(2)  // Dos columnas
+                        Grid::make(2)
                             ->schema([
                                 TextInput::make('numero_serie')
                                     ->label('Número de serie')
-                                    ->required(),
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->helperText('Máximo 255 caracteres'),
                                 TextInput::make('cantidad_disponible')
                                     ->label('Cantidad disponible')
                                     ->numeric()
                                     ->required()
-                                    ->rules('gt:0')
-                                    ->minValue(1),
+                                    ->rules('gt:0|max:1000000')
+                                    ->minValue(1)
+                                    ->maxValue(1000000)
+                                    ->helperText('La cantidad debe ser mayor a 0'),
                             ]),
                     ]),
                 Section::make('Ubicación y Estado')

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\RoleResource\Pages;
+namespace App\Filament\Resources\PermisoResource\Pages;
 
-use App\Filament\Resources\RoleResource;
+use App\Filament\Resources\PermisoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditRole extends EditRecord
+class EditPermiso extends EditRecord
 {
-    protected static string $resource = RoleResource::class;
+    protected static string $resource = PermisoResource::class;
 
     protected function getHeaderActions(): array
     {

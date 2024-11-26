@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RoleResource\Pages;
-use App\Filament\Resources\RoleResource\RelationManagers;
-use App\Models\Role;
+use App\Filament\Resources\PermisoResource\Pages;
+use App\Filament\Resources\PermisoResource\RelationManagers;
+use App\Models\Permiso;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,14 +16,15 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class RoleResource extends Resource
+class PermisoResource extends Resource
 {
-    protected static ?string $model = Role::class;
+    protected static ?string $model = Permiso::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-key';
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
     protected static ?string $navigationGroup = 'Roles y Permisos';
-    protected static ?string $navigationLabel = 'Roles';
-    protected static ?string $pluralLabel = 'Roles';
+    protected static ?string $navigationLabel = 'Permisos';
+    protected static ?string $pluralLabel = 'Permisos';
+
 
     public static function form(Form $form): Form
     {
@@ -40,11 +41,6 @@ class RoleResource extends Resource
                         'api' => 'API',
                     ])
                     ->required(),
-                Select::make('permissions')
-                    ->label('Permisos')
-                    ->multiple()
-                    ->relationship('permissions', 'name')
-                    ->preload(),
             ]);
     }
 
@@ -60,6 +56,7 @@ class RoleResource extends Resource
             ->filters([
                 //
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
@@ -79,9 +76,9 @@ class RoleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRoles::route('/'),
-            'create' => Pages\CreateRole::route('/create'),
-            'edit' => Pages\EditRole::route('/{record}/edit'),
+            'index' => Pages\ListPermisos::route('/'),
+            'create' => Pages\CreatePermiso::route('/create'),
+            'edit' => Pages\EditPermiso::route('/{record}/edit'),
         ];
     }
 }

@@ -48,9 +48,18 @@ class UserResource extends Resource
                     ->tel()
                     ->required()
                     ->maxLength(15),
-                Select::make('roles')->multiple()->relationship('roles', 'name')
+                Select::make('roles')->multiple()->relationship('roles', 'name'),
+                Select::make('estado')
+                    ->label('Estado')
+                    ->options([
+                        'activo' => 'Activo',
+                        'inactivo' => 'Inactivo',
+                    ])
+                    ->default('activo')
+                    ->required(),
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
@@ -59,14 +68,22 @@ class UserResource extends Resource
                 TextColumn::make('nombre')->label('Nombre')->sortable()->searchable(),
                 TextColumn::make('apellido')->label('Apellido')->sortable()->searchable(),
                 TextColumn::make('correo_electronico')->label('Correo')->sortable()->searchable(),
-                TextColumn::make('roles.name')  // Usamos TextColumn para mostrar los nombres de los roles
+                TextColumn::make('roles.name')  // Mostrar roles de los usuarios
                     ->label('Roles')
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(function ($state) {
-                        // Concatenar los roles si son múltiples
                         return is_array($state) ? implode(', ', $state) : $state;
-                    })
+                    }),
+                TextColumn::make('estado')
+                    ->label('Estado')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => ucfirst($state))  // Capitaliza el estado
+                    ->color(function ($state) {
+                        return $state === 'activo' ? 'success' : 'danger';
+                    }),
+
             ])
             ->filters([
                 //
@@ -80,6 +97,7 @@ class UserResource extends Resource
                 ]),
             ]);
     }
+
 
 
     public static function getRelations(): array

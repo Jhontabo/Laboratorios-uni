@@ -17,6 +17,7 @@ return new class extends Migration
                 $table->string('telefono')->nullable();
                 $table->string('Direccion');
                 $table->string('name')->virtualAs('CONCAT(nombre, " ", apellido)');
+                $table->enum('estado', ['activo', 'inactivo'])->default('activo');
                 $table->rememberToken();
                 $table->timestamps();
             });

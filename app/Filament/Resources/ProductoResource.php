@@ -18,6 +18,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Categoria;
 use App\Models\Laboratorio;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Grid;
 
 class ProductoResource extends Resource
 {
@@ -32,35 +38,68 @@ class ProductoResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('nombre')
-                    ->required(),
-                TextInput::make('descripcion'),
-                Select::make('id_categorias')  // Aquí usas el campo id de la categoría
-                    ->label('Categoría')
-                    ->options(Categoria::all()->pluck('nombre_categoria', 'id_categorias'))
-                    ->required(),
-
-                TextInput::make('numero_serie')
-                    ->label('Número de serie')
-                    ->required(),
-                TextInput::make('cantidad_disponible')
-                    ->numeric()
-                    ->required()
-                    ->rules('gt:0')
-                    ->minValue(1),
-                Select::make('id_laboratorio')
-                    ->label('Ubicacion (Laboratorio)')
-                    ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio'))
-                    ->searchable()
-                    ->required(),
-                Select::make('estado')
-                    ->label("Estado")
-                    ->options([
-                        'nuevo' => 'Nuevo',
-                        'usado' => 'Usado',
-                        'dañado' => 'Dañado',
-                    ])
-                    ->required(),
+                Section::make('Información Básica')
+                    ->schema([
+                        Grid::make(2)  // Dos columnas para una mejor distribución del espacio
+                            ->schema([
+                                TextInput::make('nombre')
+                                    ->label('Nombre del producto')
+                                    ->required(),
+                                Textarea::make('descripcion')
+                                    ->label('Descripción del producto')
+                                    ->maxLength(500)
+                                    ->helperText('Máximo 500 caracteres')
+                                    ->rows(4)
+                                    ->required(),
+                            ]),
+                    ]),
+                Section::make('Detalles del Producto')
+                    ->schema([
+                        Grid::make(2)  // Dos columnas
+                            ->schema([
+                                TextInput::make('numero_serie')
+                                    ->label('Número de serie')
+                                    ->required(),
+                                TextInput::make('cantidad_disponible')
+                                    ->label('Cantidad disponible')
+                                    ->numeric()
+                                    ->required()
+                                    ->rules('gt:0')
+                                    ->minValue(1),
+                            ]),
+                    ]),
+                Section::make('Ubicación y Estado')
+                    ->schema([
+                        Grid::make(2)  // Dos columnas
+                            ->schema([
+                                Select::make('id_categorias')
+                                    ->label('Categoría')
+                                    ->options(Categoria::all()->pluck('nombre_categoria', 'id_categorias'))
+                                    ->required(),
+                                Select::make('id_laboratorio')
+                                    ->label('Ubicación (Laboratorio)')
+                                    ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio'))
+                                    ->searchable()
+                                    ->required(),
+                                Select::make('estado')
+                                    ->label('Estado')
+                                    ->options([
+                                        'nuevo' => 'Nuevo',
+                                        'usado' => 'Usado',
+                                        'dañado' => 'Dañado',
+                                    ])
+                                    ->required(),
+                            ]),
+                    ]),
+                Section::make('Imagen del Producto')
+                    ->schema([
+                        FileUpload::make('imagen')
+                            ->label('Imagen del producto')
+                            ->image()
+                            ->directory('uploads/productos')
+                            ->disk('public')
+                            ->visibility('public')
+                    ]),
             ]);
     }
 
@@ -68,6 +107,9 @@ class ProductoResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('imagen')
+                    ->label('Imagen')
+                    ->sortable(),
                 TextColumn::make('nombre'),
                 TextColumn::make('cantidad_disponible'),
                 BadgeColumn::make('estado')
@@ -88,7 +130,8 @@ class ProductoResource extends Resource
                 TextColumn::make('laboratorio.ubicacion')->label('Ubicación'),
 
                 TextColumn::make('numero_serie'),
-                TextColumn::make('created_at')->date(),
+                TextColumn::make('created_at')->date()->label('fecha de cracion'),
+
             ])
             ->filters([
                 // Agrega filtros si es necesario

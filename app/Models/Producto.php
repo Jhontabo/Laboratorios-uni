@@ -22,7 +22,8 @@ class Producto extends Model
         'numero_serie',
         'fecha_adicion',
         'costo_unitario',
-        'estado'
+        'estado',
+        'imagen'
     ];
 
     // Relaciones con otros modelos

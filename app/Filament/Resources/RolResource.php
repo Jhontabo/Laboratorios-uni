@@ -32,12 +32,13 @@ class RolResource extends Resource
                 TextInput::make('name')
                     ->label('Nombre')
                     ->required()
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255)
+                    ->helperText('maximo 255 caracteres'),
                 Select::make('guard_name')
-                    ->label('Guard')
+                    ->label('Guardian')
                     ->options([
-                        'web' => 'Web',
-                        'api' => 'API',
+                        'web' => 'Web'
                     ])
                     ->required(),
                 Select::make('permissions')

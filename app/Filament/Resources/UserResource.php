@@ -34,22 +34,30 @@ class UserResource extends Resource
             ->schema([
                 TextInput::make('nombre')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->helperText('maximo 255 caracteres'),
                 TextInput::make('apellido')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->helperText('maximo 255 caracteres'),
                 TextInput::make('correo_electronico')
                     ->email()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->helperText('maximo 255 caracteres'),
                 TextInput::make('Direccion')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->helperText('maximo 255 caracteres'),
                 TextInput::make('telefono')
                     ->tel()
                     ->required()
-                    ->maxLength(15),
-                Select::make('roles')->multiple()->relationship('roles', 'name'),
+                    ->maxLength(15)
+                    ->helperText('maximo 15 caracteres'),
+                Select::make('roles')
+                    ->multiple()
+                    ->relationship('roles', 'name')
+                    ->preload(),
                 Select::make('estado')
                     ->label('Estado')
                     ->options([
@@ -69,18 +77,16 @@ class UserResource extends Resource
                 TextColumn::make('nombre')->label('Nombre')->sortable()->searchable(),
                 TextColumn::make('apellido')->label('Apellido')->sortable()->searchable(),
                 TextColumn::make('correo_electronico')->label('Correo')->sortable()->searchable(),
-                TextColumn::make('roles.name')  // Mostrar roles de los usuarios
-                    ->label('Roles')
+                TextColumn::make('roles')
+                    ->label('Rol')
+                    ->formatStateUsing(fn($state, $record) => $record->roles->pluck('name')->join(', '))
                     ->sortable()
-                    ->searchable()
-                    ->formatStateUsing(function ($state) {
-                        return is_array($state) ? implode(', ', $state) : $state;
-                    }),
+                    ->searchable(),
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->sortable()
                     ->searchable()
-                    ->formatStateUsing(fn($state) => ucfirst($state))  // Capitaliza el estado
+                    ->formatStateUsing(fn($state) => ucfirst($state))
                     ->color(function ($state) {
                         return $state === 'activo' ? 'success' : 'danger';
                     }),

@@ -24,7 +24,9 @@ class CategoriaResource extends Resource
             ->schema([
                 TextInput::make('nombre_categoria')
                     ->required()
-                    ->label('Nombre de la Categoría'),
+                    ->label('Nombre de la Categoría')
+                    ->maxLength(255)
+                    ->helperText('maximo 255 caracteres'),
             ]);
     }
 

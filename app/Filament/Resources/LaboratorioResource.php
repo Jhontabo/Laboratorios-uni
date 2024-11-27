@@ -10,8 +10,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use  Filament\Forms\Components\TextInput;
 
 class LaboratorioResource extends Resource
 {
@@ -26,9 +28,19 @@ class LaboratorioResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nombre')->required(),
-                Forms\Components\TextInput::make('ubicacion')->required(),
-                Forms\Components\TextInput::make('capacidad')->numeric(),
+                TextInput::make('nombre')
+                    ->required()
+                    ->maxLength(255)
+                    ->helperText('Maximo 255 caracteres'),
+                TextInput::make('ubicacion')
+                    ->required()
+                    ->maxLength(255)
+                    ->helperText('Maximo 255 caracteres'),
+                TextInput::make('capacidad')
+                    ->numeric()
+                    ->required()
+                    ->rules('gt:0|max:100')
+                    ->helperText('minimo 1'),
             ]);
     }
 
@@ -36,9 +48,9 @@ class LaboratorioResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nombre'),
-                Tables\Columns\TextColumn::make('ubicacion'),
-                Tables\Columns\TextColumn::make('capacidad'),
+                TextColumn::make('nombre'),
+                TextColumn::make('ubicacion'),
+                TextColumn::make('capacidad'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

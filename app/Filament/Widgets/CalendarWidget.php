@@ -10,8 +10,10 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
-
+use Saade\FilamentFullCalendar\Actions\DeleteAction;
+use Saade\FilamentFullCalendar\Actions\EditAction;
 
 class CalendarWidget extends FullCalendarWidget
 {
@@ -33,7 +35,7 @@ class CalendarWidget extends FullCalendarWidget
         return [
             'firstDay' => 1,
             'headerToolbar' => [
-                'left' => 'dayGridWeek,dayGridDay',
+                'left' => 'dayGridDay,dayGridWeek,dayGridMonth',
                 'center' => 'title',
                 'right' => 'prev,next today',
             ],
@@ -61,6 +63,26 @@ class CalendarWidget extends FullCalendarWidget
             })
             ->toArray();
     }
+
+    protected function modalActions(): array
+    {
+        return [
+            EditAction::make()
+                ->mountUsing(
+                    function (Horario $record, Form $form, array $arguments) {
+                        // Asegúrate de que 'arguments' contiene los datos esperados
+                        $form->fill([
+                            'title' => $record->title, // Usar el título del evento
+                            'start_at' => $arguments['event']['start'] ?? $record->start_at, // Usa el evento 'start' si existe
+                            'end_at' => $arguments['event']['end'] ?? $record->end_at, // Usa el evento 'end' si existe
+                            'color' => $record->color, // Agregar el color del evento
+                        ]);
+                    }
+                ),
+            DeleteAction::make(),
+        ];
+    }
+
 
     // Método para crear el formulario de creación de eventos
     public function getFormSchema(): array

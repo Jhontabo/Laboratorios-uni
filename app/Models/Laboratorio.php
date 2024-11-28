@@ -11,8 +11,8 @@ class Laboratorio extends Model
     use HasFactory;
 
     // Si la tabla tiene un nombre diferente al plural de este modelo, debes definirla:
-    protected $table = 'laboratorio';
-    
+    protected $table = 'laboratorios';
+
     protected $primaryKey = 'id_laboratorio';
 
     // Define los campos que se pueden llenar

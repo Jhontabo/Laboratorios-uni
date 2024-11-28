@@ -15,7 +15,7 @@ return new class extends Migration
                 $table->string('nombre')->nullable();
                 $table->text('descripcion')->nullable();
                 $table->integer('cantidad_disponible')->nullable();
-                $table->foreignId('id_laboratorio')->constrained('laboratorio', 'id_laboratorio')->onDelete('cascade')->onUpdate('cascade');
+                $table->foreignId('id_laboratorio')->constrained('laboratorios', 'id_laboratorio')->onDelete('cascade')->onUpdate('cascade');
                 $table->foreignId('id_categorias')->constrained('categorias', 'id_categorias')->onDelete('cascade')->onUpdate('cascade');
                 $table->string('numero_serie')->nullable();
                 $table->date('fecha_adicion')->nullable();

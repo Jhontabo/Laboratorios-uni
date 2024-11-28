@@ -19,7 +19,7 @@ return new class extends Migration
             // Clave foránea para la tabla laboratorio
             $table->foreignId('id_laboratorio')
                 ->nullable()
-                ->constrained('laboratorio', 'id_laboratorio')
+                ->constrained('laboratorios', 'id_laboratorio')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
 

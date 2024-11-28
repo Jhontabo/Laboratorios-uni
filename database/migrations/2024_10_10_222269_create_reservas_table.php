@@ -9,12 +9,21 @@ return new class extends Migration
     public function up()
     {
         Schema::create('reservas', function (Blueprint $table) {
-            $table->id('id_reserva');
-            $table->foreignId('id_usuario')->constrained('users', 'id_usuario')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('id_laboratorio')->constrained('laboratorio', 'id_laboratorio')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('id_horario')->constrained('horario', 'id_horario')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('id_laboratorista')->constrained('laboratorista', 'id_laboratorista')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('Estado')->nullable();
+            $table->id('id_reserva'); // Clave primaria
+
+            // Clave foránea para horario
+            $table->foreignId('id_horario')
+                ->constrained('horario', 'id_horario') // Relación con horario.id_horario
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+
+            // Clave foránea para usuarios
+            $table->foreignId('id_usuario')
+                ->constrained('users', 'id_usuario') // Relación con users.id_usuario
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+
+            $table->string('estado')->default('pendiente'); // Estado de la reserva
             $table->timestamps();
         });
     }

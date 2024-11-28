@@ -9,13 +9,28 @@ return new class extends Migration
     public function up()
     {
         Schema::create('horario', function (Blueprint $table) {
-            $table->id('id_horario');
-            $table->foreignId('id_laboratorista')->constrained('laboratorista', 'id_laboratorista')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('id_laboratorio')->constrained('laboratorio', 'id_laboratorio')->onDelete('cascade')->onUpdate('cascade'); // Asegúrate que el nombre es singular
-            $table->string('dia_semana')->nullable();
-            $table->time('hora_inicio')->nullable();
-            $table->time('hora_fin')->nullable();
-            $table->timestamps();
+            $table->id('id_horario'); // Clave primaria
+
+            $table->string('title'); // Título del evento
+            $table->string('color'); // Color del evento
+            $table->dateTime('start_at'); // Fecha y hora de inicio
+            $table->dateTime('end_at'); // Fecha y hora de fin
+
+            // Clave foránea para la tabla laboratorio
+            $table->foreignId('id_laboratorio')
+                ->nullable()
+                ->constrained('laboratorio', 'id_laboratorio')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+
+            // Clave foránea para la tabla users
+            $table->foreignId('id_usuario')
+                ->nullable()
+                ->constrained('users', 'id_usuario') // Relación con users.id_usuario
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+
+            $table->timestamps(); // Campos created_at y updated_at
         });
     }
 

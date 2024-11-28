@@ -18,7 +18,8 @@ class Reserva extends Model
         'id_laboratorio',
         'id_horario',
         'id_laboratorista',
-        'Estado'
+        'estado',
+
     ];
 
     // Definir las relaciones

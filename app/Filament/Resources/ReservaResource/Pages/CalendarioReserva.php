@@ -3,20 +3,19 @@
 namespace App\Filament\Resources\ReservaResource\Pages;
 
 use App\Filament\Resources\ReservaResource;
+use Filament\Resources\Pages\Page;
 use App\Filament\Widgets\CalendarWidget;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
-class ListReservas extends ListRecords
+class CalendarioReserva extends Page
 {
     protected static string $resource = ReservaResource::class;
 
+    protected static string $view = 'filament.resources.reserva-resource.pages.calendario-reserva';
 
-
-    protected function getHeaderActions(): array
+    protected function getHeaderWidgets(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CalendarWidget::class,
         ];
     }
 }

@@ -20,9 +20,7 @@ class ReservaResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\CalendarReservas::route('/'),  // Página principal será el calendario
-            'create' => Pages\CreateReserva::route('/create'),
-            'edit' => Pages\EditReserva::route('/{record}/edit'),
+            'index' => Pages\CalendarioReserva::route('/')
         ];
     }
 }

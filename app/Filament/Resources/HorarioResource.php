@@ -23,33 +23,31 @@ class HorarioResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('dia_semana')
+                Forms\Components\TextInput::make('title')
                     ->required()
-                    ->label('Día de la semana')
-                    ->options([
-                        'Lunes' => 'Lunes',
-                        'Martes' => 'Martes',
-                        'Miércoles' => 'Miércoles',
-                        'Jueves' => 'Jueves',
-                        'Viernes' => 'Viernes',
-                        'Sábado' => 'Sábado',
-                        'Domingo' => 'Domingo',
-                    ])
-                    ->placeholder('Selecciona un día'),
+                    ->label('Título del evento')
+                    ->placeholder('Ejemplo: Clase de Programación'),
 
-                Forms\Components\TimePicker::make('hora_inicio')
+                Forms\Components\ColorPicker::make('color')
                     ->required()
-                    ->label('Hora de inicio')
-                    ->placeholder('Selecciona la hora'),
+                    ->label('Color del evento'),
 
-                Forms\Components\TimePicker::make('hora_fin')
+                // Asegúrate de que estos campos sean de tipo `datetime`
+                Forms\Components\DateTimePicker::make('start_at')
                     ->required()
-                    ->label('Hora de fin')
-                    ->placeholder('Selecciona la hora')
+                    ->label('Fecha y hora de inicio')
+                    ->withoutSeconds() // Elimina segundos si no son necesarios
+                    ->placeholder('Selecciona la fecha y hora de inicio'),
+
+                Forms\Components\DateTimePicker::make('end_at')
+                    ->required()
+                    ->label('Fecha y hora de fin')
+                    ->withoutSeconds() // Elimina segundos si no son necesarios
+                    ->placeholder('Selecciona la fecha y hora de fin')
                     ->afterStateUpdated(function ($state, callable $set, $get) {
-                        if ($get('hora_inicio') && $state <= $get('hora_inicio')) {
-                            $set('hora_fin', null);
-                            throw new \Exception('La hora de fin debe ser mayor a la hora de inicio.');
+                        if ($get('start_at') && $state <= $get('start_at')) {
+                            $set('end_at', null);
+                            throw new \Exception('La fecha y hora de fin deben ser posteriores a la de inicio.');
                         }
                     }),
             ]);
@@ -59,23 +57,22 @@ class HorarioResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\BadgeColumn::make('dia_semana')
-                    ->label('Día de la semana')
-                    ->colors([
-                        'primary' => 'Lunes',
-                        'success' => 'Martes',
-                        'info' => 'Miércoles',
-                        'warning' => 'Jueves',
-                        'danger' => 'Viernes',
-                        'secondary' => ['Sábado'],
-                    ]),
+                Tables\Columns\TextColumn::make('title')
+                    ->label('Título del evento')
+                    ->sortable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('hora_inicio')
-                    ->label('Hora de inicio')
+                Tables\Columns\TextColumn::make('color')
+                    ->label('Color del evento'),
+
+                Tables\Columns\TextColumn::make('start_at')
+                    ->label('Fecha y hora de inicio')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('hora_fin')
-                    ->label('Hora de fin')
+                Tables\Columns\TextColumn::make('end_at')
+                    ->label('Fecha y hora de fin')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
@@ -83,23 +80,9 @@ class HorarioResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
-
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
-            ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('dia_semana')
-                    ->label('Día de la semana')
-                    ->options([
-                        'Lunes' => 'Lunes',
-                        'Martes' => 'Martes',
-                        'Miércoles' => 'Miércoles',
-                        'Jueves' => 'Jueves',
-                        'Viernes' => 'Viernes',
-                        'Sábado' => 'Sábado',
-                        'Domingo' => 'Domingo',
-                    ])
             ]);
     }
 

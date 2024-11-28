@@ -6,6 +6,7 @@ use Filament\Widgets\Widget;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use App\Models\Horario;
 use App\Filament\Resources\HorarioResource;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
@@ -68,6 +69,7 @@ class CalendarWidget extends FullCalendarWidget
             TextInput::make('title') // Campo para el título del evento
                 ->required() // Asegúrate de que sea obligatorio
                 ->label('Título del Evento'),
+            ColorPicker::make(name: 'color'),
 
             Grid::make()
                 ->schema([

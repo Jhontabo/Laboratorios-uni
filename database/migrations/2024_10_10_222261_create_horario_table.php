@@ -12,9 +12,11 @@ return new class extends Migration
             $table->id('id_horario'); // Clave primaria
 
             $table->string('title'); // Título del evento
-            $table->string('color'); // Color del evento
+            $table->string('color')->default('#00cdb8
+');; // Color del evento
             $table->dateTime('start_at'); // Fecha y hora de inicio
-            $table->dateTime('end_at'); // Fecha y hora de fin
+            $table->dateTime('end_at'); // Fecha y hora de fin 
+
 
             // Clave foránea para la tabla laboratorio
             $table->foreignId('id_laboratorio')

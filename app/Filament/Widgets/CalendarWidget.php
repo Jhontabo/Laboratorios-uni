@@ -23,6 +23,8 @@ class CalendarWidget extends FullCalendarWidget
     // Modelo para el widget
     public Model | string | null $model = Horario::class;
 
+
+
     // Método para decidir si el widget debe ser visible
     public static function canView(): bool
     {
@@ -104,7 +106,9 @@ class CalendarWidget extends FullCalendarWidget
             TextInput::make('title') // Campo para el título del evento
                 ->required() // Asegúrate de que sea obligatorio
                 ->label('Título del Evento'),
-            ColorPicker::make(name: 'color'),
+            ColorPicker::make(name: 'color')
+                ->label('Color del Evento')
+                ->default('#007bff'), // Color por defecto
 
             Grid::make()
                 ->schema([

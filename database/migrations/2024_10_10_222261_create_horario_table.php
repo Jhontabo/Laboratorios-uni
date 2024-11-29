@@ -13,7 +13,7 @@ return new class extends Migration
 
             $table->string('title'); // Título del evento
             $table->string('color')->default('#00cdb8
-');; // Color del evento
+'); // Color del evento
             $table->dateTime('start_at'); // Fecha y hora de inicio
             $table->dateTime('end_at'); // Fecha y hora de fin 
 

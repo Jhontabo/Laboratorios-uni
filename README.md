@@ -25,7 +25,7 @@ Asegúrate de tener instalado:
 
 1. Clona el repositorio:
 ```bash
-git clone <https://github.com/Jhontabo/Laboratorios-Alvernia.git>
+git clone https://github.com/Jhontabo/Laboratorios-Alvernia.git
 cd laboratorios
 ```
 
@@ -58,12 +58,12 @@ php artisan key:generate
 Crea un archivo `.env` en la raíz del proyecto. A continuación se muestra la configuración base necesaria:
 
 ```env
-APP_NAME=Laravel
+APP_NAME='Laboratorios Alvernia'
 APP_ENV=local
-APP_KEY=base64:4crm5cI4hGqraotJNjjPz6t0eGHg272S7TU8IZ2Q2XU=
+APP_KEY=base64:hDkHWS+XYIt+6cb/l0CYW6OFWZ3M/UPP+TlqBFco5hw=
 APP_DEBUG=true
 APP_TIMEZONE=UTC
-APP_URL=http://localhost
+APP_URL=http://127.0.0.1:8000
 
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en

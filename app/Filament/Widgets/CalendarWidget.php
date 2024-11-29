@@ -14,6 +14,7 @@ use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Actions\DeleteAction;
 use Saade\FilamentFullCalendar\Actions\EditAction;
+use Saade\FilamentFullCalendar\Actions\CreateAction;
 
 class CalendarWidget extends FullCalendarWidget
 {
@@ -35,7 +36,7 @@ class CalendarWidget extends FullCalendarWidget
         return [
             'firstDay' => 1,
             'headerToolbar' => [
-                'left' => 'dayGridDay,dayGridWeek,dayGridMonth',
+                'left' => 'dayGridMonth,dayGridWeek,dayGridDay',
                 'center' => 'title',
                 'right' => 'prev,next today',
             ],
@@ -54,11 +55,7 @@ class CalendarWidget extends FullCalendarWidget
                     'title' => $horario->title,
                     'start' => $horario->start_at,
                     'end' => $horario->end_at,
-                    'color' => $horario->color, // Se asume que el modelo tiene esta propiedad
-                    'url' => HorarioResource::getUrl(
-                        name: 'edit',
-                        parameters: ['record' => $horario]
-                    ),
+                    'color' => $horario->color,
                 ];
             })
             ->toArray();
@@ -80,6 +77,22 @@ class CalendarWidget extends FullCalendarWidget
                     }
                 ),
             DeleteAction::make(),
+        ];
+    }
+
+
+    protected function headerActions(): array
+    {
+        return [
+            CreateAction::make()
+                ->mountUsing(
+                    function (Form $form, array $arguments) {
+                        $form->fill([
+                            'start_at' => $arguments['start'] ?? null,
+                            'end_at' => $arguments['end'] ?? null
+                        ]);
+                    }
+                )
         ];
     }
 

@@ -28,7 +28,7 @@ class HorarioResource extends Resource
                     ->required()
                     ->label('Motivo de la reserva')
                     ->maxLength(255)
-                    ->placeholder('Ejemplo: Clase de Programación'),
+                    ->placeholder('Clase de Programación'),
 
                 Forms\Components\DateTimePicker::make('start_at')
                     ->required()

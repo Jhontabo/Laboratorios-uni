@@ -34,7 +34,11 @@ class RolResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
-                    ->helperText('maximo 255 caracteres'),
+                    ->helperText('máximo 255 caracteres')
+                    // Convertir el valor del campo a mayúsculas al mostrarlo
+                    ->afterStateHydrated(function (TextInput $component, $state) {
+                        $component->state(strtoupper($state));
+                    }),
                 Select::make('guard_name')
                     ->label('Guardian')
                     ->options([
@@ -53,7 +57,14 @@ class RolResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('Nombre')->sortable()->searchable(),
+                TextColumn::make('name')
+                    ->label('Nombre')
+                    ->sortable()
+                    ->searchable()
+                    // Convertir el valor a mayúsculas al mostrarlo en la tabla
+                    ->formatStateUsing(function ($state) {
+                        return strtoupper($state);
+                    }),
                 TextColumn::make('guard_name')->label('Guard')->sortable(),
                 TextColumn::make('created_at')->label('Creado')->dateTime()->sortable(),
                 TextColumn::make('updated_at')->label('Actualizado')->dateTime()->sortable(),

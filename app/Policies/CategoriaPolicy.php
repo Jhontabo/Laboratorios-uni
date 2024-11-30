@@ -17,7 +17,7 @@ class CategoriaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -25,7 +25,7 @@ class CategoriaPolicy
      */
     public function view(User $user, Categoria $categoria): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -33,7 +33,7 @@ class CategoriaPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -41,7 +41,7 @@ class CategoriaPolicy
      */
     public function update(User $user, Categoria $categoria): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -49,7 +49,7 @@ class CategoriaPolicy
      */
     public function delete(User $user, Categoria $categoria): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -57,7 +57,7 @@ class CategoriaPolicy
      */
     public function restore(User $user, Categoria $categoria): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -65,6 +65,6 @@ class CategoriaPolicy
      */
     public function forceDelete(User $user, Categoria $categoria): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 }

@@ -14,7 +14,7 @@ class ProductoPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -22,7 +22,7 @@ class ProductoPolicy
      */
     public function view(User $user, Producto $producto): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -30,7 +30,7 @@ class ProductoPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -38,7 +38,7 @@ class ProductoPolicy
      */
     public function update(User $user, Producto $producto): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -46,7 +46,7 @@ class ProductoPolicy
      */
     public function delete(User $user, Producto $producto): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -54,7 +54,7 @@ class ProductoPolicy
      */
     public function restore(User $user, Producto $producto): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -62,6 +62,6 @@ class ProductoPolicy
      */
     public function forceDelete(User $user, Producto $producto): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 }

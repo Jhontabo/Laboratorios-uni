@@ -15,7 +15,7 @@ class PermisoPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('ADMIN');
     }
 
     /**
@@ -23,7 +23,7 @@ class PermisoPolicy
      */
     public function view(User $user, Permiso $Permiso): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('ADMIN');
     }
 
     /**
@@ -31,7 +31,7 @@ class PermisoPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('ADMIN');
     }
 
     /**
@@ -39,7 +39,7 @@ class PermisoPolicy
      */
     public function update(User $user, Permiso $Permiso): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('ADMIN');
     }
 
     /**
@@ -47,7 +47,7 @@ class PermisoPolicy
      */
     public function delete(User $user, Permiso $Permiso): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('ADMIN');
     }
 
     /**
@@ -55,7 +55,7 @@ class PermisoPolicy
      */
     public function restore(User $user, Permiso $Permiso): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('ADMIN');
     }
 
     /**
@@ -63,6 +63,6 @@ class PermisoPolicy
      */
     public function forceDelete(User $user, Permiso $Permiso): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('ADMIN');
     }
 }

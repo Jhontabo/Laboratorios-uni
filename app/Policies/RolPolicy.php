@@ -16,7 +16,7 @@ class RolPolicy
      */
     public function viewAny(User $user)
     {
-        return $user->hasRole('Admin'); // Solo los administradores pueden ver Rols
+        return $user->hasRole('ADMIN'); // Solo los administradores pueden ver Rols
     }
 
     /**
@@ -24,7 +24,7 @@ class RolPolicy
      */
     public function view(User $user, Rol $Rol)
     {
-        return $user->hasRole('Admin'); // Solo los administradores pueden ver Rols individuales
+        return $user->hasRole('ADMIN'); // Solo los administradores pueden ver Rols individuales
     }
 
     /**
@@ -32,7 +32,7 @@ class RolPolicy
      */
     public function create(User $user)
     {
-        return $user->hasRole('Admin'); // Solo los administradores pueden crear Rols
+        return $user->hasRole('ADMIN'); // Solo los administradores pueden crear Rols
     }
 
     /**
@@ -40,7 +40,7 @@ class RolPolicy
      */
     public function update(User $user, Rol $Rol)
     {
-        return $user->hasRole('Admin'); // Solo los administradores pueden actualizar Rols
+        return $user->hasRole('ADMIN'); // Solo los administradores pueden actualizar Rols
     }
 
     /**
@@ -48,6 +48,6 @@ class RolPolicy
      */
     public function delete(User $user, Rol $Rol)
     {
-        return $user->hasRole('Admin'); // Solo los administradores pueden eliminar Rols
+        return $user->hasRole('ADMIN'); // Solo los administradores pueden eliminar Rols
     }
 }

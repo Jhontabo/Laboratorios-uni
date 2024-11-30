@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\HorarioResource\Pages;
 use App\Models\Horario;
 use Filament\Forms;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -25,45 +26,61 @@ class HorarioResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('title')
                     ->required()
-                    ->label('Título del evento')
+                    ->label('Motivo de la reserva')
+                    ->maxLength(255)
                     ->placeholder('Ejemplo: Clase de Programación'),
 
-                Forms\Components\ColorPicker::make('color')
-                    ->required()
-                    ->label('Color del evento'),
-
-                // Asegúrate de que estos campos sean de tipo `datetime`
                 Forms\Components\DateTimePicker::make('start_at')
                     ->required()
                     ->label('Fecha y hora de inicio')
-                    ->withoutSeconds() // Elimina segundos si no son necesarios
-                    ->placeholder('Selecciona la fecha y hora de inicio'),
+                    ->withoutSeconds()
+                    ->placeholder('Selecciona la fecha y hora de inicio')
+                    ->helperText('No se puede seleccionar una fecha pasada')
+                    // Validación de fecha posterior a la actual
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state && $state < now()) {
+                            // Añadir mensaje de error visual
+                            return 'La fecha y hora de inicio no pueden ser anteriores a la fecha actual.';
+                        }
+                    }),
 
                 Forms\Components\DateTimePicker::make('end_at')
                     ->required()
                     ->label('Fecha y hora de fin')
-                    ->withoutSeconds() // Elimina segundos si no son necesarios
+                    ->withoutSeconds()
                     ->placeholder('Selecciona la fecha y hora de fin')
+                    ->helperText('No se puede seleccionar una fecha pasada')
                     ->afterStateUpdated(function ($state, callable $set, $get) {
-                        if ($get('start_at') && $state <= $get('start_at')) {
-                            $set('end_at', null);
-                            throw new \Exception('La fecha y hora de fin deben ser posteriores a la de inicio.');
+                        // Validación de que la fecha de fin sea posterior a la de inicio
+                        if ($state && $state < $get('start_at')) {
+                            $set('end_at', null); // Limpiar el campo de fecha de fin
+                            return 'La fecha y hora de fin deben ser posteriores a la de inicio.';
+                        }
+
+                        // Validación de fecha posterior a la actual para la fecha de fin
+                        if ($state && $state < now()) {
+                            return 'La fecha y hora de fin no pueden ser anteriores a la fecha actual.';
                         }
                     }),
+
+                Textarea::make('description')
+                    ->label('Descripción del evento')
+                    ->maxLength(500)
+                    ->placeholder('Ejemplo: Necesito computador...'),
             ]);
     }
+
+
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->label('Título del evento')
+                    ->label('Motivo de la reserva')
                     ->sortable()
                     ->searchable(),
-
-                Tables\Columns\TextColumn::make('color')
-                    ->label('Color del evento'),
 
                 Tables\Columns\TextColumn::make('start_at')
                     ->label('Fecha y hora de inicio')

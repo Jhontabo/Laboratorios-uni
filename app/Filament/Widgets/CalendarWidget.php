@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Actions\DeleteAction;
 use Saade\FilamentFullCalendar\Actions\EditAction;
 use Saade\FilamentFullCalendar\Actions\CreateAction;
+use Filament\Forms\Components\Textarea;
 
 class CalendarWidget extends FullCalendarWidget
 {
@@ -57,7 +58,6 @@ class CalendarWidget extends FullCalendarWidget
                     'title' => $horario->title,
                     'start' => $horario->start_at,
                     'end' => $horario->end_at,
-                    'color' => $horario->color,
                 ];
             })
             ->toArray();
@@ -73,8 +73,7 @@ class CalendarWidget extends FullCalendarWidget
                         $form->fill([
                             'title' => $record->title, // Usar el título del evento
                             'start_at' => $arguments['event']['start'] ?? $record->start_at, // Usa el evento 'start' si existe
-                            'end_at' => $arguments['event']['end'] ?? $record->end_at, // Usa el evento 'end' si existe
-                            'color' => $record->color, // Agregar el color del evento
+                            'end_at' => $arguments['event']['end'] ?? $record->end_at,
                         ]);
                     }
                 ),
@@ -98,29 +97,53 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 
-
     // Método para crear el formulario de creación de eventos
     public function getFormSchema(): array
     {
         return [
             TextInput::make('title') // Campo para el título del evento
                 ->required() // Asegúrate de que sea obligatorio
-                ->label('Título del Evento'),
-            ColorPicker::make(name: 'color')
-                ->label('Color del Evento')
-                ->default('#007bff'), // Color por defecto
+                ->label('Motivo de la reserva'),
+
+            TextArea::make('description')
+                ->label('Descripción del evento')
+                ->maxLength(500)
+                ->helperText('La descripción no debe exceder los 500 caracteres'),
 
             Grid::make()
                 ->schema([
                     DateTimePicker::make('start_at') // Campo para la fecha de inicio
                         ->required() // Asegúrate de que sea obligatorio
                         ->label('Fecha de Inicio')
-                        ->displayFormat('Y-m-d H:i'), // Configura el formato de la fecha
+                        ->displayFormat('Y-m-d H:i')
+                        ->helperText('No se puede seleccionar una fecha pasada')
+                        // Validación de fecha de inicio posterior a la fecha actual
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if ($state && $state < now()) {
+                                // Añadir un mensaje de error visual
+                                $set('start_at', null); // Limpiar el campo si la fecha es pasada
+                                return 'La fecha de inicio no puede ser anterior a la fecha actual.';
+                            }
+                        }),
 
                     DateTimePicker::make('end_at') // Campo para la fecha de finalización
                         ->required() // Asegúrate de que sea obligatorio
                         ->label('Fecha de Fin')
-                        ->displayFormat('Y-m-d H:i'), // Configura el formato de la fecha
+                        ->displayFormat('Y-m-d H:i')
+                        ->helperText('No se puede seleccionar una fecha pasada')
+                        // Validación de fecha de fin posterior a la fecha de inicio
+                        ->afterStateUpdated(function ($state, callable $set, $get) {
+                            // Validar que la fecha de fin no sea anterior a la de inicio
+                            if ($state && $state < $get('start_at')) {
+                                $set('end_at', null);
+                                return 'La fecha y hora de fin deben ser posteriores a la de inicio.';
+                            }
+
+                            // Validación de que la fecha de fin no sea anterior a la actual
+                            if ($state && $state < now()) {
+                                return 'La fecha de fin no puede ser anterior a la fecha actual.';
+                            }
+                        }),
                 ]),
         ];
     }

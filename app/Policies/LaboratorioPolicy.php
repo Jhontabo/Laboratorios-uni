@@ -15,7 +15,7 @@ class LaboratorioPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -23,7 +23,7 @@ class LaboratorioPolicy
      */
     public function view(User $user, Laboratorio $laboratorio): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -31,7 +31,7 @@ class LaboratorioPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -39,7 +39,7 @@ class LaboratorioPolicy
      */
     public function update(User $user, Laboratorio $laboratorio): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -47,7 +47,7 @@ class LaboratorioPolicy
      */
     public function delete(User $user, Laboratorio $laboratorio): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -55,7 +55,7 @@ class LaboratorioPolicy
      */
     public function restore(User $user, Laboratorio $laboratorio): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     /**
@@ -63,6 +63,6 @@ class LaboratorioPolicy
      */
     public function forceDelete(User $user, Laboratorio $laboratorio): bool
     {
-        return $user->hasRole('Admin') || $user->hasRole('Laboratorista');
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 }

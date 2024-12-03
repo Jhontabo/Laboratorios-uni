@@ -79,6 +79,14 @@ class ProductoResource extends Resource
                                     ->minValue(1)
                                     ->maxValue(1000000)
                                     ->helperText('La cantidad debe ser mayor a 0'),
+                                TextInput::make('costo_unitario')
+                                    ->label('Costo Unitario')
+                                    ->numeric()
+                                    ->required()
+                                    ->rules('gt:0|max:1000000000')
+                                    ->minValue(1)
+                                    ->maxValue(1000000)
+                                    ->helperText('Ingrese el costo unitario del producto')
                             ]),
                     ]),
                 Section::make('Ubicación y Estado')
@@ -140,6 +148,10 @@ class ProductoResource extends Resource
                         'warning' => 'usado',
                         'danger' => 'dañado',
                     ]),
+                TextColumn::make('costo_unitario')
+                    ->label('Costo Unitario')
+                    ->money('cop') // Formatea el valor como moneda colombiana
+                    ->sortable(),
                 TextColumn::make('tipo_producto')->label('Tipo de producto'),
                 TextColumn::make('laboratorio.ubicacion')->label('Ubicación'),
 

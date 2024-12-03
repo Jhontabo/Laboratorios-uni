@@ -64,6 +64,13 @@ class ProductoResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->helperText('Máximo 255 caracteres'),
+                                Select::make('tipo_producto')
+                                    ->label('Tipo de Producto')
+                                    ->options([
+                                        'suministro' => 'Suministro',
+                                        'equipo' => 'Equipo'
+                                    ])
+                                    ->required(),
                                 TextInput::make('cantidad_disponible')
                                     ->label('Cantidad disponible')
                                     ->numeric()
@@ -102,7 +109,7 @@ class ProductoResource extends Resource
                         FileUpload::make('imagen')
                             ->label('Imagen del producto')
                             ->image()
-                            ->directory('uploads/productos')
+                            ->directory('productos')
                             ->disk('public')
                             ->visibility('public')
                     ]),
@@ -133,6 +140,7 @@ class ProductoResource extends Resource
                         'warning' => 'usado',
                         'danger' => 'dañado',
                     ]),
+                TextColumn::make('tipo_producto')->label('Tipo de producto'),
                 TextColumn::make('laboratorio.ubicacion')->label('Ubicación'),
 
                 TextColumn::make('numero_serie'),

@@ -21,6 +21,7 @@ return new class extends Migration
                 $table->date('fecha_adicion')->nullable();
                 $table->decimal('costo_unitario', 8, 2)->nullable();
                 $table->string('ubicacion')->nullable();
+                $table->enum('tipo_producto', ['equipo', 'suministro'])->default('equipo');
                 $table->enum('estado', ['nuevo', 'usado', 'dañado'])->default('nuevo');
                 $table->string('imagen')->nullable(); // Nueva columna para la imagen del producto
                 $table->timestamps();

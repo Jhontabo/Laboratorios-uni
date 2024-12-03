@@ -16,10 +16,10 @@ class User extends Authenticatable
     use Notifiable, HasRoles;
 
     // contrato para que solo personas autorizadas puedan acceder al sistema
-    // public function canAccessPanel(Panel $panel): bool
-    // {
-    //     return str_ends_with($this->email, '@umariana.edu.co') && $this->hasVerifiedEmail();
-    // }
+     public function canAccessPanel(Panel $panel): bool
+     {
+         return true;
+     }
 
 
     // Nombre de la tabla en la base de datos

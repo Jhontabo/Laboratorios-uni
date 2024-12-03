@@ -16,6 +16,8 @@ class UserSeeder extends Seeder
         // Crear o verificar que existan los roles
         $adminRole = Role::firstOrCreate(['name' => 'ADMIN']);
         $docenteRole = Role::firstOrCreate(['name' => 'DOCENTE']);
+        $laboratoristaRole = Role::firstOrCreate(['name' => 'LABORATORISTA']);
+        $estudianteRole = Role::firstOrCreate(['name' => 'ESTUDIANTE']);
 
         // Crear el usuario Admin si no existe
         $admin = User::firstOrCreate(
@@ -47,6 +49,38 @@ class UserSeeder extends Seeder
         // Asignar el rol de Docente al usuario Docente
         if (!$docente->hasRole($docenteRole)) {
             $docente->assignRole($docenteRole);
+        }
+
+        // Crear el usuario Laboratorista si no existe
+        $laboratorista = User::firstOrCreate(
+            ['correo_electronico' => 'laboratorista@ejemplo.com'],
+            [
+                'nombre' => 'Laura',
+                'apellido' => 'García',
+                'telefono' => '321654987',
+                'Direccion' => 'Calle Laboratorio 789',
+            ]
+        );
+
+        // Asignar el rol de Laboratorista al usuario Laboratorista
+        if (!$laboratorista->hasRole($laboratoristaRole)) {
+            $laboratorista->assignRole($laboratoristaRole);
+        }
+
+        // Crear el usuario Estudiante si no existe
+        $estudiante = User::firstOrCreate(
+            ['correo_electronico' => 'estudiante@ejemplo.com'],
+            [
+                'nombre' => 'Carlos',
+                'apellido' => 'López',
+                'telefono' => '654987321',
+                'Direccion' => 'Avenida Universidad 456',
+            ]
+        );
+
+        // Asignar el rol de Estudiante al usuario Estudiante
+        if (!$estudiante->hasRole($estudianteRole)) {
+            $estudiante->assignRole($estudianteRole);
         }
 
         $this->command->info('Usuarios y roles asignados correctamente.');

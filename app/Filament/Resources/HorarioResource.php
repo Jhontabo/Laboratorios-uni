@@ -29,6 +29,9 @@ class HorarioResource extends Resource
                     ->label('Motivo de la reserva')
                     ->maxLength(255)
                     ->placeholder('Clase de Programación'),
+                Forms\Components\ColorPicker::make('color')
+                    ->label('Color del evento')
+                    ->placeholder('Selecciona un color'),
 
                 Forms\Components\DateTimePicker::make('start_at')
                     ->required()
@@ -95,6 +98,9 @@ class HorarioResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado en')
                     ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+                Tables\Columns\ColorColumn::make('color')
+                    ->label('Color')
                     ->sortable(),
             ])
             ->actions([

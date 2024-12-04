@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('title'); // Título del evento
             $table->dateTime('start_at'); // Fecha y hora de inicio
             $table->dateTime('end_at'); // Fecha y hora de fin 
+            $table->string('color')->nullable();
             $table->text('description')->nullable();
 
 

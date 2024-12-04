@@ -37,14 +37,22 @@ class CalendarWidget extends FullCalendarWidget
     public function config(): array
     {
         return [
-            'firstDay' => 1,
+            'firstDay' => 1, // Inicia la semana en lunes
+            'slotMinTime' => '06:00:00', // Hora mínima visible
+            'slotMaxTime' => '22:00:00', // Hora máxima visible
+            'slotDuration' => '00:30:00', // Intervalo de tiempo de cada bloque
+            'locale' => 'es',
+            'initialView' => 'timeGridWeek', // Vista semanal predeterminada
             'headerToolbar' => [
-                'left' => 'dayGridMonth,dayGridWeek,dayGridDay',
+                'left' => 'prev,next today',
                 'center' => 'title',
-                'right' => 'prev,next today',
+                'right' => 'dayGridMonth,timeGridWeek,timeGridDay', // Opciones de vista
             ],
+
         ];
     }
+
+
 
     // Método para obtener eventos de la base de datos
     public function fetchEvents(array $fetchInfo): array
@@ -58,6 +66,7 @@ class CalendarWidget extends FullCalendarWidget
                     'title' => $horario->title,
                     'start' => $horario->start_at,
                     'end' => $horario->end_at,
+                    'color' => $horario->color,
                 ];
             })
             ->toArray();
@@ -74,6 +83,7 @@ class CalendarWidget extends FullCalendarWidget
                             'title' => $record->title, // Usar el título del evento
                             'start_at' => $arguments['event']['start'] ?? $record->start_at, // Usa el evento 'start' si existe
                             'end_at' => $arguments['event']['end'] ?? $record->end_at,
+                            'color' => $record->color,
                         ]);
                     }
                 ),
@@ -109,6 +119,8 @@ class CalendarWidget extends FullCalendarWidget
                 ->label('Descripción del evento')
                 ->maxLength(500)
                 ->helperText('La descripción no debe exceder los 500 caracteres'),
+            ColorPicker::make('color') // Selector de color
+                ->label('Color del evento'),
 
             Grid::make()
                 ->schema([

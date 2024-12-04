@@ -19,6 +19,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
+use Hasnayeen\Themes\Http\Middleware\SetTheme;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -34,6 +35,10 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             #->plugin(FilamentSpatieRolesPermissionsPlugin::make())
+
+            ->plugin(
+                \Hasnayeen\Themes\ThemesPlugin::make()
+            )
 
             ->plugin(
                 FilamentFullCalendarPlugin::make()
@@ -70,6 +75,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SetTheme::class
             ])
             ->authMiddleware([
                 Authenticate::class,

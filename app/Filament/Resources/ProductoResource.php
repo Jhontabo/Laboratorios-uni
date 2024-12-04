@@ -117,6 +117,7 @@ class ProductoResource extends Resource
                         FileUpload::make('imagen')
                             ->label('Imagen del producto')
                             ->image()
+                            ->imageEditor()
                             ->directory('productos')
                             ->disk('public')
                             ->visibility('public')

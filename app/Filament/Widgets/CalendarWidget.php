@@ -81,19 +81,21 @@ class CalendarWidget extends FullCalendarWidget
             EditAction::make()
                 ->mountUsing(
                     function (Horario $record, Form $form, array $arguments) {
-                        // Asegúrate de que 'arguments' contiene los datos esperados
+                        // Asegúrate de que el estado de 'is_available' se respete
                         $form->fill([
-                            'title' => $record->title, // Usar el título del evento
-                            'start_at' => $arguments['event']['start'] ?? $record->start_at, // Usa el evento 'start' si existe
-                            'end_at' => $arguments['event']['end'] ?? $record->end_at,
+                            'title' => $record->title,
+                            'description' => $record->description,
+                            'start_at' => $record->start_at,
+                            'end_at' => $record->end_at,
                             'color' => $record->color,
+                            'is_available' => $record->is_available, // Mantén el valor actual
                         ]);
                     }
                 ),
             DeleteAction::make(),
-
         ];
     }
+
 
 
     protected function headerActions(): array

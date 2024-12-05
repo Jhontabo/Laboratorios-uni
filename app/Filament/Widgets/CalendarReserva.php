@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use App\Models\Horario;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 
 class CalendarReserva extends FullCalendarWidget
@@ -19,8 +21,6 @@ class CalendarReserva extends FullCalendarWidget
     protected static ?string $heading = 'Calendario de Reservas';
     public Model | string | null $model = Horario::class;
 
-
-    protected ?int $selectedLaboratorio = null;
 
 
     // Método para decidir si el widget debe ser visible
@@ -46,9 +46,6 @@ class CalendarReserva extends FullCalendarWidget
             ],
             'editable' => false,
             'selectable' => false,
-            'eventClick' => 'function(info) {
-                window.livewire.emit("openEventModal", info.event.id);
-            }',
         ];
     }
 
@@ -58,10 +55,6 @@ class CalendarReserva extends FullCalendarWidget
         $query = Horario::query()
             ->where('is_available', true)
             ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
-
-        if ($this->selectedLaboratorio) {
-            $query->where('id_laboratorio', $this->selectedLaboratorio);
-        }
 
         return $query->get()
             ->map(function (Horario $horario) {
@@ -78,31 +71,11 @@ class CalendarReserva extends FullCalendarWidget
 
 
 
-
     protected function headerActions(): array
     {
-        return [
-            \Filament\Actions\Action::make('filtrarLaboratorio')
-                ->label('Laboratorio')
-                ->color('secondary')
-                ->form([
-                    \Filament\Forms\Components\Select::make('selectedLaboratorio')
-                        ->label('Seleccione un laboratorio')
-                        ->options(\App\Models\Laboratorio::all()->pluck('nombre', 'id_laboratorio'))
-                        ->placeholder('Todos los laboratorios'),
-                ])
-                ->action(function (array $data) {
-                    // Filtra los eventos según el laboratorio seleccionado
-                    $this->selectedLaboratorio = $data['selectedLaboratorio'] ?? null;
-
-                    // Refresca los eventos
-                    $this->fetchEvents([
-                        'start' => now()->startOfMonth(),
-                        'end' => now()->endOfMonth(),
-                    ]);
-                }),
-        ];
+        return [];
     }
+
 
 
     protected function modalActions(): array

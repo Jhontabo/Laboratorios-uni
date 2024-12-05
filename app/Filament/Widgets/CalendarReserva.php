@@ -19,11 +19,9 @@ class CalendarReserva extends FullCalendarWidget
     protected static ?string $heading = 'Calendario de Reservas';
     public Model | string | null $model = Horario::class;
 
-    // Listener para eventos Livewire
-    protected $listeners = ['openEventModal'];
 
-    // Propiedad para almacenar los datos del evento
-    public array $eventData = [];
+    protected ?int $selectedLaboratorio = null;
+
 
     // Método para decidir si el widget debe ser visible
     public static function canView(): bool
@@ -57,10 +55,15 @@ class CalendarReserva extends FullCalendarWidget
     // Método para obtener eventos de la base de datos
     public function fetchEvents(array $fetchInfo): array
     {
-        return Horario::query()
+        $query = Horario::query()
             ->where('is_available', true)
-            ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
-            ->get()
+            ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
+
+        if ($this->selectedLaboratorio) {
+            $query->where('id_laboratorio', $this->selectedLaboratorio);
+        }
+
+        return $query->get()
             ->map(function (Horario $horario) {
                 return [
                     'id' => $horario->id_horario,
@@ -74,14 +77,37 @@ class CalendarReserva extends FullCalendarWidget
     }
 
 
-    protected function modalActions(): array
+
+
+    protected function headerActions(): array
     {
         return [
-            Action::make('reservar')
-                ->label('Reservar')
-                ->color('primary')
-                ->icon('heroicon-o-check-circle'),
+            \Filament\Actions\Action::make('filtrarLaboratorio')
+                ->label('Laboratorio')
+                ->color('secondary')
+                ->form([
+                    \Filament\Forms\Components\Select::make('selectedLaboratorio')
+                        ->label('Seleccione un laboratorio')
+                        ->options(\App\Models\Laboratorio::all()->pluck('nombre', 'id_laboratorio'))
+                        ->placeholder('Todos los laboratorios'),
+                ])
+                ->action(function (array $data) {
+                    // Filtra los eventos según el laboratorio seleccionado
+                    $this->selectedLaboratorio = $data['selectedLaboratorio'] ?? null;
+
+                    // Refresca los eventos
+                    $this->fetchEvents([
+                        'start' => now()->startOfMonth(),
+                        'end' => now()->endOfMonth(),
+                    ]);
+                }),
         ];
+    }
+
+
+    protected function modalActions(): array
+    {
+        return [];
     }
 
 
@@ -98,6 +124,7 @@ class CalendarReserva extends FullCalendarWidget
                                 ->label('Fecha y hora de inicio')
                                 ->placeholder('Seleccione la fecha y hora de inicio')
                                 ->displayFormat('Y-m-d H:i')
+                                ->seconds(false)
                                 ->helperText('No se puede seleccionar una fecha pasada')
                                 ->afterStateUpdated(function ($state, callable $set) {
                                     if ($state && $state < now()) {
@@ -111,6 +138,7 @@ class CalendarReserva extends FullCalendarWidget
                                 ->label('Fecha y hora de fin')
                                 ->placeholder('Seleccione la fecha y hora de fin')
                                 ->displayFormat('Y-m-d H:i')
+                                ->seconds(false)
                                 ->helperText('Debe ser posterior a la fecha de inicio')
                                 ->afterStateUpdated(function ($state, callable $set, $get) {
                                     if ($state && $state < $get('start_at')) {

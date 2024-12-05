@@ -11,12 +11,4 @@ class Reserva extends Page
     protected static string $resource = ReservaResource::class;
 
     protected static string $view = 'filament.resources.reserva-resource.pages.reserva';
-
-
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            CalendarReserva::class,
-        ];
-    }
 }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->dateTime('end_at'); // Fecha y hora de fin 
             $table->string('color')->nullable();
             $table->text('description')->nullable();
+            $table->boolean('is_available')->default(true);
 
 
             // Clave foránea para la tabla laboratorio

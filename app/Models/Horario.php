@@ -23,7 +23,8 @@ class Horario extends Model
         'color',          // Color del evento
         'start_at',       // Fecha y hora de inicio
         'end_at',
-        'description'         // Fecha y hora de fin 
+        'description',       // Fecha y hora de fin 
+        'is_available',
     ];
 
     // Relación con usuario

@@ -20,7 +20,7 @@ class ReservaResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\CalendarioReserva::route('/')
+            'index' => Pages\Reserva::route('/'),
         ];
     }
 }

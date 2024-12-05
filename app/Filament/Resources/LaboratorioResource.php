@@ -5,7 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LaboratorioResource\Pages;
 use App\Filament\Resources\LaboratorioResource\RelationManagers;
 use App\Models\Laboratorio;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -41,6 +43,16 @@ class LaboratorioResource extends Resource
                     ->required()
                     ->rules('gt:0|max:100')
                     ->helperText('minimo 1'),
+
+                Select::make('id_usuario')
+                    ->label('Laboratorista')
+                    ->options(User::role('LABORATORISTA')->get()->pluck('name', 'id_usuario'))
+                    ->preload()
+                    ->required()
+                    ->helperText('Seleccione el laboratorista responsable del laboratorio'),
+
+
+
             ]);
     }
 
@@ -51,6 +63,11 @@ class LaboratorioResource extends Resource
                 TextColumn::make('nombre'),
                 TextColumn::make('ubicacion'),
                 TextColumn::make('capacidad'),
+                TextColumn::make('laboratorista.name')
+                    ->label('Laboratorista Responsable')
+                    ->sortable()
+                    ->searchable(),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

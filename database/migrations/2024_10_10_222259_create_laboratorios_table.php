@@ -14,6 +14,10 @@ return new class extends Migration
             $table->string('nombre')->nullable();
             $table->string('ubicacion')->nullable();
             $table->integer('capacidad')->nullable();
+            $table->foreignId('id_usuario') // Usuario asignado al laboratorio
+                ->constrained('users', 'id_usuario') // Relación con la tabla users
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->timestamps();
         });
     }

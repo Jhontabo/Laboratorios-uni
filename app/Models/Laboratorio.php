@@ -23,4 +23,10 @@ class Laboratorio extends Model
     {
         return $this->hasMany(Producto::class, 'id_laboratorio');
     }
+
+
+    public function laboratorista()
+    {
+        return $this->belongsTo(User::class, 'id_usuario');
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\HorarioResource\Pages;
 use App\Models\Horario;
+use App\Models\Laboratorio;
 use Filament\Forms;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -12,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 
 class HorarioResource extends Resource
 {
@@ -27,36 +29,24 @@ class HorarioResource extends Resource
         return $table
             ->query(fn() => Horario::where('is_available', true)) // Filtra horarios disponibles
             ->columns([
-                TextColumn::make('id_horario')
-                    ->label('ID')
-                    ->sortable()
-                    ->searchable(),
-
-                TextColumn::make('title')
-                    ->label('Nombre del Horario')
-                    ->sortable()
-                    ->searchable(),
-
-                TextColumn::make('description')
-                    ->label('Descripción')
-                    ->limit(50),
-
-                TextColumn::make('created_at')
-                    ->label('Creado en')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
-
-                TextColumn::make('updated_at')
-                    ->label('Actualizado en')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
+                TextColumn::make('id_horario')->label('ID')->sortable(),
+                TextColumn::make('title')->label('Título')->sortable()->searchable(),
+                TextColumn::make('description')->label('Descripción'),
+                TextColumn::make('laboratorio.nombre')->label('Laboratorio')->sortable(),
+                TextColumn::make('created_at')->label('Creado en')->dateTime(),
+                TextColumn::make('updated_at')->label('Actualizado en')->dateTime(),
             ])
             ->filters([
-                // Aquí puedes agregar filtros si los necesitas
+                SelectFilter::make('id_laboratorio') // Usa el ID para filtrar
+                    ->label('Laboratorio')
+                    ->relationship('laboratorio', 'nombre') // Relación con el modelo Laboratorio
+                    ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
+                    ->placeholder('Todos los laboratorios'),
             ])
             ->actions([])
             ->bulkActions([]);
     }
+
 
 
 

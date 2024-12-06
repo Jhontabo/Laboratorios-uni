@@ -6,12 +6,14 @@ use Filament\Widgets\Widget;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use App\Models\Horario;
 use App\Filament\Resources\HorarioResource;
+use App\Models\Laboratorio;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Actions\DeleteAction;
@@ -80,12 +82,27 @@ class CalendarWidget extends FullCalendarWidget
             EditAction::make()
                 ->mountUsing(
                     function (Horario $record, Form $form, array $arguments) {
-                        // Asegúrate de que 'arguments' contiene los datos esperados
+                        // Llena el formulario con los valores actuales del registro
                         $form->fill([
-                            'title' => $record->title, // Usar el título del evento
-                            'start_at' => $arguments['event']['start'] ?? $record->start_at, // Usa el evento 'start' si existe
-                            'end_at' => $arguments['event']['end'] ?? $record->end_at,
-                            'color' => $record->color,
+                            'title' => $record->title, // Título del evento
+                            'start_at' => $arguments['event']['start'] ?? $record->start_at, // Usa la fecha inicial del evento o del registro
+                            'end_at' => $arguments['event']['end'] ?? $record->end_at, // Usa la fecha de fin del evento o del registro
+                            'color' => $record->color, // Color del evento
+                            'is_available' => $record->is_available, // Disponibilidad
+                            'id_laboratorio' => $record->id_laboratorio, // Relación con el laboratorio
+                        ]);
+                    }
+                )
+                ->action(
+                    function (Horario $record, array $data) {
+                        // Actualiza los datos del evento en la base de datos
+                        $record->update([
+                            'title' => $data['title'], // Actualiza el título
+                            'start_at' => $data['start_at'], // Actualiza la fecha de inicio
+                            'end_at' => $data['end_at'], // Actualiza la fecha de fin
+                            'color' => $data['color'], // Actualiza el color
+                            'is_available' => $data['is_available'], // Actualiza la disponibilidad
+                            'id_laboratorio' => $data['id_laboratorio'], // Actualiza el laboratorio
                         ]);
                     }
                 ),
@@ -138,6 +155,14 @@ class CalendarWidget extends FullCalendarWidget
                     ColorPicker::make('color')
                         ->label('Color del evento')
                         ->helperText('Elige un color para representar este evento.'),
+
+                    Section::make('Laboratorio')
+                        ->schema([
+                            Select::make('id_laboratorio')
+                                ->label('Laboratorio')
+                                ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
+                                ->required(),
+                        ]),
                 ])->columns(2),
 
             Section::make('Horario')

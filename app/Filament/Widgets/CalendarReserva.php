@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use App\Models\Horario;
+use App\Models\Laboratorio;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\ColorPicker;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
@@ -122,6 +124,11 @@ class CalendarReserva extends FullCalendarWidget
                         ]),
                 ])
                 ->columns(2), // Diseño en dos columnas
+
+            Select::make('id_laboratorio')
+                ->label('Laboratorio')
+                ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
+                ->required(),
         ];
     }
 }

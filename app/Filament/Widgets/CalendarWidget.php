@@ -155,15 +155,12 @@ class CalendarWidget extends FullCalendarWidget
                     ColorPicker::make('color')
                         ->label('Color del evento')
                         ->helperText('Elige un color para representar este evento.'),
+                    Select::make('id_laboratorio')
+                        ->label('Laboratorio')
+                        ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
+                        ->required(),
 
-                    Section::make('Laboratorio')
-                        ->schema([
-                            Select::make('id_laboratorio')
-                                ->label('Laboratorio')
-                                ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
-                                ->required(),
-                        ]),
-                ])->columns(2),
+                ])->columns(3),
 
             Section::make('Horario')
                 ->schema([

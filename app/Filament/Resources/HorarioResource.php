@@ -31,7 +31,6 @@ class HorarioResource extends Resource
         return $table
             ->query(fn() => Horario::where('is_available', true)) // Filtra horarios disponibles
             ->columns([
-                TextColumn::make('id_horario')->label('ID')->sortable(),
                 TextColumn::make('title')->label('Título')->sortable()->searchable(),
                 TextColumn::make('laboratorio.nombre')->label('Laboratorio')->sortable(),
                 TextColumn::make('laboratorio.laboratorista.name') // Usamos el accesorio "name" del modelo User
@@ -39,7 +38,6 @@ class HorarioResource extends Resource
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('created_at')->label('Creado en')->dateTime(),
-                TextColumn::make('updated_at')->label('Actualizado en')->dateTime(),
             ])
             ->filters([
                 SelectFilter::make('id_laboratorio') // Filtro por laboratorio

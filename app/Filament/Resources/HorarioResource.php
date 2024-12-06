@@ -5,7 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\HorarioResource\Pages;
 use App\Models\Horario;
 use App\Models\Laboratorio;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -31,24 +33,26 @@ class HorarioResource extends Resource
             ->columns([
                 TextColumn::make('id_horario')->label('ID')->sortable(),
                 TextColumn::make('title')->label('Título')->sortable()->searchable(),
-                TextColumn::make('description')->label('Descripción'),
                 TextColumn::make('laboratorio.nombre')->label('Laboratorio')->sortable(),
+                TextColumn::make('laboratorio.laboratorista.name') // Usamos el accesorio "name" del modelo User
+                    ->label('Encargado')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('created_at')->label('Creado en')->dateTime(),
                 TextColumn::make('updated_at')->label('Actualizado en')->dateTime(),
             ])
             ->filters([
-                SelectFilter::make('id_laboratorio') // Usa el ID para filtrar
+                SelectFilter::make('id_laboratorio') // Filtro por laboratorio
                     ->label('Laboratorio')
-                    ->relationship('laboratorio', 'nombre') // Relación con el modelo Laboratorio
+                    ->relationship('laboratorio', 'nombre')
                     ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
                     ->placeholder('Todos los laboratorios'),
+
+
             ])
             ->actions([])
             ->bulkActions([]);
     }
-
-
-
 
 
     public static function getPages(): array

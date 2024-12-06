@@ -27,12 +27,10 @@ class Horario extends Model
         'is_available',
     ];
 
-    // Relación con usuario
-    public function user()
+    public function laboratorista()
     {
-        return $this->belongsTo(User::class, 'id_usuario');
+        return $this->belongsTo(User::class, 'id_usuario'); // 'id_usuario' debe ser la clave que conecta con el usuario
     }
-
     // Relación con laboratorio
     public function laboratorio()
     {

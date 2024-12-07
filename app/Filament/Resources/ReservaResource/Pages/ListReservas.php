@@ -10,12 +10,4 @@ use Filament\Resources\Pages\ListRecords;
 class ListReservas extends ListRecords
 {
     protected static string $resource = HorarioResource::class;
-
-
-    protected function getFooterWidgets(): array
-    {
-        return [
-            CalendarReserva::class,
-        ];
-    }
 }

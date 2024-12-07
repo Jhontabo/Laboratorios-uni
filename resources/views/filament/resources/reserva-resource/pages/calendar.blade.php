@@ -2,7 +2,8 @@
     <!-- Dropdown para seleccionar el widget -->
     <div class="flex justify-end mb-4">
         <form method="GET" action="{{ url()->current() }}">
-            <select name="widget" onchange="this.form.submit()" class="form-control border-gray-300 rounded-md shadow-sm">
+            <select name="widget" onchange="this.form.submit()"
+                class="form-control border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
                 @foreach ($this->getDropdownOptions() as $key => $label)
                     <option value="{{ $key }}"
                         {{ request()->query('widget', 'none') === $key ? 'selected' : '' }}>
@@ -20,8 +21,7 @@
                 @widget($widget)
             @endforeach
         @else
-            <!-- Mensaje opcional si no hay widgets -->
-            <p class="text-gray-500">No hay widgets seleccionados.</p>
+            <p class="text-gray-500">Horario no seleccionado.</p>
         @endif
     </div>
 </x-filament-panels::page>

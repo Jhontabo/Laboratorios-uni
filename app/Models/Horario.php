@@ -9,22 +9,20 @@ class Horario extends Model
 {
     use HasFactory;
 
-    // Nombre de la tabla
-    protected $table = 'horario';
 
-    // Clave primaria
-    protected $primaryKey = 'id_horario';
+    protected $table = 'horarios'; // Nombre de la tabla
+    protected $primaryKey = 'id_horario'; // Clave primaria
 
-    // Atributos asignables en masa
     protected $fillable = [
-        'id_user',        // ID del usuario relacionado
-        'id_laboratorio', // ID del laboratorio relacionado
-        'title',          // Título del evento
-        'color',          // Color del evento
-        'start_at',       // Fecha y hora de inicio
+        'title',
+        'start_at',
         'end_at',
-        'description',       // Fecha y hora de fin 
+        'color',
+        'description',
         'is_available',
+        'reservation_status',
+        'id_laboratorio',
+        'id_usuario',
     ];
 
     public function laboratorista()

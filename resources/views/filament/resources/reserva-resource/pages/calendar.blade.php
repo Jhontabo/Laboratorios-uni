@@ -1,6 +1,10 @@
 <x-filament-panels::page>
-    <!-- Dropdown para seleccionar el widget -->
-    <div class="flex justify-end mb-4">
+    <!-- Contenedor con flexbox para alinear el título y el dropdown -->
+    <div class="flex items-center justify-between mb-4">
+        <!-- Título -->
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Elegir horario</h3>
+
+        <!-- Dropdown para seleccionar el widget -->
         <form method="GET" action="{{ url()->current() }}">
             <select name="widget" onchange="this.form.submit()"
                 class="form-control border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
@@ -12,16 +16,5 @@
                 @endforeach
             </select>
         </form>
-    </div>
-
-    <!-- Renderizar solo el widget seleccionado -->
-    <div>
-        @if (count($this->getHeaderWidgets()) > 0)
-            @foreach ($this->getHeaderWidgets() as $widget)
-                @widget($widget)
-            @endforeach
-        @else
-            <p class="text-gray-500">Horario no seleccionado.</p>
-        @endif
     </div>
 </x-filament-panels::page>

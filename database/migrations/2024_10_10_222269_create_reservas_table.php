@@ -13,7 +13,7 @@ return new class extends Migration
 
             // Clave foránea para horario
             $table->foreignId('id_horario')
-                ->constrained('horario', 'id_horario') // Relación con horario.id_horario
+                ->constrained('horarios', 'id_horario') // Relación con horarios.id_horario
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
 
@@ -24,7 +24,11 @@ return new class extends Migration
                 ->onUpdate('cascade');
 
             $table->string('estado')->default('pendiente'); // Estado de la reserva
-            $table->timestamps();
+            $table->timestamps(); // Campos created_at y updated_at
+
+            // Índices adicionales (opcional)
+            $table->index('id_horario');
+            $table->index('id_usuario');
         });
     }
 

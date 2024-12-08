@@ -61,8 +61,11 @@ class CalendarWidget extends FullCalendarWidget
 
     public function fetchEvents(array $fetchInfo): array
     {
-        return Horario::query()
-            ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
+
+        $query = Horario::query();
+
+        // Filtra por rango de fechas
+        return $query->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
             ->get()
             ->map(function (Horario $horario) {
                 return [
@@ -75,6 +78,8 @@ class CalendarWidget extends FullCalendarWidget
             })
             ->toArray();
     }
+
+
 
     protected function modalActions(): array
     {

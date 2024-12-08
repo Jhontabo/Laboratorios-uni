@@ -14,38 +14,44 @@ class Calendar extends Page
 
     protected static string $view = 'filament.resources.reserva-resource.pages.calendar';
 
-    protected function getFooterWidgets(): array
+    public function getFooterWidgets(): array
     {
         // Obtén el parámetro 'widget' y establece 'Todos' como valor predeterminado
         $selectedWidget = request()->query('widget', 'Todos');
 
-        // Consulta el laboratorio seleccionado si coincide con el nombre
+        // Si se selecciona "Todos", muestra un widget general
+        if ($selectedWidget === 'Todos') {
+            return [CalendarWidget::class];
+        }
+
+        // Si el parámetro corresponde a un laboratorio específico, intenta cargarlo
         $laboratorio = Laboratorio::where('nombre', $selectedWidget)->first();
 
         if ($laboratorio) {
             // Devuelve un widget específico relacionado con el laboratorio
-            return [CalendarWidget::class]; // Puedes personalizar este widget si es necesario
+            return [CalendarWidget::class]; // Personaliza este widget si es necesario
         }
 
         if ($selectedWidget === 'Reserva') {
             return [CalendarReserva::class];
         }
 
-        // No retorna widgets si no hay selección válida
-        return [];
+        // Retorna un widget por defecto si no se encuentra un laboratorio
+        return [CalendarWidget::class];
     }
+
 
     public function getDropdownOptions(): array
     {
         // Obtén todos los nombres de los laboratorios de la base de datos
-        $laboratorios = Laboratorio::all()->pluck('nombre')->toArray();
+        $laboratorios = Laboratorio::all()->pluck('nombre', 'nombre')->toArray();
 
-        // Crea las opciones para el dropdown
-        $options = ['Todos' => 'Todos', 'Reserva' => 'Reserva'];
+        // Crea las opciones para el dropdown con "Todos" y "Reserva"
+        $options = [
+            'Todos' => 'Todos',
+            'Reserva' => 'Reserva'
+        ] + $laboratorios;
 
-        foreach ($laboratorios as $laboratorio) {
-            $options[$laboratorio] = $laboratorio;
-        }
 
         return $options;
     }

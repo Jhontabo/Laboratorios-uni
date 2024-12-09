@@ -12,7 +12,7 @@ return [
     ],
 
     'providers' => [
-        'usuarios' => [
+        'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,  // Modelo correcto
         ],

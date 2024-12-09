@@ -35,6 +35,12 @@ class Horario extends Model
         return $this->belongsTo(Laboratorio::class, 'id_laboratorio');
     }
 
+
+    public function reservas()
+    {
+        return $this->hasMany(Reserva::class, 'id_horario', 'id_horario');
+    }
+
     // Accesor para el rango de tiempo (opcional)
     public function getTimeRangeAttribute(): string
     {

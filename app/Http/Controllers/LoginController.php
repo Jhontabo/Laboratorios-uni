@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Laravel\Socialite\Facades\Socialite;
-use App\Models\User;  // Asegúrate de que estás importando tu modelo Usuario
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
@@ -20,28 +19,59 @@ class LoginController extends Controller
     // Manejar el callback de Google
     public function handleGoogleCallback()
     {
-        // Este es el punto donde parece estar el problema. El método `stateless` debería funcionar aquí.
-        $googleUser = Socialite::driver('google')->user();
+        try {
+            // Obtener datos del usuario desde Google
+            $googleUser = Socialite::driver('google')->user();
 
+            // Loguear los datos del usuario de Google para depuración
+            Log::info('Usuario autenticado con Google:', [
+                'email' => $googleUser->getEmail(),
+                'name' => $googleUser->getName(),
+                'avatar' => $googleUser->getAvatar(),
+            ]);
 
-        // Loguear los datos del usuario de Google para debug
-        Log::info('Usuario autenticado con Google:', [
-            'email' => $googleUser->getEmail(),
-            'name' => $googleUser->getName(),
-            'avatar' => $googleUser->getAvatar(),
-        ]);
+            // Intentar encontrar al usuario en la base de datos
+            $user = User::where('correo_electronico', $googleUser->getEmail())->first();
 
-        // Intentar encontrar al usuario en la base de datos
-        $user = User::where('correo_electronico', $googleUser->getEmail())->first();
+            if ($user) {
+                // Iniciar sesión al usuario autorizado
+                Auth::login($user);
 
-        if ($user) {
-            Auth::login($user);
-            return redirect('/admin');
-        } else {
+                // Redirigir al área protegida
+                return redirect('/admin');
+            } else {
+                // Validar el dominio del correo electrónico
+                $emailDomain = substr(strrchr($googleUser->getEmail(), "@"), 1);
+                if ($emailDomain !== 'umariana.edu.co') {
+                    // Notificar acceso denegado si el correo no pertenece al dominio autorizado
+                    Notification::make()
+                        ->title('Acceso denegado')
+                        ->danger()
+                        ->body('El correo electrónico no pertenece a la Universidad Mariana.')
+                        ->send();
+
+                    return redirect('/');
+                }
+
+                // Si llega aquí, el usuario no está registrado en el sistema
+                Notification::make()
+                    ->title('Acceso denegado')
+                    ->danger()
+                    ->body('El usuario no está autorizado para acceder.')
+                    ->send();
+
+                return redirect('/');
+            }
+        } catch (\Exception $e) {
+            // Manejo de errores
+            Log::error('Error en el inicio de sesión con Google:', [
+                'error' => $e->getMessage(),
+            ]);
+
             Notification::make()
-                ->title('Acceso denegado')
+                ->title('Error de autenticación')
                 ->danger()
-                ->body('El usuario no está autorizado para acceder.')
+                ->body('Hubo un problema al autenticar con Google.')
                 ->send();
 
             return redirect('/');

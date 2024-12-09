@@ -8,20 +8,17 @@ return new class extends Migration
 {
     public function up()
     {
-        if (!Schema::hasTable('users')) {
-            Schema::create('users', function (Blueprint $table) {
-                $table->bigIncrements('id_usuario');
-                $table->string('nombre');
-                $table->string('apellido');
-                $table->string('correo_electronico')->unique();
-                $table->string('telefono')->nullable();
-                $table->string('Direccion');
-                $table->string('name')->virtualAs('CONCAT(nombre, " ", apellido)');
-                $table->enum('estado', ['activo', 'inactivo'])->default('activo');
-                $table->rememberToken();
-                $table->timestamps();
-            });
-        }
+        Schema::create('users', function (Blueprint $table) {
+            $table->bigIncrements('id_usuario'); // Clave primaria personalizada
+            $table->string('nombre'); // Nombre del usuario
+            $table->string('apellido'); // Apellido del usuario
+            $table->string('correo_electronico')->unique(); // Correo único
+            $table->string('telefono')->nullable(); // Teléfono opcional
+            $table->string('direccion'); // Dirección
+            $table->enum('estado', ['activo', 'inactivo'])->default('activo'); // Estado del usuario
+            $table->rememberToken(); // Token para recordar sesión
+            $table->timestamps(); // Timestamps created_at y updated_at
+        });
     }
 
     public function down()

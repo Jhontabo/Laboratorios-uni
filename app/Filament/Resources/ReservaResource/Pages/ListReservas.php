@@ -2,12 +2,10 @@
 
 namespace App\Filament\Resources\ReservaResource\Pages;
 
-use App\Filament\Resources\HorarioResource;
-use App\Filament\Widgets\CalendarReserva;
-use Filament\Actions;
+use App\Filament\Resources\ReservaResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ListReservas extends ListRecords
 {
-    protected static string $resource = HorarioResource::class;
+    protected static string $resource = ReservaResource::class;
 }

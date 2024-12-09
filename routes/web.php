@@ -2,16 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use Illuminate\Support\Facades\Auth;
 
-// Ruta para la página de inicio (redirige al login directamente)
+
 Route::get('/', function () {
-    return view('auth.login');  // Carga la vista de login que creaste previamente
+    return Auth::check() ? redirect()->route('dashboard') : view('auth.login');
 });
 
-// Ruta para mostrar la página de login (esta puede ser la misma que en el inicio)
-Route::get('login', function () {
-    return view('auth.login');  // Vista de login
-})->name('login');
 
 // Ruta para la autenticación con Google
 Route::get('auth/google', [LoginController::class, 'redirectToGoogle'])->name('auth.google');
@@ -19,14 +16,15 @@ Route::get('auth/google', [LoginController::class, 'redirectToGoogle'])->name('a
 // Ruta de callback para Google
 Route::get('auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
 
-// Rutas protegidas para usuarios autenticados
+// Rutas protegidas con el middleware 'auth'
 Route::middleware(['auth'])->group(function () {
+    // Ruta para el dashboard
     Route::get('/dashboard', function () {
-        // Redirigir al panel de Filament
         return redirect()->route('filament.admin.pages.dashboard');
     })->name('dashboard');
-});
 
-Route::get('/app', function () {
-    return view('app');
-})->middleware('auth');
+    // Ruta para otra vista protegida
+    Route::get('/app', function () {
+        return view('app');
+    });
+});

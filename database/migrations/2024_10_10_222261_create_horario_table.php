@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('horarios', function (Blueprint $table) {
-            $table->id('id_horario'); // Clave primaria
+            $table->id('id_horario'); // Clave primaria personalizada
 
             $table->string('title'); // Título del evento
             $table->dateTime('start_at'); // Fecha y hora de inicio
@@ -17,28 +17,27 @@ return new class extends Migration
             $table->string('color')->nullable(); // Color del evento
             $table->text('description')->nullable(); // Descripción opcional
             $table->boolean('is_available')->default(true); // Disponibilidad
-            $table->string('reservation_status')->default(false); // Estado de la reserva
 
-            // Clave foránea para la tabla laboratorio
+            // Clave foránea para la tabla laboratorios
             $table->foreignId('id_laboratorio')
                 ->nullable()
-                ->constrained('laboratorios', 'id_laboratorio')
-                ->onDelete('cascade')
-                ->onUpdate('cascade')
+                ->constrained('laboratorios', 'id_laboratorio') // Relación con laboratorios.id_laboratorio
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate()
                 ->comment('Relación con la tabla laboratorios');
 
             // Clave foránea para la tabla users
             $table->foreignId('id_usuario')
                 ->nullable()
-                ->constrained('users', 'id_usuario') // Relación con users.id
-                ->onDelete('cascade')
-                ->onUpdate('cascade')
+                ->constrained('users', 'id_usuario') // Relación con users.id_usuario
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate()
                 ->comment('Relación con la tabla usuarios');
 
             $table->timestamps(); // Campos created_at y updated_at
 
             // Índices adicionales (opcional)
-            $table->index('reservation_status'); // Indexar por estado de reserva
+            $table->index('is_available'); // Índice para disponibilidad
         });
     }
 

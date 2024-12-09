@@ -10,6 +10,9 @@
     "require": {
         "php": "^8.2",
         "althinect/filament-spatie-roles-permissions": "^2.2",
+        "blade-ui-kit/blade-heroicons": "^2.5",
+        "codeat3/blade-google-material-design-icons": "^1.19",
+        "davidhsianturi/blade-bootstrap-icons": "^1.5",
         "filament/filament": "^3.2",
         "hasnayeen/themes": "^3.0",
         "laravel/framework": "^11.9",

@@ -9,6 +9,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
+use Filament\Notifications\Notification;
 
 class SolicitudesReservasResource extends Resource
 {
@@ -38,6 +39,14 @@ class SolicitudesReservasResource extends Resource
                     ->label('Correo Electrónico')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('intervalo') // Intervalo de tiempo desde la relación
+                    ->label('Intervalo de Tiempo')
+                    ->getStateUsing(
+                        fn($record) => $record->horario && $record->horario->start_at && $record->horario->end_at
+                            ? $record->horario->start_at->format('d/m/Y H:i') . ' - ' . $record->horario->end_at->format('H:i')
+                            : 'No asignado'
+                    )
+                    ->sortable(),
                 TextColumn::make('estado') // Estado de la reserva
                     ->label('Estado')
                     ->formatStateUsing(fn($state) => match ($state) {
@@ -52,15 +61,18 @@ class SolicitudesReservasResource extends Resource
                         'success' => 'aceptada',
                         'danger' => 'rechazada',
                     ]),
-                TextColumn::make('created_at') // Fecha de creación
-                    ->label('Fecha de Creación')
-                    ->dateTime(),
             ])
             ->actions([
                 Action::make('Aceptar')
-                    ->action(function (Reserva $record) { // Usa el modelo correcto
+                    ->action(function (Reserva $record) {
                         $record->estado = 'aceptada';
                         $record->save();
+
+                        Notification::make()
+                            ->title('Reserva Aceptada')
+                            ->success()
+                            ->body('La reserva ha sido aceptada correctamente.')
+                            ->send();
                     })
                     ->visible(fn(Reserva $record) => $record->estado === 'pendiente')
                     ->color('success')
@@ -75,6 +87,12 @@ class SolicitudesReservasResource extends Resource
                         $record->estado = 'rechazada';
                         $record->razon_rechazo = $data['razon_rechazo'];
                         $record->save();
+
+                        Notification::make()
+                            ->title('Reserva Rechazada')
+                            ->danger()
+                            ->body('La reserva ha sido rechazada. Razón: ' . $data['razon_rechazo'])
+                            ->send();
                     })
                     ->visible(fn(Reserva $record) => $record->estado === 'pendiente')
                     ->color('danger')
@@ -84,7 +102,6 @@ class SolicitudesReservasResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
-
 
     public static function getPages(): array
     {

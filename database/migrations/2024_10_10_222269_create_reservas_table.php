@@ -1,42 +1,134 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Filament\Resources;
 
-return new class extends Migration
+use App\Filament\Resources\ReservaResource\Pages;
+use App\Models\Horario;
+use App\Models\Reserva;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Auth;
+
+class ReservaResource extends Resource
 {
-    public function up()
+    protected static ?string $model = Reserva::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static ?string $navigationLabel = 'Reservas';
+    protected static ?string $navigationGroup = 'Horarios y reservas';
+
+    public static function table(Table $table): Table
     {
-        Schema::create('reservas', function (Blueprint $table) {
-            $table->id('id_reserva'); // Clave primaria personalizada
+        return $table
+            ->query(fn() => Horario::with(['reservas' => fn($query) => $query->where('estado', 'pendiente')])
+                ->where('is_available', true)) // Mostrar solo horarios disponibles
+            ->columns([
+                TextColumn::make('title') // Título del horario
+                    ->label('Título del Horario')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('laboratorio.nombre') // Nombre del laboratorio
+                    ->label('Laboratorio')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('laboratorio.laboratorista.name') // Nombre del laboratorista
+                    ->label('Encargado del Laboratorio')
+                    ->formatStateUsing(fn($record) => $record?->laboratorio?->laboratorista?->name ?? 'N/A') // Fallback si no hay laboratorista
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('start_at') // Fecha y hora de inicio
+                    ->label('Inicio')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('end_at') // Fecha y hora de fin
+                    ->label('Fin')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('reservas.estado') // Estado de la reserva
+                    ->label('Estado')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'pendiente' => 'Pendiente',
+                        'aceptada' => 'Aceptada',
+                        'rechazada' => 'Rechazada',
+                        default => 'Disponible',
+                    })
+                    ->badge()
+                    ->colors([
+                        'primary' => 'pendiente',
+                        'success' => 'aceptada',
+                        'danger' => 'rechazada',
+                    ]),
+            ])
+            ->filters([
+                SelectFilter::make('id_laboratorio') // Filtro por laboratorio
+                    ->label('Laboratorio')
+                    ->relationship('laboratorio', 'nombre')
+                    ->options(fn() => Horario::with('laboratorio')
+                        ->get()
+                        ->pluck('laboratorio.nombre', 'laboratorio.id')),
+            ])
+            ->actions([
+                Action::make('Reservar')
+                    ->action(function (Horario $record) {
+                        // Verifica si el usuario está autenticado
+                        $user = Auth::user();
 
-            $table->string('nombre_usuario')->nullable()->comment('Nombre del usuario que realizó la reserva');
-            $table->string('apellido_usuario')->nullable()->comment('Apellido del usuario que realizó la reserva');
-            $table->string('correo_usuario')->nullable()->comment('Correo del usuario que realizó la reserva');
-            $table->text('razon_rechazo')->nullable()->comment('Razón del rechazo de la reserva');
+                        if (!$user) {
+                            Notification::make()
+                                ->title('Acción no permitida')
+                                ->danger()
+                                ->body('Debes iniciar sesión para realizar una reserva.')
+                                ->send();
+                            return;
+                        }
 
-            // Clave foránea para horarios
-            $table->foreignId('id_horario')
-                ->constrained('horarios', 'id_horario')
-                ->cascadeOnDelete()
-                ->cascadeOnUpdate();
+                        // Verifica si ya existe una solicitud pendiente para este horario
+                        $existingReservation = Reserva::where('id_horario', $record->id_horario)
+                            ->where('id_usuario', $user->id_usuario)
+                            ->where('estado', 'pendiente')
+                            ->exists();
 
-            // Clave foránea para usuarios
-            $table->foreignId('id_usuario')
-                ->nullable() // Permitir null para usuarios no autenticados
-                ->constrained('users', 'id_usuario')
-                ->nullOnDelete(); // Dejar null si el usuario se elimina
+                        if ($existingReservation) {
+                            Notification::make()
+                                ->title('Reserva pendiente')
+                                ->warning()
+                                ->body('Ya tienes una solicitud pendiente para este horario.')
+                                ->send();
+                            return;
+                        }
 
-            // Estado de la reserva
-            $table->string('estado', 20)->default('pendiente')->comment('Estado de la reserva');
+                        // Crear la reserva asociada
+                        Reserva::create([
+                            'id_horario' => $record->id_horario,
+                            'id_usuario' => $user->id_usuario, // ID del usuario autenticado
+                            'nombre_usuario' => $user->nombre, // Nombre del usuario autenticado
+                            'apellido_usuario' => $user->apellido,
+                            'correo_usuario' => $user->correo_electronico, // Correo del usuario autenticado
+                            'estado' => 'pendiente',
+                        ]);
 
-            $table->timestamps(); // Campos created_at y updated_at
-        });
+                        Notification::make()
+                            ->title('Reserva creada')
+                            ->success()
+                            ->body('Tu solicitud de reserva ha sido enviada correctamente.')
+                            ->send();
+                    })
+                    ->visible(fn(Horario $record) => $record->is_available) // Mostrar solo si está disponible
+                    ->color('primary')
+                    ->icon('heroicon-o-plus'),
+            ])
+            ->bulkActions([]);
     }
 
-    public function down()
+    public static function getPages(): array
     {
-        Schema::dropIfExists('reservas');
+        return [
+            'index' => Pages\ListReservas::route('/'),
+        ];
     }
-};
+}

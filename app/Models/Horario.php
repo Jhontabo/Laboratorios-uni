@@ -25,6 +25,13 @@ class Horario extends Model
         'id_usuario',
     ];
 
+    // Asegúrate de que los campos de fecha se interpreten como objetos Carbon
+    protected $casts = [
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
+    ];
+
+
     public function laboratorista()
     {
         return $this->belongsTo(User::class, 'id_usuario'); // 'id_usuario' debe ser la clave que conecta con el usuario
@@ -40,6 +47,7 @@ class Horario extends Model
     {
         return $this->hasMany(Reserva::class, 'id_horario', 'id_horario');
     }
+
 
     // Accesor para el rango de tiempo (opcional)
     public function getTimeRangeAttribute(): string

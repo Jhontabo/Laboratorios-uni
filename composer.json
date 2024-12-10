@@ -14,6 +14,7 @@
         "codeat3/blade-google-material-design-icons": "^1.19",
         "davidhsianturi/blade-bootstrap-icons": "^1.5",
         "filament/filament": "^3.2",
+        "filament/notifications": "^3.2",
         "hasnayeen/themes": "^3.0",
         "laravel/framework": "^11.9",
         "laravel/socialite": "^5.16",

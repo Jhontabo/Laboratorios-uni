@@ -36,12 +36,6 @@ class PermisoResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->helperText('maximo 255  caracteres'),
-                Select::make('guard_name')
-                    ->label('Guardian')
-                    ->options([
-                        'web' => 'Web'
-                    ])
-                    ->required(),
             ]);
     }
 
@@ -50,7 +44,6 @@ class PermisoResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->label('Nombre')->sortable()->searchable(),
-                TextColumn::make('guard_name')->label('Guardian')->sortable(),
                 TextColumn::make('created_at')->label('Creado')->dateTime()->sortable(),
                 TextColumn::make('updated_at')->label('Actualizado')->dateTime()->sortable(),
             ])

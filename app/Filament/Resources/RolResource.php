@@ -39,12 +39,6 @@ class RolResource extends Resource
                     ->afterStateHydrated(function (TextInput $component, $state) {
                         $component->state(strtoupper($state));
                     }),
-                Select::make('guard_name')
-                    ->label('Guardian')
-                    ->options([
-                        'web' => 'Web'
-                    ])
-                    ->required(),
                 Select::make('permissions')
                     ->label('Permisos')
                     ->multiple()
@@ -65,7 +59,6 @@ class RolResource extends Resource
                     ->formatStateUsing(function ($state) {
                         return strtoupper($state);
                     }),
-                TextColumn::make('guard_name')->label('Guard')->sortable(),
                 TextColumn::make('created_at')->label('Creado')->dateTime()->sortable(),
                 TextColumn::make('updated_at')->label('Actualizado')->dateTime()->sortable(),
             ])

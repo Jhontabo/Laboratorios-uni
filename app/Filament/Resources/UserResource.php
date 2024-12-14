@@ -45,7 +45,7 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->helperText('maximo 255 caracteres'),
-                TextInput::make('Direccion')
+                TextInput::make('direccion')
                     ->required()
                     ->maxLength(255)
                     ->helperText('maximo 255 caracteres'),

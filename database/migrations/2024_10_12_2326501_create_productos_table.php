@@ -19,6 +19,7 @@ return new class extends Migration
                 $table->foreignId('id_categorias')->constrained('categorias', 'id_categorias')->onDelete('cascade')->onUpdate('cascade');
                 $table->string('numero_serie')->nullable();
                 $table->date('fecha_adicion')->nullable();
+                $table->date('fecha_adquisicion')->nullable();
                 $table->decimal('costo_unitario', 8, 2)->nullable();
                 $table->string('ubicacion')->nullable();
                 $table->enum('tipo_producto', ['equipo', 'suministro'])->default('equipo');

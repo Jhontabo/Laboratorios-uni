@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Categoria;
 use App\Models\Laboratorio;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\Textarea;
@@ -86,7 +87,11 @@ class ProductoResource extends Resource
                                     ->rules('gt:0|max:1000000000')
                                     ->minValue(1)
                                     ->maxValue(1000000)
-                                    ->helperText('Ingrese el costo unitario del producto')
+                                    ->helperText('Ingrese el costo unitario del producto'),
+                                DatePicker::make('fecha_adquisicion') // Nuevo campo de fecha
+                                    ->label('Fecha de Adquisición')
+                                    ->required()
+                                    ->helperText('Seleccione la fecha de adquisición del producto'),
                             ]),
                     ]),
                 Section::make('Ubicación y Estado')
@@ -153,6 +158,7 @@ class ProductoResource extends Resource
                     ->label('Costo Unitario')
                     ->money('cop') // Formatea el valor como moneda colombiana
                     ->sortable(),
+                TextColumn::make('fecha_adquisicion')->label('Fecha de Adquisición'),
                 TextColumn::make('tipo_producto')->label('Tipo de producto'),
                 TextColumn::make('laboratorio.ubicacion')->label('Ubicación'),
 

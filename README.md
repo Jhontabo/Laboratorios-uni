@@ -89,7 +89,12 @@ cp .env.example .env
 php artisan key:generate
 
 ```
+6. Problemas al cargar imagenes
 
+```bash
+php artisan storage:link
+
+```
   
 ## Configuración del Entorno
 
@@ -146,7 +151,7 @@ LOG_LEVEL=debug
 
 DB_CONNECTION=mysql
 
-DB_HOST=127.0.0.1
+DB_HOST=127.0.0.1 # o tambien localhost
 
 DB_PORT=3306
 

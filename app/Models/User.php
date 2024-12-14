@@ -35,7 +35,7 @@ class User extends Authenticatable
         'apellido',
         'correo_electronico',
         'telefono',
-        'Direccion',
+        'direccion',
         'estado',
     ];
 

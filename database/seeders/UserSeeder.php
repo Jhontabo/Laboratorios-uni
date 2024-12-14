@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
                 'nombre' => 'Jhon',
                 'apellido' => 'Tajumbina',
                 'telefono' => '123456789',
-                'Direccion' => 'Calle Falsa 123',
+                'direccion' => 'Calle Falsa 123',
                 'rol' => $adminRole,
             ],
             [
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
                 'nombre' => 'Jonathan',
                 'apellido' => 'Burbano',
                 'telefono' => '987654321',
-                'Direccion' => 'Calle Real 456',
+                'direccion' => 'Calle Real 456',
                 'rol' => $docenteRole,
             ],
             [
@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
                 'nombre' => 'Laura',
                 'apellido' => 'García',
                 'telefono' => '321654987',
-                'Direccion' => 'Calle Laboratorio 789',
+                'direccion' => 'Calle Laboratorio 789',
                 'rol' => $laboratoristaRole,
             ],
             [
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
                 'nombre' => 'Carlos',
                 'apellido' => 'López',
                 'telefono' => '654987321',
-                'Direccion' => 'Avenida Universidad 456',
+                'direccion' => 'Avenida Universidad 456',
                 'rol' => $estudianteRole,
             ],
         ];
@@ -59,7 +59,7 @@ class UserSeeder extends Seeder
                     'nombre' => $data['nombre'],
                     'apellido' => $data['apellido'],
                     'telefono' => $data['telefono'],
-                    'Direccion' => $data['Direccion'],
+                    'direccion' => $data['direccion'],
                 ]
             );
 

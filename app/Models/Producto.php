@@ -21,6 +21,7 @@ class Producto extends Model
         'id_categorias',
         'numero_serie',
         'fecha_adicion',
+        'fecha_adquisicion',
         'costo_unitario',
         'estado',
         'tipo_producto',

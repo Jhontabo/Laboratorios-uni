@@ -109,3 +109,7 @@ return [
 
 
 ];
+
+Filament::getUserAvatarProvider()->setNameUsing(function ($user) {
+    return $user->name . ' ' . $user->apellido;
+});

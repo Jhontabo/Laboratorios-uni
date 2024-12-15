@@ -44,7 +44,9 @@ class User extends Authenticatable implements HasAvatar
         'telefono',
         'direccion',
         'estado',
+        'custom_fields',
         'avatar_url',
+
     ];
 
     // Atributos ocultos
@@ -53,6 +55,16 @@ class User extends Authenticatable implements HasAvatar
     ];
 
     public $timestamps = true;
+
+
+    protected function casts(): array
+    {
+        return [
+            #'email_verified_at' => 'datetime',
+            #'password' => 'hashed',
+            'custom_fields' => 'array'
+        ];
+    }
 
     // Si no usas una columna virtual, agrega este accesorio
     // public function getNameAttribute()

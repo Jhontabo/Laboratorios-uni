@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
 
             ->plugins([
                 FilamentEditProfilePlugin::make()
-                    ->slug('Mi perfil')
+                    ->slug('mi-perfil')
                     ->setTitle('Mi perfil')
                     ->setNavigationLabel('Mi perfil')
                     ->setIcon('heroicon-o-user')
@@ -51,6 +51,9 @@ class AdminPanelProvider extends PanelProvider
                         directory: 'avatars', // image will be stored in 'storage/app/public/avatars
                         rules: 'mimes:jpeg,png|max:1024'
                     )
+                    ->customProfileComponents([
+                        #\App\Livewire\CustomProfileComponent::class
+                    ])
 
 
             ])

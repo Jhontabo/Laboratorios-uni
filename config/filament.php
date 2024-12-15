@@ -3,6 +3,7 @@
 use Filament\Facades\Filament;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use App\Filament\Widgets\CalendarWidget;
+
 return [
 
 
@@ -98,7 +99,7 @@ return [
     // ...
     'auth' => [
         'guard' => 'web',  // Usa el guardia correcto
-        'user' => App\Models\Usuario::class,
+        'user' => App\Models\User::class,
         'logout_redirect' => '/',  // Modelo correcto
     ],
 
@@ -108,7 +109,3 @@ return [
 
 
 ];
-
-Filament::getUserAvatarProvider()->setNameUsing(function ($user) {
-    return $user->nombre . ' ' . $user->apellido;
-});

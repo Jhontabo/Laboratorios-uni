@@ -22,9 +22,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return redirect()->route('filament.admin.pages.dashboard');
     })->name('dashboard');
-
-    // Ruta para otra vista protegida
-    Route::get('/app', function () {
-        return view('app');
-    });
 });

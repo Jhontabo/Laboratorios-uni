@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
                         rules: 'mimes:jpeg,png|max:1024'
                     )
                     ->customProfileComponents([
-                        #\App\Livewire\CustomProfileComponent::class
+                        \App\Livewire\CustomProfileComponent::class
                     ])
 
 

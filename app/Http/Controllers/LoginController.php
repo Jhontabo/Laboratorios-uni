@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
@@ -30,6 +29,14 @@ class LoginController extends Controller
                 'avatar' => $googleUser->getAvatar(),
             ]);
 
+            // Validar el dominio del correo electrónico
+            $emailDomain = substr(strrchr($googleUser->getEmail(), "@"), 1);
+            if ($emailDomain !== 'umariana.edu.co') {
+                // Redirigir con un mensaje de sesión si el dominio no es permitido
+                return redirect('/')
+                    ->with('error', 'El correo electrónico no pertenece a la Universidad Mariana.');
+            }
+
             // Intentar encontrar al usuario en la base de datos
             $user = User::where('email', $googleUser->getEmail())->first();
 
@@ -40,27 +47,9 @@ class LoginController extends Controller
                 // Redirigir al área protegida
                 return redirect('/admin');
             } else {
-                // Validar el dominio del correo electrónico
-                $emailDomain = substr(strrchr($googleUser->getEmail(), "@"), 1);
-                if ($emailDomain !== 'umariana.edu.co') {
-                    // Notificar acceso denegado si el correo no pertenece al dominio autorizado
-                    Notification::make()
-                        ->title('Acceso denegado')
-                        ->danger()
-                        ->body('El correo electrónico no pertenece a la Universidad Mariana.')
-                        ->send();
-
-                    return redirect('/');
-                }
-
-                // Si llega aquí, el usuario no está registrado en el sistema
-                Notification::make()
-                    ->title('Acceso denegado')
-                    ->danger()
-                    ->body('El usuario no está autorizado para acceder.')
-                    ->send();
-
-                return redirect('/');
+                // Si el usuario no está registrado, mostrar un mensaje
+                return redirect('/')
+                    ->with('error', 'No estás autorizado para acceder al sistema.');
             }
         } catch (\Exception $e) {
             // Manejo de errores
@@ -68,13 +57,8 @@ class LoginController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            Notification::make()
-                ->title('Error de autenticación')
-                ->danger()
-                ->body('Hubo un problema al autenticar con Google.')
-                ->send();
-
-            return redirect('/');
+            return redirect('/')
+                ->with('error', 'Hubo un problema al autenticar con Google.');
         }
     }
 }

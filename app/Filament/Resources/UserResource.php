@@ -32,7 +32,7 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('nombre')
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255)
                     ->helperText('maximo 255 caracteres'),

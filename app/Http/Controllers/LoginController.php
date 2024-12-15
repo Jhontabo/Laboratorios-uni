@@ -31,7 +31,7 @@ class LoginController extends Controller
             ]);
 
             // Intentar encontrar al usuario en la base de datos
-            $user = User::where('correo_electronico', $googleUser->getEmail())->first();
+            $user = User::where('email', $googleUser->getEmail())->first();
 
             if ($user) {
                 // Iniciar sesión al usuario autorizado

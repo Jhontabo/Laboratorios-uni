@@ -94,7 +94,7 @@ class ReservaResource extends Resource
                             'id_usuario' => $user->id_usuario,
                             'nombre_usuario' => $user->nombre,
                             'apellido_usuario' => $user->apellido,
-                            'correo_usuario' => $user->correo_electronico,
+                            'correo_usuario' => $user->email,
                             'estado' => 'pendiente',
                         ]);
 

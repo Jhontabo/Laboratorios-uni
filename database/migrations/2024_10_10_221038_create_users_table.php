@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id_usuario'); // Clave primaria personalizada
-            $table->string('nombre'); // Nombre del usuario
+            $table->string('name'); // Nombre del usuario
             $table->string('apellido'); // Apellido del usuario
-            $table->string('correo_electronico')->unique(); // Correo único
+            $table->string('email')->unique(); // Correo único
             $table->string('telefono')->nullable(); // Teléfono opcional
             $table->string('direccion'); // Dirección
             $table->enum('estado', ['activo', 'inactivo'])->default('activo'); // Estado del usuario

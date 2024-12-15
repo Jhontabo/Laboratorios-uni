@@ -16,6 +16,7 @@
         "filament/filament": "^3.2",
         "filament/notifications": "^3.2",
         "hasnayeen/themes": "^3.0",
+        "joaopaulolndev/filament-edit-profile": "^1.0",
         "laravel/framework": "^11.9",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.9",

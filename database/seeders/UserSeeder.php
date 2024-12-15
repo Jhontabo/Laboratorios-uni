@@ -19,32 +19,32 @@ class UserSeeder extends Seeder
         // Crear usuarios
         $usuarios = [
             [
-                'correo_electronico' => 'jhonse.tajumbina@umariana.edu.co',
-                'nombre' => 'Jhon',
+                'email' => 'jhonse.tajumbina@umariana.edu.co',
+                'name' => 'Jhon',
                 'apellido' => 'Tajumbina',
                 'telefono' => '123456789',
                 'direccion' => 'Calle Falsa 123',
                 'rol' => $adminRole,
             ],
             [
-                'correo_electronico' => 'jonathanc.burbano221@umariana.edu.co',
-                'nombre' => 'Jonathan',
+                'email' => 'jonathanc.burbano221@umariana.edu.co',
+                'name' => 'Jonathan',
                 'apellido' => 'Burbano',
                 'telefono' => '987654321',
                 'direccion' => 'Calle Real 456',
                 'rol' => $docenteRole,
             ],
             [
-                'correo_electronico' => 'laboratorista@ejemplo.com',
-                'nombre' => 'Laura',
+                'email' => 'laboratorista@ejemplo.com',
+                'name' => 'Laura',
                 'apellido' => 'García',
                 'telefono' => '321654987',
                 'direccion' => 'Calle Laboratorio 789',
                 'rol' => $laboratoristaRole,
             ],
             [
-                'correo_electronico' => 'estudiante@ejemplo.com',
-                'nombre' => 'Carlos',
+                'email' => 'estudiante@ejemplo.com',
+                'name' => 'Carlos',
                 'apellido' => 'López',
                 'telefono' => '654987321',
                 'direccion' => 'Avenida Universidad 456',
@@ -54,9 +54,9 @@ class UserSeeder extends Seeder
 
         foreach ($usuarios as $data) {
             $user = User::firstOrCreate(
-                ['correo_electronico' => $data['correo_electronico']],
+                ['email' => $data['email']],
                 [
-                    'nombre' => $data['nombre'],
+                    'name' => $data['name'],
                     'apellido' => $data['apellido'],
                     'telefono' => $data['telefono'],
                     'direccion' => $data['direccion'],

@@ -20,6 +20,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use Hasnayeen\Themes\Http\Middleware\SetTheme;
+use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -30,11 +31,29 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile(false)
             ->colors([
                 'primary' => Color::Amber,
             ])
 
             #->plugin(FilamentSpatieRolesPermissionsPlugin::make())
+
+            ->plugins([
+                FilamentEditProfilePlugin::make()
+                    ->slug('Mi perfil')
+                    ->setTitle('Mi perfil')
+                    ->setNavigationLabel('Mi perfil')
+                    ->setIcon('heroicon-o-user')
+                    ->shouldShowDeleteAccountForm(false)
+                    ->shouldShowBrowserSessionsForm(false)
+                    ->shouldShowAvatarForm(
+                        value: true,
+                        directory: 'avatars', // image will be stored in 'storage/app/public/avatars
+                        rules: 'mimes:jpeg,png|max:1024'
+                    )
+
+
+            ])
 
             ->plugin(
                 \Hasnayeen\Themes\ThemesPlugin::make()

@@ -9,9 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Panel;
+use Filament\Models\Contracts\HasAvatar;
+use Illuminate\Support\Facades\Storage;
 
 // usa esto para production 'class User extends Authenticatable implements FilamentUser'
-class User extends Authenticatable
+class User extends Authenticatable implements HasAvatar
 {
     use Notifiable, HasRoles;
 
@@ -20,6 +22,11 @@ class User extends Authenticatable
     public function canAccessPanel(Panel $panel): bool
     {
         return true;
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar_url ? Storage::url($this->avatar_url) : null;
     }
 
 
@@ -31,12 +38,13 @@ class User extends Authenticatable
 
     // Atributos asignables en masa
     protected $fillable = [
-        'nombre',
+        'name',
         'apellido',
-        'correo_electronico',
+        'email',
         'telefono',
         'direccion',
         'estado',
+        'avatar_url',
     ];
 
     // Atributos ocultos
@@ -47,8 +55,8 @@ class User extends Authenticatable
     public $timestamps = true;
 
     // Si no usas una columna virtual, agrega este accesorio
-    public function getNameAttribute()
-    {
-        return $this->nombre . ' ' . $this->apellido;
-    }
+    // public function getNameAttribute()
+    // {
+    //     return $this->nombre . ' ' . $this->apellido;
+    // }
 }

@@ -40,7 +40,7 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->helperText('maximo 255 caracteres'),
-                TextInput::make('correo_electronico')
+                TextInput::make('email')
                     ->email()
                     ->required()
                     ->maxLength(255)
@@ -76,7 +76,7 @@ class UserResource extends Resource
             ->columns([
                 TextColumn::make('nombre')->label('Nombre')->sortable()->searchable(),
                 TextColumn::make('apellido')->label('Apellido')->sortable()->searchable(),
-                TextColumn::make('correo_electronico')->label('Correo')->sortable()->searchable(),
+                TextColumn::make('email')->label('Correo')->sortable()->searchable(),
                 TextColumn::make('roles')
                     ->label('Rol')
                     ->formatStateUsing(fn($state, $record) => $record->roles->pluck('name')->join(', '))

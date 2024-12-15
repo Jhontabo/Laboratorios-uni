@@ -18,7 +18,7 @@ created:
     - app/Models/Horario.php
     - app/Models/Reserva.php
 models:
-    User: { id_usuario: bigIncrements, nombre: string, apellido: string, correo_electronico: 'string unique', telefono: 'string nullable', direccion: string, estado: 'enum:activo,inactivo default:activo', timestamps: timestamps }
+    User: { id_usuario: bigIncrements, nombre: string, apellido: string, email: 'string unique', telefono: 'string nullable', direccion: string, estado: 'enum:activo,inactivo default:activo', timestamps: timestamps }
     Laboratorio: { id_laboratorio: id, nombre: 'string nullable', ubicacion: 'string nullable', capacidad: 'integer nullable', timestamps: timestamps }
     Categoria: { id_categorias: id, nombre_categoria: 'string nullable', timestamps: timestamps }
     Producto: { id_productos: id, nombre: 'string nullable', descripcion: 'text nullable', cantidad_disponible: 'integer nullable', id_laboratorio: 'foreign:Laboratorio', id_categorias: 'foreign:Categoria', numero_serie: 'string nullable', fecha_adicion: 'date nullable', costo_unitario: 'decimal:8,2 nullable', ubicacion: 'string nullable', estado: 'enum:nuevo,usado,dañado default:nuevo', imagen: 'string nullable', timestamps: timestamps }

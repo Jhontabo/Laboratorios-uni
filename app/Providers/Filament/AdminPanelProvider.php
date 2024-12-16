@@ -38,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
 
             #->plugin(FilamentSpatieRolesPermissionsPlugin::make())
 
+            ->databaseNotifications()
             ->plugins([
                 FilamentEditProfilePlugin::make()
                     ->slug('mi-perfil')

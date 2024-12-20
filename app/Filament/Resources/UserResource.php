@@ -3,20 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-
-use function Laravel\Prompts\select;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
 
 class UserResource extends Resource
 {
@@ -96,13 +97,42 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Action::make('toggleEstado')
+                    ->label(fn(Model $record) => $record->estado === 'activo' ? 'Desactivar' : 'Activar')
+                    ->action(function (Model $record) {
+                        $record->estado = $record->estado === 'activo' ? 'inactivo' : 'activo';
+                        $record->save();
+
+                        Notification::make()
+                            ->title($record->estado === 'activo' ? 'Usuario Activado' : 'Usuario Desactivado')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->color(fn(Model $record) => $record->estado === 'activo' ? 'danger' : 'success')
+                    ->icon(fn(Model $record) => $record->estado === 'activo' ? 'jam-user-remove' : 'sui-user-add'),
+                // Otras acciones...
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                BulkAction::make('desactivarSeleccionados')
+                    ->label('Desactivar Seleccionados')
+                    ->action(function (Collection $records) {
+                        $records->each(function (Model $record) {
+                            if (!in_array($record->roles->pluck('name')->first(), ['ADMIN', 'LABORATORISTA'])) {
+                                $record->estado = 'inactivo';
+                                $record->save();
+                            }
+                        });
+
+                        Notification::make()
+                            ->title('Usuarios Desactivados')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->color('danger')
+                    ->icon('jam-user-remove'),
+                // Otras acciones masivas...
             ]);
     }
 

@@ -12,6 +12,8 @@
         "althinect/filament-spatie-roles-permissions": "^2.2",
         "blade-ui-kit/blade-heroicons": "^2.5",
         "codeat3/blade-google-material-design-icons": "^1.19",
+        "codeat3/blade-jam-icons": "^1.6",
+        "codeat3/blade-system-uicons": "^1.7",
         "davidhsianturi/blade-bootstrap-icons": "^1.5",
         "filament/filament": "^3.2",
         "filament/notifications": "^3.2",

@@ -13,7 +13,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Support\Facades\Storage;
 
 // usa esto para production 'class User extends Authenticatable implements FilamentUser'
-class User extends Authenticatable implements HasAvatar
+class User extends Authenticatable implements HasAvatar, filamentUser
 {
     use Notifiable, HasRoles;
 
@@ -21,7 +21,8 @@ class User extends Authenticatable implements HasAvatar
     // contrato para que solo personas autorizadas puedan acceder al sistema
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        // Permitir acceso solo si el usuario está activo
+        return $this->estado === 'activo';
     }
 
     public function getFilamentAvatarUrl(): ?string

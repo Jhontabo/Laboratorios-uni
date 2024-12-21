@@ -22,6 +22,8 @@
         "laravel/framework": "^11.9",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.9",
+        "owenvoke/blade-fontawesome": "^2.8",
+        "pxlrbt/filament-excel": "^2.3",
         "saade/filament-fullcalendar": "^3.0"
     },
     "require-dev": {

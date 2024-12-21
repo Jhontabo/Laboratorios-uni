@@ -11,13 +11,15 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\BulkAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+
 
 class UserResource extends Resource
 {
@@ -114,25 +116,49 @@ class UserResource extends Resource
                 // Otras acciones...
             ])
             ->bulkActions([
-                BulkAction::make('desactivarSeleccionados')
-                    ->label('Desactivar Seleccionados')
-                    ->action(function (Collection $records) {
-                        $records->each(function (Model $record) {
-                            if (!in_array($record->roles->pluck('name')->first(), ['ADMIN', 'LABORATORISTA'])) {
-                                $record->estado = 'inactivo';
-                                $record->save();
-                            }
-                        });
 
-                        Notification::make()
-                            ->title('Usuarios Desactivados')
-                            ->success()
-                            ->send();
-                    })
-                    ->requiresConfirmation()
-                    ->color('danger')
-                    ->icon('jam-user-remove'),
-                // Otras acciones masivas...
+                Tables\Actions\BulkActionGroup::make(
+                    [
+                        ExportBulkAction::make(),
+
+
+                        BulkAction::make('activarSeleccionados')
+                            ->label('Activar Seleccionados')
+                            ->action(function (Collection $records) {
+                                $records->each(function (Model $record) {
+                                    $record->estado = 'activo';
+                                    $record->save();
+                                });
+
+                                Notification::make()
+                                    ->title('Usuarios Activados')
+                                    ->success()
+                                    ->send();
+                            })
+                            ->requiresConfirmation()
+                            ->color('success')
+                            ->icon('sui-user-add'),
+
+                        BulkAction::make('desactivarSeleccionados')
+                            ->label('Desactivar Seleccionados')
+                            ->action(function (Collection $records) {
+                                $records->each(function (Model $record) {
+                                    if (!in_array($record->roles->pluck('name')->first(), ['ADMIN', 'LABORATORISTA'])) {
+                                        $record->estado = 'inactivo';
+                                        $record->save();
+                                    }
+                                });
+
+                                Notification::make()
+                                    ->title('Usuarios Desactivados')
+                                    ->success()
+                                    ->send();
+                            })
+                            ->requiresConfirmation()
+                            ->color('danger')
+                            ->icon('jam-user-remove'),
+                    ]
+                ),
             ]);
     }
 

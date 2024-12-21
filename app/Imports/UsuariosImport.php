@@ -27,7 +27,7 @@ class UsuariosImport implements ToCollection, WithHeadingRow
                 continue; // Salta al siguiente registro
             }
 
-            User::create([
+            $user = User::create([
                 'name' => $row['nombre'],
                 'apellido' => $row['apellido'],
                 'email' => $row['email'],
@@ -35,6 +35,8 @@ class UsuariosImport implements ToCollection, WithHeadingRow
                 'direccion' => $row['direccion'],
                 'estado' => $row['estado']
             ]);
+
+            $user->assignRole('ESTUDIANTE');
         }
     }
 }

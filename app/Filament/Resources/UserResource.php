@@ -19,6 +19,9 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Columns\Column;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 
 class UserResource extends Resource
@@ -119,7 +122,13 @@ class UserResource extends Resource
 
                 Tables\Actions\BulkActionGroup::make(
                     [
-                        ExportBulkAction::make(),
+                        ExportBulkAction::make()->exports([
+                            ExcelExport::make('table')->fromTable()
+                                ->withFilename('Timesheet_' . date('d-m-Y') . '_export')
+                                ->askForWriterType(),
+                        ]),
+
+
 
 
                         BulkAction::make('activarSeleccionados')

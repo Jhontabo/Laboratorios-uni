@@ -39,6 +39,7 @@ class User extends Authenticatable implements HasAvatar, filamentUser
 
     // Atributos asignables en masa
     protected $fillable = [
+        'id_usuario',
         'name',
         'apellido',
         'email',
@@ -66,10 +67,4 @@ class User extends Authenticatable implements HasAvatar, filamentUser
             'custom_fields' => 'array'
         ];
     }
-
-    // Si no usas una columna virtual, agrega este accesorio
-    // public function getNameAttribute()
-    // {
-    //     return $this->nombre . ' ' . $this->apellido;
-    // }
 }

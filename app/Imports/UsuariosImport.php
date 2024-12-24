@@ -27,6 +27,8 @@ class UsuariosImport implements ToCollection, WithHeadingRow
                 continue; // Salta al siguiente registro
             }
 
+            // esto es lo que debe salir en el excel para que se pueda importar
+
             $user = User::create([
                 'name' => $row['nombre'],
                 'apellido' => $row['apellido'],

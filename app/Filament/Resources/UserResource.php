@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Filters\Filter;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Columns\Column;
@@ -99,8 +100,27 @@ class UserResource extends Resource
 
             ])
             ->filters([
-                //
+                Filter::make('estado')
+                    ->label('Estado')
+                    ->form([
+                        Select::make('estado')
+                            ->options([
+                                'activo' => 'Activo',
+                                'inactivo' => 'Inactivo',
+                            ])
+                            ->placeholder('Todos'),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['estado'], fn($q) => $q->where('estado', $data['estado']))),
+
+                Filter::make('name')
+                    ->form([
+                        TextInput::make('name')->label('Nombre')->placeholder('Buscar por nombre'),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['name'], fn($q) => $q->where('name', 'like', "%{$data['name']}%"))),
             ])
+
+            // acciones que se puede realizar en la tabla
+
             ->actions([
                 Action::make('toggleEstado')
                     ->label(fn(Model $record) => $record->estado === 'activo' ? 'Desactivar' : 'Activar')
@@ -118,6 +138,8 @@ class UserResource extends Resource
                     ->icon(fn(Model $record) => $record->estado === 'activo' ? 'jam-user-remove' : 'sui-user-add'),
                 // Otras acciones...
             ])
+
+
             ->bulkActions([
 
                 Tables\Actions\BulkActionGroup::make(

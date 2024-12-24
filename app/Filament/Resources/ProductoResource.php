@@ -25,6 +25,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Filters\Filter;
 
 class ProductoResource extends Resource
 {
@@ -138,8 +139,8 @@ class ProductoResource extends Resource
                     ->label('Imagen')
                     ->sortable(),
                 TextColumn::make('nombre'),
-                TextColumn::make('cantidad_disponible'),
-                BadgeColumn::make('estado')
+                TextColumn::make('cantidad_disponible')->label('Disponible'),
+                TextColumn::make('estado')
                     ->label('Estado')
                     ->formatStateUsing(function ($state) {
                         return match ($state) {
@@ -154,20 +155,65 @@ class ProductoResource extends Resource
                         'warning' => 'usado',
                         'danger' => 'dañado',
                     ]),
+
+                TextColumn::make('numero_serie'),
                 TextColumn::make('costo_unitario')
                     ->label('Costo Unitario')
                     ->money('cop') // Formatea el valor como moneda colombiana
                     ->sortable(),
-                TextColumn::make('fecha_adquisicion')->label('Fecha de Adquisición'),
+
                 TextColumn::make('tipo_producto')->label('Tipo de producto'),
                 TextColumn::make('laboratorio.ubicacion')->label('Ubicación'),
-
-                TextColumn::make('numero_serie'),
+                TextColumn::make('fecha_adquisicion')->label('Fecha de Adquisición'),
                 TextColumn::make('created_at')->date()->label('fecha de cracion'),
 
             ])
+
             ->filters([
-                // Agrega filtros si es necesario
+                Filter::make('nombre')
+                    ->form([
+                        TextInput::make('nombre')->label('Nombre')->placeholder('Buscar por nombre'),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['nombre'], fn($q) => $q->where('nombre', 'like', "%{$data['nombre']}%"))),
+
+                Filter::make('numero_serie')
+                    ->form([
+                        TextInput::make('numero_serie')->label('Numero de serie')->placeholder('Buscar por numero de serie'),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['numero_serie'], fn($q) => $q->where('numero_serie', 'like', "%{$data['numero_serie']}%"))),
+
+
+                Filter::make('estado')
+                    ->label('Estado')
+                    ->form([
+                        Select::make('estado')
+                            ->options([
+                                'nuevo' => 'Nuevo',
+                                'usado' => 'Usado',
+                                'dañado' => 'Dañado',
+                            ]),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['estado'], fn($q) => $q->where('estado', $data['estado']))),
+
+                Filter::make('categoria')
+                    ->label('Categoría')
+                    ->form([
+                        Select::make('id_categorias')
+                            ->label('Categoría')
+                            ->options(Categoria::all()->pluck('nombre_categoria', 'id_categorias')),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['id_categorias'], fn($q) => $q->where('id_categorias', $data['id_categorias']))),
+
+                Filter::make('ubicacion')
+                    ->label('Ubicación')
+                    ->form([
+                        Select::make('id_laboratorio')
+                            ->label('Ubicación')
+                            ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio')),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['id_laboratorio'], fn($q) => $q->where('id_laboratorio', $data['id_laboratorio']))),
+
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Categoria;
 use App\Models\Laboratorio;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\ImageColumn;
@@ -25,7 +26,11 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class ProductoResource extends Resource
 {
@@ -114,6 +119,8 @@ class ProductoResource extends Resource
                                         'nuevo' => 'Nuevo',
                                         'usado' => 'Usado',
                                         'dañado' => 'Dañado',
+                                        'dado_de_baja' => 'Dado de baja',
+                                        'perdido' => 'Perdido',
                                     ])
                                     ->required(),
                             ]),
@@ -147,6 +154,9 @@ class ProductoResource extends Resource
                             'nuevo' => 'Nuevo',
                             'usado' => 'Usado',
                             'dañado' => 'Dañado',
+                            'dado_de_baja' => 'Dado de baja',
+                            'perdido' => 'Perdido',
+
                             default => '-',
                         };
                     })
@@ -154,6 +164,8 @@ class ProductoResource extends Resource
                         'success' => 'nuevo',
                         'warning' => 'usado',
                         'danger' => 'dañado',
+                        'warning' => 'dado_de_baja',
+                        'danger' => 'perdido',
                     ]),
 
                 TextColumn::make('numero_serie'),
@@ -191,6 +203,8 @@ class ProductoResource extends Resource
                                 'nuevo' => 'Nuevo',
                                 'usado' => 'Usado',
                                 'dañado' => 'Dañado',
+                                'dado_de_baja' => 'Dado de baja',
+                                'perdido' => 'perdido',
                             ]),
                     ])
                     ->query(fn(Builder $query, array $data) => $query->when($data['estado'], fn($q) => $q->where('estado', $data['estado']))),
@@ -217,12 +231,69 @@ class ProductoResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\DeleteAction::make(),
+
+
+                Action::make('darDeBaja')
+                    ->label('Dar de Baja')
+                    ->action(function (Model $record) {
+                        $record->update(['estado' => 'dado_de_baja']);
+
+                        Notification::make()
+                            ->title('Producto dado de baja')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->color('warning'),
+
+                Action::make('reportarPerdido')
+                    ->label('Reportar como Perdido')
+                    ->action(function (Model $record) {
+                        $record->update(['estado' => 'perdido']);
+
+                        Notification::make()
+                            ->title('Producto reportado como perdido')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->color('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+
+                    BulkAction::make('darDeBajaSeleccionados')
+                        ->label('Dar de Baja')
+                        ->action(function (Collection $records) {
+                            $records->each(fn(Model $record) => $record->update(['estado' => 'dado_de_baja']));
+
+                            Notification::make()
+                                ->title('Productos dados de baja')
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->color('warning'),
+
+                    BulkAction::make('reportarPerdidosSeleccionados')
+                        ->label('Reportar como Perdidos')
+                        ->action(function (Collection $records) {
+                            $records->each(fn(Model $record) => $record->update(['estado' => 'perdido']));
+
+                            Notification::make()
+                                ->title('Productos reportados como perdidos')
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->color('danger'),
+
+
                 ]),
+
+
             ]);
     }
 

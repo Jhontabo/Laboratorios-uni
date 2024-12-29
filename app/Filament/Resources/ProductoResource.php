@@ -20,6 +20,7 @@ use App\Models\Categoria;
 use App\Models\Laboratorio;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\Textarea;
@@ -94,7 +95,13 @@ class ProductoResource extends Resource
                                     ->minValue(1)
                                     ->maxValue(1000000)
                                     ->helperText('Ingrese el costo unitario del producto'),
-                                DatePicker::make('fecha_adquisicion') // Nuevo campo de fecha
+                                DateTimePicker::make('fecha_adquisicion') // Nuevo campo de fecha
+                                    ->displayFormat('d/m/Y')
+                                    ->seconds(false)
+                                    ->native(false)
+                                    ->closeOnDateSelection()
+                                    ->minDate(now()->subYears(100))
+                                    ->maxDate(now())
                                     ->label('Fecha de Adquisición')
                                     ->required()
                                     ->helperText('Seleccione la fecha de adquisición del producto'),

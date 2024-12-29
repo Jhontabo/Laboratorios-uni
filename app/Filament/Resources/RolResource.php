@@ -31,6 +31,7 @@ class RolResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->label('Nombre')
+                    ->autocapitalize('words')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)

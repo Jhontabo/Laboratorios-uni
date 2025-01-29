@@ -251,10 +251,8 @@ VITE_APP_NAME="${APP_NAME}"
 
   
 
-GOOGLE_CLIENT_ID=206158634484-n33qdthgmja2ts664a2va4u7jplpe2i6.apps.googleusercontent.com
-
-GOOGLE_CLIENT_SECRET=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
-
+GOOGLE_CLIENT_ID=803765845727-k3i6u818p8gc1qoeqs80l8gjj13h7th5.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
 GOOGLE_REDIRECT=http://127.0.0.1:8000/auth/google/callback
 
 ```

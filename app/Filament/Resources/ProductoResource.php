@@ -42,6 +42,7 @@ class ProductoResource extends Resource
     protected static ?string $navigationGroup = 'Inventario';
 
 
+
     public static function form(Form $form): Form
     {
         return $form
@@ -60,7 +61,8 @@ class ProductoResource extends Resource
                                     ->maxLength(500)
                                     ->helperText('Máximo 500 caracteres')
                                     ->rows(4)
-                                    ->required(),
+                                    ->cols(20)
+                                    ->required()
                             ]),
                     ]),
                 Section::make('Detalles del Producto')
@@ -90,6 +92,7 @@ class ProductoResource extends Resource
                                 TextInput::make('costo_unitario')
                                     ->label('Costo Unitario')
                                     ->numeric()
+                                    ->prefix('$')
                                     ->required()
                                     ->rules('gt:0|max:1000000000')
                                     ->minValue(1)

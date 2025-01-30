@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
                 'apellido' => 'Burbano',
                 'telefono' => '987654321',
                 'direccion' => 'Calle Real 456',
-                'rol' => $docenteRole,
+                'rol' => $adminRole,
             ],
             [
                 'email' => 'laboratorista@ejemplo.com',

@@ -27,4 +27,9 @@ class EditUser extends EditRecord
             ->title('Usuario actualizado')
             ->sendToDatabase(Auth::user());
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

@@ -9,4 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateLaboratorio extends CreateRecord
 {
     protected static string $resource = LaboratorioResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index'); 
+    }
 }

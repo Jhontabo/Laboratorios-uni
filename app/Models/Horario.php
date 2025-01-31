@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
+use Filament\Notifications\Notification;
 
 class Horario extends Model
 {
@@ -30,7 +32,35 @@ class Horario extends Model
         'start_at' => 'datetime',
         'end_at' => 'datetime',
     ];
+    public static function boot()
+    {
+        parent::boot();
 
+        static::creating(function ($horario) {
+            $existe = self::where('id_laboratorio', $horario->id_laboratorio)
+                ->where(function ($query) use ($horario) {
+                    $query->whereBetween('start_at', [$horario->start_at, $horario->end_at])
+                          ->orWhereBetween('end_at', [$horario->start_at, $horario->end_at])
+                          ->orWhere(function ($query) use ($horario) {
+                              $query->where('start_at', '<=', $horario->start_at)
+                                    ->where('end_at', '>=', $horario->end_at);
+                          });
+                })
+                ->exists();
+
+                if ($existe) {
+                    Notification::make()
+                        ->title('Error')
+                        ->body('Ya existe un horario en este rango de tiempo para este laboratorio.')
+                        ->danger()
+                        ->send();
+        
+                    throw ValidationException::withMessages([
+                        'error' => 'Ya existe un horario en este rango de tiempo para este laboratorio.'
+                    ]);
+                }
+        });
+    }
 
     public function laboratorista()
     {

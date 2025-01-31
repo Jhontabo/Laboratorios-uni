@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Filament\Widgets;
-
+use Carbon\Carbon;
 use Filament\Widgets\Widget;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use App\Models\Horario;
@@ -190,7 +190,9 @@ class CalendarWidget extends FullCalendarWidget
                                 ->required()
                                 ->label('Fecha y hora de inicio')
                                 ->placeholder('Seleccione la fecha y hora de inicio')
-                                ->displayFormat('Y-m-d H:i')
+                                ->displayFormat('d/m/Y H:i')
+                                ->native(false)
+                                ->minDate(Carbon::now())
                                 ->helperText('No se puede seleccionar una fecha pasada')
                                 ->afterStateUpdated(function ($state, callable $set) {
                                     if ($state && $state < now()) {
@@ -203,7 +205,9 @@ class CalendarWidget extends FullCalendarWidget
                                 ->required()
                                 ->label('Fecha y hora de fin')
                                 ->placeholder('Seleccione la fecha y hora de fin')
-                                ->displayFormat('Y-m-d H:i')
+                                ->displayFormat('d/m/Y H:i')
+                                ->native(false) 
+                                ->minDate(Carbon::now())
                                 ->helperText('Debe ser posterior a la fecha de inicio')
                                 ->afterStateUpdated(function ($state, callable $set, $get) {
                                     if ($state && $state < $get('start_at')) {

@@ -116,6 +116,7 @@ class CalendarWidget extends FullCalendarWidget
     }
 
 
+    
     protected function headerActions(): array
     {
         return [
@@ -128,6 +129,20 @@ class CalendarWidget extends FullCalendarWidget
                         ]);
                     }
                 )
+                ->action(function(array $data)
+                {
+                    Horario::create([
+                        'title' => $data['title'],
+                        'start_at' => $data['start_at'],
+                        'end_at' => $data['end_at'],
+                        'color' => $data['color'],
+                        'description' => $data['description'],
+                        'is_available' => $data['is_available'] ?? true,
+                        'id_laboratorio' => $data['id_laboratorio'],
+                        'id_usuario' => auth()->id(), 
+                    ]);
+                }
+            ),
         ];
     }
 

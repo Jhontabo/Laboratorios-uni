@@ -2,7 +2,7 @@
     <!-- Contenedor con flexbox para alinear el título y el dropdown -->
     <div class="flex items-center justify-between mb-4">
         <!-- Título -->
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Elegir horario</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Elegir horariosas</h3>
 
         <!-- Dropdown para seleccionar el widget -->
         <form method="GET" action="{{ url()->current() }}">

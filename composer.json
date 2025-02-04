@@ -25,7 +25,7 @@
         "laravel/tinker": "^2.9",
         "owenvoke/blade-fontawesome": "^2.8",
         "pxlrbt/filament-excel": "^2.3",
-        "saade/filament-fullcalendar": "^3.0"
+        "saade/filament-fullcalendar": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.2",

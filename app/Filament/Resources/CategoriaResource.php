@@ -52,4 +52,5 @@ class CategoriaResource extends Resource
             'edit' => Pages\EditCategoria::route('/{record}/edit'),
         ];
     }
+    
 }

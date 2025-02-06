@@ -4,8 +4,7 @@ namespace App\Filament\Resources\ReservaResource\Pages;
 
 use Filament\Resources\Pages\Page;
 use App\Filament\Resources\ReservaResource;
-use App\Filament\Widgets\CalendarWidget;
-use App\Filament\Widgets\CalendarReserva;
+use App\Filament\Widgets\ReservaCalendar as ReservaCalendarWidget;
 use App\Models\Laboratorio;
 use App\Models\Reserva;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +21,15 @@ class ReservaCalendar extends Page
     {
         // Cargar por defecto el primer laboratorio disponible
         $this->selectedLaboratorio = Laboratorio::first()?->id_laboratorio ?? null;
+    }
+
+    
+    // Incluir widgets en la página
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\ReservaCalendar::class, 
+        ];
     }
 
     // Obtener lista de laboratorios para el dropdown
@@ -74,7 +82,7 @@ class ReservaCalendar extends Page
     }
 
     public function getLaboratorios()
-{
-    return \App\Models\Laboratorio::pluck('nombre', 'id_laboratorio')->toArray();
-}
+    {
+        return \App\Models\Laboratorio::pluck('nombre', 'id_laboratorio')->toArray();
+    }
 }

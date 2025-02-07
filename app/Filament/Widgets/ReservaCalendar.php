@@ -168,4 +168,26 @@ class ReservaCalendar extends FullCalendarWidget
     {
         return !request()->routeIs('filament.admin.pages.dashboard');
     }
+    
+
+    public function onEventClick(array $event): void
+    {
+        logger()->info('Evento clickeado:', ['event' => $event]);
+
+        if (!isset($event['id'])) {
+            logger()->error('No se ha seleccionado un horario válido.');
+
+            Notification::make()
+                ->title('Horario no disponible')
+                ->body('No hay un horario disponible en este espacio.')
+                ->danger()
+                ->send();
+
+            return; // Salir sin hacer más acciones
+        }
+
+        // **Eliminar cualquier referencia a abrir el modal**
+        $this->eventId = (int) $event['id'];
+        logger()->info('ID del horario capturado:', ['eventId' => $this->eventId]);
+    }
 }

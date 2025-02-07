@@ -9,6 +9,7 @@ use App\Models\Reserva;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Notifications\Notification;
 
 class ReservaCalendar extends FullCalendarWidget
 {
@@ -18,10 +19,23 @@ class ReservaCalendar extends FullCalendarWidget
     protected static bool $isLazy = false; // Para cargar datos automáticamente
 
     public ?int $selectedLaboratorio = null; // Laboratorio seleccionado
+    public ?int $eventId = null; // Variable para almacenar el ID del evento seleccionado
+
+    protected $listeners = [
+        'reserveLab' => 'reserveLab',
+        'setEventId' => 'setEventId',
+    ];
 
     public function mount(): void
     {
         $this->selectedLaboratorio = Laboratorio::first()?->id_laboratorio ?? null;
+    }
+
+    // Establecer el ID del evento cuando se hace clic en un horario
+    public function setEventId(int $eventId): void
+    {
+        $this->eventId = $eventId;
+        logger()->info('Se ha seleccionado el evento:', ['eventId' => $this->eventId]);
     }
 
     // Obtener horarios disponibles
@@ -30,29 +44,64 @@ class ReservaCalendar extends FullCalendarWidget
         if (!$this->selectedLaboratorio) {
             return [];
         }
-
-        // Validar que las claves necesarias existen
+    
         if (!isset($fetchInfo['start']) || !isset($fetchInfo['end'])) {
             return [];
         }
-
-        // Buscar los horarios disponibles en la tabla horarios
+    
         $horarios = Horario::where('is_available', 1)
             ->where('id_laboratorio', $this->selectedLaboratorio)
             ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
             ->get();
-
+    
         return $horarios->map(fn($horario) => [
             'id' => $horario->id_horario,
             'title' => 'Disponible - ' . $horario->title,
             'start' => $horario->start_at,
             'end' => $horario->end_at,
             'color' => '#00FF00',
+            'extendedProps' => [
+                'isAvailable' => $horario->is_available
+            ],
         ])->toArray();
     }
-
     public function getFormSchema(): array
     {
+        logger()->info('Valor de eventId antes de buscar horario:', ['eventId' => $this->eventId]);
+    
+        if (!$this->eventId) {
+            logger()->error('No se ha seleccionado un evento para reservar.');
+            
+            if (!session()->has('notified')) {
+                session()->flash('notified', true);
+                Notification::make()
+                    ->title('Horario no disponible')
+                    ->body('No hay un horario disponible en este espacio.')
+                    ->danger()
+                    ->send();
+            }
+    
+            return [];
+        }
+    
+        $horario = Horario::find($this->eventId);
+        logger()->info('Valor de $horario:', ['horario formulario' => $horario]);
+    
+        if (!$horario || $horario->is_available == 0) {
+            logger()->error('El horario seleccionado no existe o ya fue reservado.');
+            
+            if (!session()->has('notified')) {
+                session()->flash('notified', true);
+                Notification::make()
+                    ->title('Horario no disponible')
+                    ->body('Este horario no está disponible.')
+                    ->danger()
+                    ->send();
+            }
+    
+            return [];
+        }
+    
         return [
             Select::make('selectedLaboratorio')
                 ->label('Seleccionar Laboratorio')
@@ -60,20 +109,43 @@ class ReservaCalendar extends FullCalendarWidget
                 ->default($this->selectedLaboratorio)
                 ->reactive()
                 ->afterStateUpdated(fn() => $this->dispatch('refreshCalendar')),
+    
+            \Filament\Forms\Components\DateTimePicker::make('start_at')
+                ->label('Fecha de Inicio')
+                ->default($horario->start_at)
+                ->required(),
+    
+            \Filament\Forms\Components\DateTimePicker::make('end_at')
+                ->label('Fecha de Fin')
+                ->default($horario->end_at)
+                ->required(),
         ];
     }
 
-    // Reservar un horario disponible
-    public function reserveLab(int $eventId): void
+    public function reserveLab(): void
     {
-        $horario = Horario::find($eventId);
-
-        if (!$horario || $horario->is_available == 0) {
-            return; // Evitar reservas duplicadas
+        if (!$this->eventId) {
+            Notification::make()
+                ->title('Error')
+                ->body('Debe seleccionar un evento válido para reservar.')
+                ->danger()
+                ->send();
+            return;
         }
 
-        // Registrar la reserva en la tabla reservas
-        $reserva = Reserva::create([
+        $horario = Horario::find($this->eventId);
+        logger()->info('Intentando reservar el horario:', ['horario' => $horario]);
+
+        if (!$horario || $horario->is_available == 0) {
+            Notification::make()
+                ->title('Error de reserva')
+                ->body('Este espacio no está disponible para reserva.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        Reserva::create([
             'id_horario' => $horario->id_horario,
             'id_usuario' => Auth::id(),
             'estado' => 'reservado',
@@ -81,16 +153,19 @@ class ReservaCalendar extends FullCalendarWidget
             'updated_at' => now(),
         ]);
 
-        // Cambiar el estado del horario a ocupado
         $horario->update(['is_available' => 0]);
 
-        // Refrescar el calendario
+        Notification::make()
+            ->title('Reserva exitosa')
+            ->body('Reserva realizada con éxito.')
+            ->success()
+            ->send();
+
         $this->dispatch('refreshCalendar');
     }
 
     public static function canView(): bool
     {
-        // Ocultar el widget en el dashboard principal
         return !request()->routeIs('filament.admin.pages.dashboard');
     }
 }

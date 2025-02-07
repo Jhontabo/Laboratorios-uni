@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\ReservaController;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : view('auth.login');

@@ -5,7 +5,7 @@ use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use App\Filament\Widgets\CalendarWidget;
 
 return [
-
+       
 
     'widgets' => [
         CalendarWidget::class,

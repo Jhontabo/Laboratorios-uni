@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ReservaResource\Pages\ReservaCalendar; // Importación correcta
+use App\Filament\Resources\ReservaResource\Pages\RecursoCalendar; // Importación correcta
 use App\Filament\Widgets\ReservaCalendar as WidgetReservaCalendar; // Evitar confusión con nombres
 use App\Models\Horario;
 use App\Models\Reserva;
@@ -24,7 +24,7 @@ class ReservaResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ReservaCalendar::route('/'), // Usar la clase correcta
+            'index' => RecursoCalendar::route('/'), // Usar la clase correcta
         ];
     }
     

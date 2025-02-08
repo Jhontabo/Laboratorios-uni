@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
+use Saade\FilamentFullCalendar\Actions\DeleteAction;
+use Saade\FilamentFullCalendar\Actions\EditAction;
+use Saade\FilamentFullCalendar\Actions\CreateAction;
 
 class ReservaCalendar extends FullCalendarWidget
 {
@@ -31,11 +34,12 @@ class ReservaCalendar extends FullCalendarWidget
         $this->selectedLaboratorio = Laboratorio::first()?->id_laboratorio ?? null;
     }
 
-    // Establecer el ID del evento cuando se hace clic en un horario
     public function setEventId(int $eventId): void
     {
         $this->eventId = $eventId;
-        logger()->info('Se ha seleccionado el evento:', ['eventId' => $this->eventId]);
+        // Aquí puedes agregar la lógica que desees al seleccionar un evento
+        // Por ejemplo, registrar en el log o realizar alguna acción específica
+        logger()->info('Se ha seleccionado el evento desde evenId:', ['eventId' => $this->eventId]);
     }
 
     // Obtener horarios disponibles
@@ -67,18 +71,21 @@ class ReservaCalendar extends FullCalendarWidget
     }
     public function getFormSchema(): array
     {
-        logger()->info('Valor de eventId antes de buscar horario:', ['eventId' => $this->eventId]);
+        //logger()->info('Valor de eventId antes de buscar horario:', ['eventId' => $this->eventId]);
+    
     
         if (!$this->eventId) {
-            logger()->error('No se ha seleccionado un evento para reservar.');
+            //logger()->error('No se ha seleccionado un evento para reservar.');
             
             if (!session()->has('notified')) {
+                
                 session()->flash('notified', true);
                 Notification::make()
                     ->title('Horario no disponible')
                     ->body('No hay un horario disponible en este espacio.')
                     ->danger()
                     ->send();
+                    
             }
     
             return [];
@@ -88,6 +95,7 @@ class ReservaCalendar extends FullCalendarWidget
         logger()->info('Valor de $horario:', ['horario formulario' => $horario]);
     
         if (!$horario || $horario->is_available == 0) {
+            logger()->info('dentro');
             logger()->error('El horario seleccionado no existe o ya fue reservado.');
             
             if (!session()->has('notified')) {
@@ -172,22 +180,36 @@ class ReservaCalendar extends FullCalendarWidget
 
     public function onEventClick(array $event): void
     {
-        logger()->info('Evento clickeado:', ['event' => $event]);
+        logger()->info('Evento  desde onEnventClick clickeado:', ['event' => $event]);
 
-        if (!isset($event['id'])) {
-            logger()->error('No se ha seleccionado un horario válido.');
-
-            Notification::make()
-                ->title('Horario no disponible')
-                ->body('No hay un horario disponible en este espacio.')
-                ->danger()
-                ->send();
-
-            return; // Salir sin hacer más acciones
-        }
-
+        
         // **Eliminar cualquier referencia a abrir el modal**
         $this->eventId = (int) $event['id'];
         logger()->info('ID del horario capturado:', ['eventId' => $this->eventId]);
     }
+
+    protected function getFullCalendarOptions(): array
+    {
+        return [
+            'initialView' => 'dayGridMonth', // Vista inicial del calendario
+            'locale' => 'es', // Idioma en español
+            'events' => $this->fetchEvents(), // Método para obtener los eventos
+            'selectable' => true, // Permitir selección de fechas
+            'select' => function ($info) {
+                // Manejador para la selección de un rango de fechas
+                // Dejar vacío si no se desea ninguna acción
+            },
+            'dateClick' => function ($info) {
+                // Manejador para el clic en una fecha específica
+                // Dejar vacío si no se desea ninguna acción
+            },
+            'eventClick' => function ($info) {
+                // Manejador para el clic en un evento
+                // Aquí puedes definir el comportamiento deseado
+                // Por ejemplo, capturar el ID del evento sin abrir un modal
+                $this->setEventId((int) $info['event']['id']);
+            },
+        ];
+    }
+    
 }

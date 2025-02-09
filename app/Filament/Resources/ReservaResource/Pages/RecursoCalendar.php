@@ -4,37 +4,54 @@ namespace App\Filament\Resources\ReservaResource\Pages;
 
 use Filament\Resources\Pages\Page;
 use App\Filament\Resources\ReservaResource;
-use App\Filament\Widgets\ReservaCalendar as ReservaCalendarWidget;
+
+use App\Filament\Widgets\ReservaCalendar;
+
+
 use App\Models\Laboratorio;
-use App\Models\Reserva;
-use Illuminate\Support\Facades\Auth;
 
 class RecursoCalendar extends Page
 {
     protected static string $resource = ReservaResource::class;
-    
+
     protected static string $view = 'filament.resources.reserva-resource.pages.reserva';
 
-    public ?int $selectedLaboratorio = null; // Variable para el laboratorio seleccionado
-
-    public function mount(): void
+    public function getFooterWidgets(): array
     {
-        // Cargar por defecto el primer laboratorio disponible
-        $this->selectedLaboratorio = Laboratorio::first()?->id_laboratorio ?? null;
+        // Obtén el parámetro 'widget' y establece 'Todos' como valor predeterminado
+        $selectedWidget = request()->query('widget', 'Todos');
+
+        // Si se selecciona "Todos", muestra el widget general de reservas
+        if ($selectedWidget === 'Todos') {
+            return [ReservaCalendar::class];
+        }
+
+        // Si el parámetro corresponde a un laboratorio específico, intenta cargarlo
+        $laboratorio = Laboratorio::where('nombre', $selectedWidget)->first();
+
+        if ($laboratorio) {
+            return [ReservaCalendar::class]; // Puedes cambiarlo si tienes widgets específicos por laboratorio
+        }
+
+        return [ReservaCalendar::class]; // Retorna el widget por defecto
     }
 
-    
-    // Incluir widgets en la página
-    protected function getFooterWidgets(): array
+    public function getDropdownOptions(): array
     {
-        return [
-            \App\Filament\Widgets\ReservaCalendar::class, 
-        ];
+        // Obtén todos los nombres de los laboratorios de la base de datos
+        $laboratorios = Laboratorio::all()->pluck('nombre', 'nombre')->toArray();
+
+        // Crea las opciones para el dropdown con "Todos"
+        $options = ['Todos' => 'Todos'] + $laboratorios;
+
+        return $options;
     }
 
-
-    public function getLaboratorios()
+    /**
+     * Método para obtener la lista de laboratorios
+     */
+    public function getLaboratorios(): array
     {
-        return \App\Models\Laboratorio::pluck('nombre', 'id_laboratorio')->toArray();
+        return Laboratorio::pluck('nombre', 'id_laboratorio')->toArray();
     }
 }

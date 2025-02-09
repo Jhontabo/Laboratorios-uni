@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Filament\Widgets;
-use Carbon\Carbon;
+
 use Filament\Widgets\Widget;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use App\Models\Horario;
 use App\Filament\Resources\HorarioResource;
 use App\Models\Laboratorio;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
@@ -116,7 +117,6 @@ class CalendarWidget extends FullCalendarWidget
     }
 
 
-    
     protected function headerActions(): array
     {
         return [
@@ -129,20 +129,6 @@ class CalendarWidget extends FullCalendarWidget
                         ]);
                     }
                 )
-                ->action(function(array $data)
-                {
-                    Horario::create([
-                        'title' => $data['title'],
-                        'start_at' => $data['start_at'],
-                        'end_at' => $data['end_at'],
-                        'color' => $data['color'],
-                        'description' => $data['description'],
-                        'is_available' => $data['is_available'] ?? true,
-                        'id_laboratorio' => $data['id_laboratorio'],
-                        'id_usuario' => auth()->id(), 
-                    ]);
-                }
-            ),
         ];
     }
 
@@ -162,7 +148,7 @@ class CalendarWidget extends FullCalendarWidget
                         ->placeholder('Ejemplo: Clase de programación avanzada')
                         ->helperText('La descripción no debe exceder los 500 caracteres'),
                 ])
-                ->columns(2), // Dividido en dos columnas
+                ->columns(2),
 
             Section::make('Disponibilidad y color')
                 ->schema([
@@ -179,25 +165,23 @@ class CalendarWidget extends FullCalendarWidget
                         ->label('Laboratorio')
                         ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
                         ->required(),
-
                 ])->columns(3),
 
             Section::make('Horario')
                 ->schema([
-                    Grid::make(2) // Dividido en dos columnas
+                    Grid::make(2)
                         ->schema([
                             DateTimePicker::make('start_at')
                                 ->required()
                                 ->label('Fecha y hora de inicio')
                                 ->placeholder('Seleccione la fecha y hora de inicio')
-                                ->displayFormat('d/m/Y H:i')
+                                ->displayFormat('H:i')
                                 ->native(false)
-                                ->minDate(Carbon::now())
+                                ->minDate(Carbon::now()) // 🔹 Evita fechas pasadas
                                 ->helperText('No se puede seleccionar una fecha pasada')
                                 ->afterStateUpdated(function ($state, callable $set) {
-                                    if ($state && $state < now()) {
-                                        $set('start_at', null); // Limpia el campo si es inválido
-                                        return 'La fecha de inicio no puede ser anterior a la actual.';
+                                    if ($state && Carbon::parse($state)->isPast()) {
+                                        $set('start_at', null);
                                     }
                                 }),
 
@@ -205,19 +189,18 @@ class CalendarWidget extends FullCalendarWidget
                                 ->required()
                                 ->label('Fecha y hora de fin')
                                 ->placeholder('Seleccione la fecha y hora de fin')
-                                ->displayFormat('d/m/Y H:i')
-                                ->native(false) 
-                                ->minDate(Carbon::now())
+                                ->displayFormat('H:i')
+                                ->native(false)
+                                ->minDate(Carbon::now()) // 🔹 Evita fechas pasadas
                                 ->helperText('Debe ser posterior a la fecha de inicio')
                                 ->afterStateUpdated(function ($state, callable $set, $get) {
-                                    if ($state && $state < $get('start_at')) {
-                                        $set('end_at', null); // Limpia el campo si es inválido
-                                        return 'La fecha de fin debe ser posterior a la de inicio.';
+                                    if ($state && Carbon::parse($state)->lessThan(Carbon::parse($get('start_at')))) {
+                                        $set('end_at', null);
                                     }
                                 }),
                         ]),
                 ])
-                ->columns(2), // Diseño en dos columnas
+                ->columns(2),
         ];
     }
 }

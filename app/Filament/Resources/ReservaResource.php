@@ -2,16 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ReservaResource\Pages\RecursoCalendar; // Importación correcta
-use App\Filament\Widgets\ReservaCalendar as WidgetReservaCalendar; // Evitar confusión con nombres
+use App\Filament\Resources\ReservaResource\Pages\RecursoCalendar;
 use App\Models\Horario;
 use App\Models\Reserva;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\Action;
-use Illuminate\Support\Facades\Auth;
+
 
 class ReservaResource extends Resource
 {
@@ -27,5 +22,4 @@ class ReservaResource extends Resource
             'index' => RecursoCalendar::route('/'), // Usar la clase correcta
         ];
     }
-    
 }

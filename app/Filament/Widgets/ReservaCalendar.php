@@ -17,12 +17,20 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Reserva;
 
 class ReservaCalendar extends FullCalendarWidget
 {
     protected static ?string $heading = 'Calendario de Reservas';
     public Model | string | null $model = Horario::class;
-
+    public ?Reserva $reserva = null; // Agregar esta línea
+    public ?string $start_at = null;
+    public ?string $end_at = null;
+    public ?int $id_laboratorio = null;
+    public ?string $nombre_usuario = null;
+    public ?string $apellido_usuario = null;
+    public ?string $correo_usuario = null;
+    
 
 
     // Método para decidir si el widget debe ser visible
@@ -30,26 +38,22 @@ class ReservaCalendar extends FullCalendarWidget
     {
         return !request()->routeIs('filament.admin.pages.dashboard'); // Ocultar en el dashboard principal
     }
-
     // Configuración de FullCalendar
     public function config(): array
     {
         return [
-            'firstDay' => 1,
-            'slotMinTime' => '06:00:00',
-            'slotMaxTime' => '22:00:00',
-            'slotDuration' => '00:30:00',
+            
+            'firstDay' => 1, // Inicia la semana en lunes+
+            'slotMinTime' => '06:00:00', // Hora mínima visible
+            'slotMaxTime' => '22:00:00', // Hora máxima visible
+            'slotDuration' => '00:30:00', // Intervalo de tiempo de cada bloque
             'locale' => 'es',
-            'initialView' => 'timeGridWeek',
-            'headerToolbar' => [
-                'left' => 'prev,next today',
-                'center' => 'title',
-                'right' => 'timeGridWeek,timeGridDay',
-            ],
-            'editable' => false,
+            'initialView' => 'timeGridWeek', // Vista semanal predeterminada
+            
             'selectable' => false,
         ];
     }
+
 
     // Método para obtener eventos de la base de datos
     public function fetchEvents(array $fetchInfo): array
@@ -78,61 +82,162 @@ class ReservaCalendar extends FullCalendarWidget
         return [];
     }
 
-
-
-    protected function modalActions(): array
+    public function onEventClick(array $event): void
     {
-        return [Action::make('reservar')
-            ->label('Reservar')
-            ->button()
-            ->color('primary')
-            ->action(fn() => $this->reservarHorario()),];
+        logger()->info('🔔 Evento clickeado:', ['event_data' => json_encode($event)]);
+    
+        if (!isset($event['id'])) {
+            logger()->error('⚠️ No se ha seleccionado un horario válido.');
+            return;
+        }
+    
+        $horario = Horario::find($event['id']);
+    
+        if (!$horario) {
+            logger()->error('❌ No se encontró el horario seleccionado.');
+            return;
+        }
+    
+        $this->eventId = $horario->id_horario;
+        $this->id_laboratorio = $horario->id_laboratorio;
+    
+        //logger()->info('📌 Intentando abrir el modal de reserva...');  
+        $this->dispatch('refresh');
+        usleep(300000); 
+        $this->mountAction('reservar');
+        //logger()->info('🎉 Modal debería estar abierto ahora.');
     }
 
+
+ 
+    
+    protected function modalActions(): array
+    {
+        //logger()->info('🛠 Ejecutando modalActions() correctamente'); // 🔥 Log para verificar
+    
+        return [
+            Action::make('reservar')
+                ->label('Reservar')
+                ->button()
+                ->color('primary')
+                ->form(fn () => $this->getFormSchema()) 
+                ->action(function () {
+                    $this->reservarHorario();
+                }),
+        ];
+    }
+
+    public function reservarHorario()
+    {
+        //logger()->info('ID del dentro de reserva:', ['id_laboratorio' => $this->id_laboratorio]);
+        //logger()->info('ID del dentro de reserva:', ['id_horario' => $this->eventId]);
+
+        $data = $this->form->getState();
+        
+        try {
+            // Validar si ya existe una reserva para este horario
+            $reservaExistente = Reserva::where('id_horario', $data['id_horario'])->first();
+    
+            if ($reservaExistente) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Este horario ya ha sido reservado.')
+                    ->danger()
+                    ->send();
+                return;
+            }
+    
+            // Crear la reserva en la base de datos
+            Reserva::create([
+                'id_usuario' => auth()->id(),
+                'id_horario' => $data['id_horario'],
+                'id_laboratorio' => $data['reservarHorario'],
+                'nombre_usuario' => $data['nombre_usuario'] ?? null,
+                'apellido_usuario' => $data['apellido_usuario'] ?? null,
+                'correo_usuario' => $data['correo_usuario'] ?? null,
+                'estado' => Reserva::ESTADO_PENDIENTE,
+            ]);
+    
+            // Notificación de éxito
+            Notification::make()
+                ->title('Reserva creada')
+                ->body('Se ha reservado el horario con éxito.')
+                ->success()
+                ->send();
+    
+            // Refrescar el calendario
+            $this->dispatch('refresh');
+            
+        } catch (\Exception $e) {
+            //logger()->error('Error al reservar:', ['error' => $e->getMessage()]);
+            Notification::make()
+                ->title('Error')
+                ->body('No se pudo completar la reserva.')
+                ->danger()
+                ->send();
+        }
+    }
 
 
     public function getFormSchema(): array
-    {
-        return [
-            Section::make('Horario')
-                ->schema([
-                    Grid::make(2) // Dividido en dos columnas
-                        ->schema([
-                            DateTimePicker::make('start_at')
-                                ->required()
-                                ->label('Fecha y hora de inicio')
-                                ->placeholder('Seleccione la fecha y hora de inicio')
-                                ->displayFormat('Y-m-d H:i')
-                                ->seconds(false)
-                                ->helperText('No se puede seleccionar una fecha pasada')
-                                ->afterStateUpdated(function ($state, callable $set) {
-                                    if ($state && $state < now()) {
-                                        $set('start_at', null); // Limpia el campo si es inválido
-                                        return 'La fecha de inicio no puede ser anterior a la actual.';
-                                    }
-                                }),
-
-                            DateTimePicker::make('end_at')
-                                ->required()
-                                ->label('Fecha y hora de fin')
-                                ->placeholder('Seleccione la fecha y hora de fin')
-                                ->displayFormat('Y-m-d H:i')
-                                ->seconds(false)
-                                ->helperText('Debe ser posterior a la fecha de inicio')
-                                ->afterStateUpdated(function ($state, callable $set, $get) {
-                                    if ($state && $state < $get('start_at')) {
-                                        $set('end_at', null); // Limpia el campo si es inválido
-                                        return 'La fecha de fin debe ser posterior a la de inicio.';
-                                    }
-                                }),
-                        ]),
-                ])
-                ->columns(2), // Diseño en dos columnas
-
-            Select::make('id_laboratorio')
-                ->label('Laboratorio')
-                ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
-                ->required(),
-        ];
+{
+    //logger()->info('📌 getFormSchema() ha sido ejecutado');
+    $horario = Horario::find($this->eventId);
+    
+    if (!$horario) {
+        logger()->error('❌ No se encontró el horario con ID:', ['id' => $this->eventId]);
+        return [];
     }
+
+    $this->reserva = Reserva::where('id_horario', $horario->id_horario)->first();
+
+    return [
+        Section::make('Horario')
+            ->schema([
+                Grid::make(2)
+                    ->schema([
+                        DateTimePicker::make('start_at')
+                            ->default($horario->start_at)
+                           
+                            ->label('Fecha y hora de inicio')
+                            ->required(),
+
+                        DateTimePicker::make('end_at')
+                            ->default($horario->end_at)
+                            
+                            ->label('Fecha y hora de fin')
+                            ->required(),
+                    ]),
+            ]),
+
+        Select::make('id_laboratorio')
+            ->label('Laboratorio')
+            ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
+            ->default($horario->id_laboratorio)
+            ->disabled(),
+
+        TextInput::make('id_horario')
+            ->default($horario->id_horario)
+            ->hidden(),
+
+        TextInput::make('nombre_usuario')
+            ->label('Nombre')
+            ->default($this->reserva?->nombre_usuario ?? auth()->user()->name ?? '')
+            ->disabled()
+            ->required(),
+
+        TextInput::make('apellido_usuario')
+            ->label('Apellido')
+            ->default($this->reserva?->apellido_usuario ?? $usuario->apellido ?? '')
+            ->disabled()
+            ->required(),
+
+        TextInput::make('correo_usuario')
+            ->label('Correo Electrónico')
+            ->default($this->reserva?->correo_usuario ?? auth()->user()->email ?? '')
+            ->disabled()
+            ->email()
+            ->required(),
+    ];
 }
+}                

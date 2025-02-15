@@ -23,35 +23,12 @@
 
     
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                events: '/ruta-para-cargar-eventos', // Ruta correcta para cargar los horarios
-                selectable: true,
-                
-                eventClick: function(info) {
-                    console.clear(); // ✅ Limpiar consola para que sea más fácil ver los datos
-                    
-                    console.log("Evento seleccionado:", info.event);
-                    console.log("Propiedades extendidas:", info.event.extendedProps);
-
-                    // Verificar si hay un horario disponible
-                    if (!info.event.extendedProps || info.event.extendedProps.isAvailable === 0) {
-                        console.warn("❌ No hay horario disponible en este espacio.");
-                        Livewire.emit("setEventId", null); // Enviar null si no hay horario
-                        alert("No hay horario disponible en este espacio.");
-                        return;
-                    }
-
-                    // ✅ Si hay un horario disponible, enviamos el ID del evento
-                    console.log("✅ ID del horario disponible:", info.event.id);
-                    Livewire.emit("setEventId", info.event.id);
-                }
+    <div wire:ignore>
+        <script>
+            Livewire.on('openModal', (modalName) => {
+                console.log(`🛠 Livewire recibió la señal para abrir el modal: ${modalName}`);
             });
-
-            calendar.render();
-        });
-    </script>
+        </script>
+    </div>
+   
 </x-filament-panels::page>

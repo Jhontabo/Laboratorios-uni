@@ -132,11 +132,10 @@ class ReservaCalendar extends FullCalendarWidget
 
     public function reservarHorario()
 {
-    logger()->info('🔔 Reservando horario...');
+    //logger()->info('🔔 Reservando horario...');
 
-    // Prueba si estas variables tienen valores correctos
-    logger()->info('ID Horario:', ['eventId' => $this->eventId]);
-    logger()->info('ID Laboratorio:', ['id_laboratorio' => $this->id_laboratorio]);
+    //logger()->info('ID Horario:', ['eventId' => $this->eventId]);
+    //logger()->info('ID Laboratorio:', ['id_laboratorio' => $this->id_laboratorio]);
 
     try {
         // Si `getState()` está fallando, usa directamente `$this->eventId`
@@ -168,7 +167,7 @@ class ReservaCalendar extends FullCalendarWidget
         $this->dispatch('refresh');
 
     } catch (\Exception $e) {
-        logger()->error('❌ Error al intentar crear la reserva:', ['error' => $e->getMessage()]);
+        //logger()->error('❌ Error al intentar crear la reserva:', ['error' => $e->getMessage()]);
 
         Notification::make()
             ->title('Error')

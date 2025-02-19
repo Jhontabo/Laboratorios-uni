@@ -8,7 +8,6 @@ return new class extends Migration
 {
     public function up()
     {
-        // Crear la tabla 'reservas'
         Schema::create('reservas', function (Blueprint $table) {
             $table->id('id_reserva'); // Clave primaria personalizada
 
@@ -26,11 +25,19 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 
-            // Clave foránea para usuarios
-            $table->foreignId('id_usuario')
-                ->nullable() // Permitir null para reservas de usuarios no autenticados
-                ->constrained('users', 'id_usuario')
-                ->nullOnDelete(); // Si el usuario se elimina, el campo se establece en null
+            // ✅ Corregir la clave foránea de `id_usuario`
+            $table->unsignedBigInteger('id_usuario')->nullable(); // Permitir NULL para usuarios no autenticados
+            $table->foreign('id_usuario')
+                ->references('id_usuario') // 🔥 Referenciar `id_usuario` en `users`
+                ->on('users')
+                ->nullOnDelete(); // Si el usuario es eliminado, se pone NULL
+
+            // ✅ Corregir la clave foránea de `id_laboratorio`
+            $table->unsignedBigInteger('id_laboratorio')->nullable();
+            $table->foreign('id_laboratorio')
+                ->references('id_laboratorio')
+                ->on('laboratorios')
+                ->cascadeOnDelete();
 
             // Estado de la reserva
             $table->string('estado', 20)->default('pendiente')->comment('Estado de la reserva');

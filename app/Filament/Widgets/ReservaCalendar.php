@@ -18,6 +18,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Reserva;
+use Filament\Notifications\Notification;
 
 class ReservaCalendar extends FullCalendarWidget
 {
@@ -30,7 +31,7 @@ class ReservaCalendar extends FullCalendarWidget
     public ?string $nombre_usuario = null;
     public ?string $apellido_usuario = null;
     public ?string $correo_usuario = null;
-    
+    public ?int $eventId = null;
 
 
     // Método para decidir si el widget debe ser visible
@@ -83,31 +84,33 @@ class ReservaCalendar extends FullCalendarWidget
     }
 
     public function onEventClick(array $event): void
-    {
-        logger()->info('🔔 Evento clickeado:', ['event_data' => json_encode($event)]);
-    
-        if (!isset($event['id'])) {
-            logger()->error('⚠️ No se ha seleccionado un horario válido.');
-            return;
-        }
-    
-        $horario = Horario::find($event['id']);
-    
-        if (!$horario) {
-            logger()->error('❌ No se encontró el horario seleccionado.');
-            return;
-        }
-    
-        $this->eventId = $horario->id_horario;
-        $this->id_laboratorio = $horario->id_laboratorio;
-    
-        //logger()->info('📌 Intentando abrir el modal de reserva...');  
-        $this->dispatch('refresh');
-        usleep(300000); 
-        $this->mountAction('reservar');
-        //logger()->info('🎉 Modal debería estar abierto ahora.');
+{
+    logger()->info('🔔 Evento clickeado:', ['event_data' => json_encode($event)]);
+
+    if (!isset($event['id'])) {
+        logger()->error('⚠️ No se ha seleccionado un horario válido.');
+        return;
     }
 
+    $horario = Horario::find($event['id']);
+
+    if (!$horario) {
+        logger()->error('❌ No se encontró el horario seleccionado.');
+        return;
+    }
+
+    $this->eventId = $horario->id_horario;
+    $this->id_laboratorio = $horario->id_laboratorio;
+
+    logger()->info('Evento seleccionado:', [
+        'eventId' => $this->eventId,
+        'id_laboratorio' => $this->id_laboratorio
+    ]);
+
+    $this->dispatch('refresh');
+    usleep(300000);
+    $this->mountAction('reservar');
+}
 
  
     
@@ -128,55 +131,52 @@ class ReservaCalendar extends FullCalendarWidget
     }
 
     public function reservarHorario()
-    {
-        //logger()->info('ID del dentro de reserva:', ['id_laboratorio' => $this->id_laboratorio]);
-        //logger()->info('ID del dentro de reserva:', ['id_horario' => $this->eventId]);
+{
+    logger()->info('🔔 Reservando horario...');
 
-        $data = $this->form->getState();
-        
-        try {
-            // Validar si ya existe una reserva para este horario
-            $reservaExistente = Reserva::where('id_horario', $data['id_horario'])->first();
-    
-            if ($reservaExistente) {
-                Notification::make()
-                    ->title('Error')
-                    ->body('Este horario ya ha sido reservado.')
-                    ->danger()
-                    ->send();
-                return;
-            }
-    
-            // Crear la reserva en la base de datos
-            Reserva::create([
-                'id_usuario' => auth()->id(),
-                'id_horario' => $data['id_horario'],
-                'id_laboratorio' => $data['reservarHorario'],
-                'nombre_usuario' => $data['nombre_usuario'] ?? null,
-                'apellido_usuario' => $data['apellido_usuario'] ?? null,
-                'correo_usuario' => $data['correo_usuario'] ?? null,
-                'estado' => Reserva::ESTADO_PENDIENTE,
-            ]);
-    
-            // Notificación de éxito
-            Notification::make()
-                ->title('Reserva creada')
-                ->body('Se ha reservado el horario con éxito.')
-                ->success()
-                ->send();
-    
-            // Refrescar el calendario
-            $this->dispatch('refresh');
-            
-        } catch (\Exception $e) {
-            //logger()->error('Error al reservar:', ['error' => $e->getMessage()]);
-            Notification::make()
-                ->title('Error')
-                ->body('No se pudo completar la reserva.')
-                ->danger()
-                ->send();
-        }
+    // Prueba si estas variables tienen valores correctos
+    logger()->info('ID Horario:', ['eventId' => $this->eventId]);
+    logger()->info('ID Laboratorio:', ['id_laboratorio' => $this->id_laboratorio]);
+
+    try {
+        // Si `getState()` está fallando, usa directamente `$this->eventId`
+        $datosReserva = [
+            'id_usuario' => auth()->id(),
+            'id_horario' => $this->eventId ?? null,
+            'id_laboratorio' => $this->id_laboratorio ?? null,
+            'nombre_usuario' => auth()->user()->name ?? 'Sin nombre',
+            'apellido_usuario' => auth()->user()->apellido ?? 'Sin apellido',
+            'correo_usuario' => auth()->user()->email ?? 'correo@ejemplo.com',
+            'estado' => Reserva::ESTADO_PENDIENTE,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        logger()->info('📝 Datos que se intentan insertar en reservas:', $datosReserva);
+
+        // Crear la reserva
+        $reserva = Reserva::create($datosReserva);
+
+        logger()->info('✅ Reserva creada con éxito:', $reserva->toArray());
+
+        Notification::make()
+            ->title('Reserva creada')
+            ->body('Se ha reservado el horario con éxito.')
+            ->success()
+            ->send();
+
+        $this->dispatch('refresh');
+
+    } catch (\Exception $e) {
+        logger()->error('❌ Error al intentar crear la reserva:', ['error' => $e->getMessage()]);
+
+        Notification::make()
+            ->title('Error')
+            ->body('No se pudo completar la reserva.')
+            ->danger()
+            ->send();
     }
+}
 
 
     public function getFormSchema(): array
@@ -228,7 +228,7 @@ class ReservaCalendar extends FullCalendarWidget
 
         TextInput::make('apellido_usuario')
             ->label('Apellido')
-            ->default($this->reserva?->apellido_usuario ?? $usuario->apellido ?? '')
+            ->default($this->reserva?->apellido_usuario ?? auth()->user()->apellido ?? '')
             ->disabled()
             ->required(),
 

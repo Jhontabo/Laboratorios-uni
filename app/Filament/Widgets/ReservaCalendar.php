@@ -84,33 +84,48 @@ class ReservaCalendar extends FullCalendarWidget
     }
 
     public function onEventClick(array $event): void
-{
-    logger()->info('🔔 Evento clickeado:', ['event_data' => json_encode($event)]);
-
-    if (!isset($event['id'])) {
-        logger()->error('⚠️ No se ha seleccionado un horario válido.');
-        return;
+    {
+        logger()->info('🔔 Evento clickeado:', ['event_data' => json_encode($event)]);
+    
+        if (!isset($event['id'])) {
+            logger()->error('⚠️ No se ha seleccionado un horario válido.');
+            return;
+        }
+    
+        $horario = Horario::find($event['id']);
+    
+        if (!$horario) {
+            logger()->error('❌ No se encontró el horario seleccionado.');
+            return;
+        }
+    
+        // Verificar si el horario ya está reservado antes de abrir el modal
+        $reservaExistente = Reserva::where('id_horario', $horario->id_horario)
+            ->where('estado', '!=', Reserva::ESTADO_RECHAZADA) // Ignorar reservas rechazadas
+            ->exists();
+    
+        if ($reservaExistente) {
+            Notification::make()
+                ->title('Espacio ya reservado')
+                ->body('Este espacio ya ha sido reservado y no se puede volver a reservar.')
+                ->danger()
+                ->send();
+            return; // Detiene la ejecución y no abre el modal
+        }
+    
+        // Si el horario está disponible, asignar valores y abrir el modal
+        $this->eventId = $horario->id_horario;
+        $this->id_laboratorio = $horario->id_laboratorio;
+    
+        logger()->info('Evento seleccionado:', [
+            'eventId' => $this->eventId,
+            'id_laboratorio' => $this->id_laboratorio
+        ]);
+    
+        $this->dispatch('refresh'); // Refresca la vista si es necesario
+        usleep(300000); // Pausa corta para evitar conflictos
+        $this->mountAction('reservar'); // Abre el modal solo si está disponible
     }
-
-    $horario = Horario::find($event['id']);
-
-    if (!$horario) {
-        logger()->error('❌ No se encontró el horario seleccionado.');
-        return;
-    }
-
-    $this->eventId = $horario->id_horario;
-    $this->id_laboratorio = $horario->id_laboratorio;
-
-    logger()->info('Evento seleccionado:', [
-        'eventId' => $this->eventId,
-        'id_laboratorio' => $this->id_laboratorio
-    ]);
-
-    $this->dispatch('refresh');
-    usleep(300000);
-    $this->mountAction('reservar');
-}
 
  
     
@@ -139,6 +154,20 @@ class ReservaCalendar extends FullCalendarWidget
 
     try {
         // Si `getState()` está fallando, usa directamente `$this->eventId`
+        // Verificar si el horario ya está reservado
+        $reservaExistente = Reserva::where('id_horario', $this->eventId)
+            ->where('estado', '!=', Reserva::ESTADO_RECHAZADA) // Ignora reservas rechazadas
+            ->exists();
+
+        if ($reservaExistente) {
+            Notification::make()
+                ->title('Error')
+                ->body('Este espacio ya está reservado.')
+                ->danger()
+                ->send();
+            return;
+        }
+
         $datosReserva = [
             'id_usuario' => auth()->id(),
             'id_horario' => $this->eventId ?? null,
@@ -151,7 +180,7 @@ class ReservaCalendar extends FullCalendarWidget
             'updated_at' => now(),
         ];
 
-        logger()->info('📝 Datos que se intentan insertar en reservas:', $datosReserva);
+        //logger()->info('📝 Datos que se intentan insertar en reservas:', $datosReserva);
 
         // Crear la reserva
         $reserva = Reserva::create($datosReserva);

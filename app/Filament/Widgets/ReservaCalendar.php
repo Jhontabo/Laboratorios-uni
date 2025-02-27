@@ -24,7 +24,7 @@ class ReservaCalendar extends FullCalendarWidget
 {
     protected static ?string $heading = 'Calendario de Reservas';
     public Model | string | null $model = Horario::class;
-    public ?Reserva $reserva = null; // Agregar esta línea
+    public ?Reserva $reserva = null; 
     public ?string $start_at = null;
     public ?string $end_at = null;
     public ?int $id_laboratorio = null;
@@ -33,23 +33,32 @@ class ReservaCalendar extends FullCalendarWidget
     public ?string $correo_usuario = null;
     public ?int $eventId = null;
 
+    public function mount()
+    {
+        
+        $this->id_laboratorio = session()->get('lab');
+        //logger()->info('desde ReservaCalendar mount', ['event_data' =>  $this->id_laboratorio]);
+    }
+    
 
-    // Método para decidir si el widget debe ser visible
+
+   // Método para decidir si el widget debe ser visible
     public static function canView(): bool
     {
-        return !request()->routeIs('filament.admin.pages.dashboard'); // Ocultar en el dashboard principal
+        return !request()->routeIs('filament.admin.pages.dashboard'); 
     }
+
     // Configuración de FullCalendar
     public function config(): array
     {
         return [
             
-            'firstDay' => 1, // Inicia la semana en lunes+
-            'slotMinTime' => '06:00:00', // Hora mínima visible
-            'slotMaxTime' => '22:00:00', // Hora máxima visible
-            'slotDuration' => '00:30:00', // Intervalo de tiempo de cada bloque
+            'firstDay' => 1,
+            'slotMinTime' => '06:00:00',
+            'slotMaxTime' => '22:00:00',
+            'slotDuration' => '00:30:00', 
             'locale' => 'es',
-            'initialView' => 'timeGridWeek', // Vista semanal predeterminada
+            'initialView' => 'timeGridWeek',
             
             'selectable' => false,
         ];
@@ -59,23 +68,31 @@ class ReservaCalendar extends FullCalendarWidget
     // Método para obtener eventos de la base de datos
     public function fetchEvents(array $fetchInfo): array
     {
-        $query = Horario::query()
-            ->where('is_available', true)
-            ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
+       
+        $this->id_laboratorio = $this->id_laboratorio ?? request()->query('laboratorio');
 
+        //logger()->info('id laboratorio', ['event_data' =>  $this->id_laboratorio]);
+    
+        $query = Horario::query()
+            ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
+            ->when($this->id_laboratorio, function ($query) { // Reemplazar $laboratorioId por $this->id_laboratorio
+                return $query->where('id_laboratorio', $this->id_laboratorio);
+            })
+            ->with('reservas'); // Asegurar que se carga la relación reservas
+    
         return $query->get()
             ->map(function (Horario $horario) {
+                $reservado = $horario->reservas()->where('estado', '!=', Reserva::ESTADO_RECHAZADA)->count() > 0;
                 return [
                     'id' => $horario->id_horario,
-                    'title' => $horario->title,
+                    'title' => $reservado ? 'Reservado' : 'Disponible',
                     'start' => $horario->start_at,
                     'end' => $horario->end_at,
-                    'color' => $horario->color ?? '#28a745',
+                    'color' => $reservado ? '#dc3545' : '#28a745',
                 ];
             })
             ->toArray();
     }
-
 
 
     protected function headerActions(): array
@@ -85,7 +102,7 @@ class ReservaCalendar extends FullCalendarWidget
 
     public function onEventClick(array $event): void
     {
-        logger()->info('🔔 Evento clickeado:', ['event_data' => json_encode($event)]);
+        //logger()->info('🔔 Evento clickeado:', ['event_data' => json_encode($event)]);
     
         if (!isset($event['id'])) {
             logger()->error('⚠️ No se ha seleccionado un horario válido.');
@@ -101,7 +118,7 @@ class ReservaCalendar extends FullCalendarWidget
     
         // Verificar si el horario ya está reservado antes de abrir el modal
         $reservaExistente = Reserva::where('id_horario', $horario->id_horario)
-            ->where('estado', '!=', Reserva::ESTADO_RECHAZADA) // Ignorar reservas rechazadas
+            ->where('estado', '!=', Reserva::ESTADO_RECHAZADA) 
             ->exists();
     
         if ($reservaExistente) {
@@ -241,7 +258,7 @@ class ReservaCalendar extends FullCalendarWidget
         Select::make('id_laboratorio')
             ->label('Laboratorio')
             ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
-            ->default($horario->id_laboratorio)
+            ->default($this->id_laboratorio) 
             ->disabled(),
 
         TextInput::make('id_horario')
@@ -268,4 +285,6 @@ class ReservaCalendar extends FullCalendarWidget
             ->required(),
     ];
 }
+
+
 }                

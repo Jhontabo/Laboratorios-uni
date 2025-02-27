@@ -16,37 +16,51 @@ class RecursoCalendar extends Page
 
     protected static string $view = 'filament.resources.reserva-resource.pages.reserva';
 
-    public function getFooterWidgets(): array
+
+    public ?int $id_laboratorio = null;
+
+    public function mount()
     {
-        // Obtén el parámetro 'widget' y establece 'Todos' como valor predeterminado
-        $selectedWidget = request()->query('widget', 'Todos');
-
-        // Si se selecciona "Todos", muestra el widget general de reservas
-        if ($selectedWidget === 'Todos') {
-            return [ReservaCalendar::class];
-        }
-
-        // Si el parámetro corresponde a un laboratorio específico, intenta cargarlo
-        $laboratorio = Laboratorio::where('nombre', $selectedWidget)->first();
-
-        if ($laboratorio) {
-            return [ReservaCalendar::class]; // Puedes cambiarlo si tienes widgets específicos por laboratorio
-        }
-
-        return [ReservaCalendar::class]; // Retorna el widget por defecto
+        $this->id_laboratorio = request()->query('widget');
+        logger()->info('id laboratorio RecursoCalendar mount', ['event_data' =>  $this->id_laboratorio]);
+        session()->put('lab', $this->id_laboratorio);
     }
 
-    public function getDropdownOptions(): array
-    {
-        // Obtén todos los nombres de los laboratorios de la base de datos
-        $laboratorios = Laboratorio::all()->pluck('nombre', 'nombre')->toArray();
+        public function getFilteredReservas()
+        {
+            // Si tenemos $id_laboratorio, filtramos. De lo contrario, mostramos todo.
+            $query = Reserva::query();
+    
+            if ($this->id_laboratorio) {
+                $query->where('id_laboratorio', $this->id_laboratorio);
+            }
+    
+            return $query->get();
+        }
+    
 
-        // Crea las opciones para el dropdown con "Todos"
-        $options = ['Todos' => 'Todos'] + $laboratorios;
+        public function getFooterWidgets(): array
+        {
+            //logger()->info('id laboratorio RecursoCalendar getFooterWidgets', ['event_data' =>  $this->id_laboratorio]);
+            return [
+                ReservaCalendar::class,
+            ];
+        }
+        
 
-        return $options;
-    }
-
+        public function getDropdownOptions(): array
+        {
+            // Obtenemos los laboratorios y usamos el id como clave
+            $laboratorios = Laboratorio::all()->pluck('nombre', 'id_laboratorio')->toArray();
+        
+            // Agregamos las opciones adicionales
+            $options = [
+                'Todos' => 'Todos',
+                'Reserva' => 'Reserva',
+            ] + $laboratorios;
+        
+            return $options;
+        }
     /**
      * Método para obtener la lista de laboratorios
      */

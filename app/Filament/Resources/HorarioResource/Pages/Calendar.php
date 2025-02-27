@@ -13,6 +13,16 @@ class Calendar extends Page
     protected static string $resource = HorarioResource::class;
 
     protected static string $view = 'filament.resources.reserva-resource.pages.calendar';
+    public ?int $id_laboratorio = null;
+
+    public function mount()
+    {
+        $laboratorioParam = request()->query('laboratorio');
+        $this->id_laboratorio = is_numeric($laboratorioParam) ? (int) $laboratorioParam : null;
+    
+        logger()->info('id laboratorio Calendar mount', ['event_data' =>  $this->id_laboratorio]);
+        session()->put('lab', $this->id_laboratorio);
+    }
 
     public function getFooterWidgets(): array
     {
@@ -43,16 +53,11 @@ class Calendar extends Page
 
     public function getDropdownOptions(): array
     {
-        // Obtén todos los nombres de los laboratorios de la base de datos
-        $laboratorios = Laboratorio::all()->pluck('nombre', 'nombre')->toArray();
-
-        // Crea las opciones para el dropdown con "Todos" y "Reserva"
+        $laboratorios = Laboratorio::all()->pluck('nombre', 'id_laboratorio')->toArray();
         $options = [
             'Todos' => 'Todos',
             'Reserva' => 'Reserva'
         ] + $laboratorios;
-
-
         return $options;
     }
 }

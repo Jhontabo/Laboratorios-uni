@@ -62,24 +62,37 @@ class CalendarWidget extends FullCalendarWidget
 
     public function fetchEvents(array $fetchInfo): array
     {
-
+        // Recupera el id del laboratorio desde la sesión
+        $labId = session()->get('lab');
+        // Recupera el filtro widget, por defecto "Todos"
+        $widgetFilter = request()->query('widget', 'Todos');
+    
         $query = Horario::query();
-
+    
         // Filtra por rango de fechas
-        return $query->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
-            ->get()
-            ->map(function (Horario $horario) {
-                return [
-                    'id' => $horario->id_horario,
-                    'title' => $horario->title,
-                    'start' => $horario->start_at,
-                    'end' => $horario->end_at,
-                    'color' => $horario->color,
-                ];
-            })
-            ->toArray();
+        $query->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
+    
+        // Si se ha seleccionado un laboratorio (id guardado en sesión), filtra por él
+        if (!is_null($labId)) {
+            $query->where('id_laboratorio', $labId);
+        }
+    
+        // Si se selecciona "Reserva", filtra por los eventos reservados
+        if ($widgetFilter === 'Reserva') {
+            // Supongamos que un evento reservado es donde is_available es false
+            $query->where('is_available', false);
+        }
+    
+        return $query->get()->map(function (Horario $horario) {
+            return [
+                'id'    => $horario->id_horario,
+                'title' => $horario->title,
+                'start' => $horario->start_at,
+                'end'   => $horario->end_at,
+                'color' => $horario->color,
+            ];
+        })->toArray();
     }
-
 
 
     protected function modalActions(): array

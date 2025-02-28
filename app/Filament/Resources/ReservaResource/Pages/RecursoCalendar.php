@@ -21,7 +21,7 @@ class RecursoCalendar extends Page
 
     public function mount()
     {
-        $this->id_laboratorio = request()->query('widget');
+        $this->id_laboratorio = request()->query('laboratorio');
         logger()->info('id laboratorio RecursoCalendar mount', ['event_data' =>  $this->id_laboratorio]);
         session()->put('lab', $this->id_laboratorio);
     }

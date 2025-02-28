@@ -8,7 +8,6 @@ use App\Filament\Resources\ReservaResource\Widgets\CalendarWidget;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,9 +27,5 @@ class AppServiceProvider extends ServiceProvider
 
         Model::unguard();
         App::setLocale('es');
-
-        if (env('APP_ENV') !== 'local') {
-            URL::forceScheme('https');
-        }
     }
 }

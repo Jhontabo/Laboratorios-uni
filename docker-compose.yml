@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+      - /var/www/vendor
+    networks:
+      - laravel
+    depends_on:
+      db:
+        condition: service_healthy # Espera hasta que MySQL esté listo
+    env_file:
+      - .env.docker
+
+  db:
+    image: mysql:8.0
+    container_name: laravel_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laboratorios
+      MYSQL_ROOT_PASSWORD: 277353
+    networks:
+      - laravel
+    volumes:
+      - ./mysql_data:/var/lib/mysql # Usamos una carpeta persistente en lugar de dbdata
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  nginx:
+    image: nginx:latest
+    container_name: laravel_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+
+volumes:
+  mysql_data: # Cambiado de "dbdata" a "mysql_data"

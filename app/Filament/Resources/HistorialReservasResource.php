@@ -13,6 +13,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
+
 class HistorialReservasResource extends Resource
 {
     protected static ?string $model = Reserva::class;
@@ -20,6 +21,10 @@ class HistorialReservasResource extends Resource
     protected static ?string $navigationLabel = 'Historial de Reservas';
     protected static ?string $pluralLabel = 'Historial de Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
+
+
+
+    
     
     public static function query(Builder $query): Builder
     {

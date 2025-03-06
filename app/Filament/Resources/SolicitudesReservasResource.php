@@ -19,6 +19,10 @@ class SolicitudesReservasResource extends Resource
     protected static ?string $navigationLabel = 'Solicitudes de Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
 
+
+
+    
+
     public static function table(Table $table): Table
     {
         return $table

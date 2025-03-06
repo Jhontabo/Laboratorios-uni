@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\CheckboxList;
 
 class RolResource extends Resource
 {
@@ -25,27 +26,38 @@ class RolResource extends Resource
     protected static ?string $navigationLabel = 'Roles';
     protected static ?string $pluralLabel = 'Roles';
 
+
+
+    
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Nombre')
-                    ->autocapitalize('words')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255)
-                    ->helperText('máximo 255 caracteres')
-                    // Convertir el valor del campo a mayúsculas al mostrarlo
-                    ->afterStateHydrated(function (TextInput $component, $state) {
-                        $component->state(strtoupper($state));
-                    }),
-                Select::make('permissions')
-                    ->label('Permisos')
-                    ->multiple()
-                    ->relationship('permissions', 'name')
-                    ->preload(),
-            ]);
+        ->schema([
+            TextInput::make('name')
+                ->label('Nombre')
+                ->autocapitalize('words')
+                ->required()
+                ->unique(ignoreRecord: true)
+                ->maxLength(255)
+                ->helperText('Máximo 255 caracteres')
+                ->afterStateHydrated(function (TextInput $component, $state) {
+                    $component->state(strtoupper($state));
+                }),
+
+            Select::make('permissions')
+                ->label('Permisos disponibles')
+                ->multiple()
+                ->relationship('permissions', 'name')
+                ->preload(),
+
+            CheckboxList::make('permisos_asignados')
+                ->label('Permisos asignados')
+                ->options(fn ($record) => $record 
+                    ? $record->permissions->pluck('name', 'id')->toArray()
+                    : []
+                )
+                ->disabled(),
+        ]);
     }
 
     public static function table(Table $table): Table

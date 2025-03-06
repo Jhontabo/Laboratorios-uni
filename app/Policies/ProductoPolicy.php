@@ -2,66 +2,69 @@
 
 namespace App\Policies;
 
-use App\Models\Producto;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\Models\Producto;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProductoPolicy
 {
+    use HandlesAuthorization;
+
     /**
-     * Determine whether the user can view any models.
+     * Determina si el usuario puede ver cualquier producto.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user)
     {
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
+        return $user->hasPermissionTo('ver cualquier producto');
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determina si el usuario puede ver un producto específico.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Producto  $producto
+     * @return bool
      */
-    public function view(User $user, Producto $producto): bool
+    public function view(User $user, Producto $producto)
     {
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
+        return $user->hasPermissionTo('ver producto');
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determina si el usuario puede crear un producto.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
      */
-    public function create(User $user): bool
+    public function create(User $user)
     {
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
+        return $user->hasPermissionTo('crear producto');
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determina si el usuario puede actualizar un producto.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Producto  $producto
+     * @return bool
      */
-    public function update(User $user, Producto $producto): bool
+    public function update(User $user, Producto $producto)
     {
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
+        return $user->hasPermissionTo('actualizar producto');
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determina si el usuario puede eliminar un producto.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Producto  $producto
+     * @return bool
      */
-    public function delete(User $user, Producto $producto): bool
+    public function delete(User $user, Producto $producto)
     {
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Producto $producto): bool
-    {
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Producto $producto): bool
-    {
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
+        return $user->hasPermissionTo('eliminar producto');
     }
 }

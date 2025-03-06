@@ -16,6 +16,10 @@ class ReservaResource extends Resource
     protected static ?string $navigationLabel = 'Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
 
+
+
+    
+
     public static function getPages(): array
     {
         return [

@@ -19,11 +19,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PermisoResource extends Resource
 {
     protected static ?string $model = Permiso::class;
+    protected static ?int $navigationSort = null;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
-    protected static ?string $navigationGroup = 'Roles y Permisos';
-    protected static ?string $navigationLabel = 'Permisos';
-    protected static ?string $pluralLabel = 'Permisos';
+    #protected static ?string $navigationGroup = 'Roles y Permisos';
+    #protected static ?string $navigationLabel = 'Permisos';
+    #protected static ?string $pluralLabel = 'Permisos';
 
 
     public static function form(Form $form): Form

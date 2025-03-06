@@ -41,7 +41,7 @@ class ProductoResource extends Resource
     protected static ?string $navigationLabel = 'Productos';
     protected static ?string $navigationGroup = 'Inventario';
 
-
+    
 
     public static function form(Form $form): Form
     {

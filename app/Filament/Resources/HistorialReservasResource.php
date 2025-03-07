@@ -21,6 +21,12 @@ class HistorialReservasResource extends Resource
     protected static ?string $pluralLabel = 'Historial de Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
     
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+
+        return $user ? $user->can('ver panel historial reservas') : false;
+    }
     
     public static function query(Builder $query): Builder
     {

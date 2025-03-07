@@ -42,7 +42,6 @@ class CalendarWidget extends FullCalendarWidget
             'filament.docente.pages.dashboard',
             'filament.laboratorista.pages.dashboard'
 
-
         ];
 
        

@@ -10,18 +10,33 @@ class CategoriaPolicy
 {
     use HandlesAuthorization;
 
-   /**
-     * Determina si el usuario puede ver cualquier categoría.
-     *
-     * @param  \App\Models\User  $user
-     * @return bool
-     */
+    
     public function viewAny(User $user)
     {
-        // Permite al usuario ver el panel de categorías si tiene el permiso adecuado
-        return $user->hasPermissionTo('ver panel categorias');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel categorias');
+    }
+
+  
+    public function view(User $user, Categoria $categoria)
+    {
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver categoria');
     }
 
 
-    
+    public function create(User $user)
+    {
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear categoria');
+    }
+
+   
+    public function update(User $user, Categoria $categoria)
+    {
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar categoria');
+    }
+
+   
+    public function delete(User $user, Categoria $categoria)
+    {
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar categoria');
+    }
 }

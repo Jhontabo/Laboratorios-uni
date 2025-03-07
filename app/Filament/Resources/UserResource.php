@@ -73,6 +73,8 @@ class UserResource extends Resource
                     ])
                     ->default('activo')
                     ->required(),
+
+                    
             ]);
     }
 

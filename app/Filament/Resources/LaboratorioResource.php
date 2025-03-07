@@ -25,6 +25,7 @@ class LaboratorioResource extends Resource
     protected static ?string $navigationLabel = 'laboratorios';
 
     protected static ?string $navigationGroup = 'Laboratorios';
+    
 
     public static function form(Forms\Form $form): Forms\Form
     {

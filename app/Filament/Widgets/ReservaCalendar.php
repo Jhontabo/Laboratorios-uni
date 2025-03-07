@@ -58,8 +58,12 @@ class ReservaCalendar extends FullCalendarWidget
             'slotMaxTime' => '22:00:00',
             'slotDuration' => '00:30:00',
             'locale' => 'es',
-            'initialView' => 'timeGridWeek',
-
+            'initialView' => 'timeGridWeek', // Vista semanal predeterminada
+            'headerToolbar' => [
+                'left' => 'prev,next today',
+                'center' => 'title',
+                'right' => 'dayGridMonth,timeGridWeek,timeGridDay', // Opciones de vista
+            ],
             'selectable' => false,
         ];
     }

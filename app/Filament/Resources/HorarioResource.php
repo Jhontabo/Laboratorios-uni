@@ -17,6 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 
+
 class HorarioResource extends Resource
 {
     protected static ?string $model = Horario::class;
@@ -25,7 +26,7 @@ class HorarioResource extends Resource
     protected static ?string $navigationGroup = 'Horarios y reservas';
     protected static ?string $label = 'Horarios';
     protected static ?int $navigationSort = 2; // Orden en el menú de navegación
-
+    
     public static function getPages(): array
     {
         return [

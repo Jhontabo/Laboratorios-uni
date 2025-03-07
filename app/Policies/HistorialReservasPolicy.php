@@ -13,7 +13,7 @@ class HistorialReservasPolicy
 
     public function viewAny(User $user)
     {
-        return $user->hasPermissionTo('ver historial de reservas');
+        return $user->hasPermissionTo('ver panel historial reservas');
     }
 
     public function create(User $user)

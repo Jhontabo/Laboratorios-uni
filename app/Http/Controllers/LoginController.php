@@ -44,8 +44,14 @@ class LoginController extends Controller
                 // Iniciar sesión al usuario autorizado
                 Auth::login($user);
 
-                // Redirigir al área protegida
-                return redirect('/admin');
+                // Verificar permisos del usuario
+                if ($this->hasAccess($user)) {
+                    // Redirigir según el rol del usuario
+                    return $this->redirectUserBasedOnRole($user);
+                } else {
+                    return redirect('/')
+                        ->with('error', 'No tienes permisos para acceder al sistema.');
+                }
             } else {
                 // Si el usuario no está registrado, mostrar un mensaje
                 return redirect('/')
@@ -59,6 +65,29 @@ class LoginController extends Controller
 
             return redirect('/')
                 ->with('error', 'Hubo un problema al autenticar con Google.');
+        }
+    }
+
+    // Verificar si el usuario tiene acceso
+    private function hasAccess(User $user)
+    {
+        // Verifica si el usuario tiene uno de los roles permitidos
+        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA') || $user->hasRole('DOCENTE') || $user->hasRole('ESTUDIANTE');
+    }
+
+    private function redirectUserBasedOnRole(User $user)
+    {
+        if ($user->hasRole('ADMIN')) {
+            return redirect('/admin');
+        } elseif ($user->hasRole('LABORATORISTA')) {
+            return redirect('/laboratorista');
+        } elseif ($user->hasRole('DOCENTE')) {
+            return redirect('/docente');
+        } elseif ($user->hasRole('ESTUDIANTE')) {
+            return redirect('/estudiante');
+        } else {
+            return redirect('/')
+                ->with('error', 'No tienes un rol asignado.');
         }
     }
 }

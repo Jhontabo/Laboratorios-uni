@@ -26,7 +26,10 @@ class PermisoResource extends Resource
     #protected static ?string $navigationLabel = 'Permisos';
     #protected static ?string $pluralLabel = 'Permisos';
 
-
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false; 
+    }
     public static function form(Form $form): Form
     {
         return $form

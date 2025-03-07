@@ -4,65 +4,49 @@ namespace App\Policies;
 
 use App\Models\Permiso;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PermisoPolicy
 {
     use HandlesAuthorization;
+
     /**
-     * Determine whether the user can view any models.
+     * Determina si el usuario puede ver cualquier permiso.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user)
     {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel permisos');
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determina si el usuario puede ver un permiso específico.
      */
-    public function view(User $user, Permiso $Permiso): bool
+    public function view(User $user, Permiso $permiso)
     {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver permisos');
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determina si el usuario puede crear un permiso.
      */
-    public function create(User $user): bool
+    public function create(User $user)
     {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear permisos');
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determina si el usuario puede actualizar un permiso.
      */
-    public function update(User $user, Permiso $Permiso): bool
+    public function update(User $user, Permiso $permiso)
     {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar permisos');
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determina si el usuario puede eliminar un permiso.
      */
-    public function delete(User $user, Permiso $Permiso): bool
+    public function delete(User $user, Permiso $permiso)
     {
-        return $user->hasRole('ADMIN');
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Permiso $Permiso): bool
-    {
-        return $user->hasRole('ADMIN');
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Permiso $Permiso): bool
-    {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar permisos');
     }
 }

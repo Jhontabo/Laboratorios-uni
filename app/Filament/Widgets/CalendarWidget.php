@@ -35,8 +35,18 @@ class CalendarWidget extends FullCalendarWidget
     // Método para decidir si el widget debe ser visible
     public static function canView(): bool
     {
-        // Ocultar el widget en el dashboard principal
-        return !request()->routeIs('filament.admin.pages.dashboard');
+       
+        $routesToHideWidget = [
+            'filament.admin.pages.dashboard',
+            'filament.estudiante.pages.dashboard',
+            'filament.docente.pages.dashboard',
+            'filament.laboratorista.pages.dashboard'
+
+
+        ];
+
+       
+        return !in_array(request()->route()->getName(), $routesToHideWidget);
     }
 
     // Configuración de FullCalendar

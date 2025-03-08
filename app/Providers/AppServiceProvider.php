@@ -30,8 +30,8 @@ class AppServiceProvider extends ServiceProvider
         App::setLocale('es');
 
 
-        // if (env('APP_ENV') !== 'production') {
-        //     URL::forceScheme('https'); // 🔥 Fuerza HTTPS en producción
-        // }
+        if (env('APP_ENV') !== 'production') {
+            URL::forceScheme('https'); // 🔥 Fuerza HTTPS en producción
+        }
     }
 }

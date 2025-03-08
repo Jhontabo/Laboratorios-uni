@@ -1,5 +1,5 @@
-# Imagen base de PHP con FPM
-FROM php:8.2-fpm
+# Imagen base de PHP con FPM (Actualizado a PHP 8.3)
+FROM php:8.3-fpm
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql intl zip
 
-# Instalar Composer
+# Instalar Composer (última versión)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Configurar directorio de trabajo
@@ -35,8 +35,6 @@ RUN composer clear-cache
 
 # Instalar dependencias de Laravel sin límite de memoria
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-interaction --no-progress
-RUN COMPOSER_MEMORY_LIMIT=-1 composer update --no-interaction --no-progress
-RUN COMPOSER_MEMORY_LIMIT=-1 composer require livewire/livewire filament/filament:"^3.2" -W --no-interaction
 
 # Ajustar permisos después de instalar dependencias
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/vendor

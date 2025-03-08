@@ -15,8 +15,6 @@ echo "🎨 Compilando assets con Vite..."
 npm install
 npm run build
 
-echo "📄 Ejecutando migraciones..."
-php artisan migrate --force
 
 echo "⚡ Optimizando Laravel..."
 php artisan config:cache

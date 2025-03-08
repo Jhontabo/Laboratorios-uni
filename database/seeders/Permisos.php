@@ -11,10 +11,11 @@ class Permisos extends Seeder
     public function run(): void
     {
         // Crear roles
-        $admin = Role::firstOrCreate(['name' => 'ADMIN']);
-        $laboratorista = Role::firstOrCreate(['name' => 'LABORATORISTA']);
-        $docente = Role::firstOrCreate(['name' => 'DOCENTE']);
-        $estudiante = Role::firstOrCreate(['name' => 'ESTUDIANTE']);
+        $roles = ['ADMIN', 'LABORATORISTA', 'DOCENTE', 'ESTUDIANTE'];
+
+        foreach ($roles as $role) {
+            Role::firstOrCreate(['name' => $role]);
+        }
 
         // Crear permisos
         $permissions = [
@@ -26,7 +27,7 @@ class Permisos extends Seeder
             'eliminar categoria',
             'restaurar categoria',
             'eliminar permanentemente categoria',
-            
+
             // Permisos de Laboratorio
             'ver cualquier laboratorio',
             'ver laboratorio',
@@ -94,19 +95,32 @@ class Permisos extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // Asignar permisos a roles
-        $admin->givePermissionTo(Permission::all()); // Admin tiene todos los permisos
-        $laboratorista->givePermissionTo([
-            'ver cualquier categoria', 'ver categoria', 'ver cualquier horario', 'ver horario'
+        // Obtener roles
+        $admin = Role::where('name', 'ADMIN')->first();
+        $laboratorista = Role::where('name', 'LABORATORISTA')->first();
+        $docente = Role::where('name', 'DOCENTE')->first();
+        $estudiante = Role::where('name', 'ESTUDIANTE')->first();
+
+        // Asignar permisos a los roles
+        $admin->syncPermissions(Permission::all()); // ADMIN tiene todos los permisos
+        $laboratorista->syncPermissions([
+            'ver cualquier categoria',
+            'ver categoria',
+            'ver cualquier horario',
+            'ver horario'
         ]);
-        $docente->givePermissionTo([
-            'ver cualquier horario', 'ver horario'
+        $docente->syncPermissions([
+            'ver cualquier horario',
+            'ver horario'
         ]);
-        $estudiante->givePermissionTo([
-            'ver cualquier producto', 'ver producto'
+        $estudiante->syncPermissions([
+            'ver cualquier producto',
+            'ver producto'
         ]);
+
+        $this->command->info('Roles y permisos creados correctamente.');
     }
 }

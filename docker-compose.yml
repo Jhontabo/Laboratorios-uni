@@ -10,34 +10,10 @@ services:
       - .:/var/www
     networks:
       - laravel
-    depends_on:
-      db:
-        condition: service_healthy
     env_file:
       - .env.docker
     ports:
       - "8080:8080" # ✅ Railway espera el puerto 8080
 
-  db:
-    image: mysql:8.0
-    container_name: laravel_db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: laboratorios
-      MYSQL_ROOT_PASSWORD: 277353
-    networks:
-      - laravel
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 10s
-      retries: 5
-      timeout: 5s
-
 networks:
   laravel:
-
-
-volumes:
-  mysql_data:

@@ -11,12 +11,18 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Crear roles
-        $adminRole = Role::firstOrCreate(['name' => 'ADMIN']);
-        $docenteRole = Role::firstOrCreate(['name' => 'DOCENTE']);
-        $laboratoristaRole = Role::firstOrCreate(['name' => 'LABORATORISTA']);
-        $estudianteRole = Role::firstOrCreate(['name' => 'ESTUDIANTE']);
+        $roles = [
+            'ADMIN',
+            'DOCENTE',
+            'LABORATORISTA',
+            'ESTUDIANTE'
+        ];
 
-        // Crear usuarios
+        foreach ($roles as $role) {
+            Role::firstOrCreate(['name' => $role]);
+        }
+
+        // Crear usuarios con sus roles
         $usuarios = [
             [
                 'email' => 'jhonse.tajumbina@umariana.edu.co',
@@ -24,7 +30,8 @@ class UserSeeder extends Seeder
                 'apellido' => 'Tajumbina',
                 'telefono' => '123456789',
                 'direccion' => 'Calle Falsa 123',
-                'rol' => $adminRole,
+
+                'rol' => 'ADMIN',
             ],
             [
                 'email' => 'jonathanc.burbano221@umariana.edu.co',
@@ -32,7 +39,8 @@ class UserSeeder extends Seeder
                 'apellido' => 'Burbano',
                 'telefono' => '987654321',
                 'direccion' => 'Calle Real 456',
-                'rol' => $adminRole,
+
+                'rol' => 'ADMIN',
             ],
             [
                 'email' => 'laboratorista@ejemplo.com',
@@ -40,7 +48,8 @@ class UserSeeder extends Seeder
                 'apellido' => 'García',
                 'telefono' => '321654987',
                 'direccion' => 'Calle Laboratorio 789',
-                'rol' => $laboratoristaRole,
+
+                'rol' => 'LABORATORISTA',
             ],
             [
                 'email' => 'estudiante@ejemplo.com',
@@ -48,7 +57,8 @@ class UserSeeder extends Seeder
                 'apellido' => 'López',
                 'telefono' => '654987321',
                 'direccion' => 'Avenida Universidad 456',
-                'rol' => $estudianteRole,
+
+                'rol' => 'ESTUDIANTE',
             ],
         ];
 
@@ -60,11 +70,14 @@ class UserSeeder extends Seeder
                     'apellido' => $data['apellido'],
                     'telefono' => $data['telefono'],
                     'direccion' => $data['direccion'],
+
                 ]
             );
 
-            if (!$user->hasRole($data['rol'])) {
-                $user->assignRole($data['rol']);
+            $role = Role::where('name', $data['rol'])->first(); // ✅ Buscar el rol como string
+
+            if ($role && !$user->hasRole($role->name)) {
+                $user->assignRole($role->name);
             }
         }
 

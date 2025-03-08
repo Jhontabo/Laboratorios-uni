@@ -23,7 +23,6 @@ class UserSeeder extends Seeder
         }
 
         // Crear usuarios con sus roles
-
         $usuarios = [
             [
                 'email' => 'jhonse.tajumbina@umariana.edu.co',
@@ -59,23 +58,25 @@ class UserSeeder extends Seeder
             ],
             // Nuevo usuario DOCENTE
             [
-                'email' => 'docente@ejemplo.com',
-                'name' => 'María',
-                'apellido' => 'Fernández',
+                'email' => 'danielf.zapata221@umariana.edu.co',
+                'name' => 'Daniel',
+                'apellido' => 'Zapata',
                 'telefono' => '741258963',
                 'direccion' => 'Avenida Docente 123',
                 'rol' => 'DOCENTE',
             ],
             // Nuevo usuario ESTUDIANTE
-            [
-                'email' => 'nuevoestudiante@ejemplo.com',
-                'name' => 'Luis',
+            [        // Crear usuarios con sus roles
+
+                'email' => 'ivanda.martinez@umariana.edu.co',
+                'name' => 'Iván Darío',
                 'apellido' => 'Martínez',
                 'telefono' => '852963741',
                 'direccion' => 'Calle Campus 789',
                 'rol' => 'ESTUDIANTE',
             ],
         ];
+
 
 
         foreach ($usuarios as $data) {

@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
         }
 
         // Crear usuarios con sus roles
+
         $usuarios = [
             [
                 'email' => 'jhonse.tajumbina@umariana.edu.co',
@@ -30,7 +31,6 @@ class UserSeeder extends Seeder
                 'apellido' => 'Tajumbina',
                 'telefono' => '123456789',
                 'direccion' => 'Calle Falsa 123',
-
                 'rol' => 'ADMIN',
             ],
             [
@@ -39,7 +39,6 @@ class UserSeeder extends Seeder
                 'apellido' => 'Burbano',
                 'telefono' => '987654321',
                 'direccion' => 'Calle Real 456',
-
                 'rol' => 'ADMIN',
             ],
             [
@@ -48,7 +47,6 @@ class UserSeeder extends Seeder
                 'apellido' => 'García',
                 'telefono' => '321654987',
                 'direccion' => 'Calle Laboratorio 789',
-
                 'rol' => 'LABORATORISTA',
             ],
             [
@@ -57,10 +55,28 @@ class UserSeeder extends Seeder
                 'apellido' => 'López',
                 'telefono' => '654987321',
                 'direccion' => 'Avenida Universidad 456',
-
+                'rol' => 'ESTUDIANTE',
+            ],
+            // Nuevo usuario DOCENTE
+            [
+                'email' => 'docente@ejemplo.com',
+                'name' => 'María',
+                'apellido' => 'Fernández',
+                'telefono' => '741258963',
+                'direccion' => 'Avenida Docente 123',
+                'rol' => 'DOCENTE',
+            ],
+            // Nuevo usuario ESTUDIANTE
+            [
+                'email' => 'nuevoestudiante@ejemplo.com',
+                'name' => 'Luis',
+                'apellido' => 'Martínez',
+                'telefono' => '852963741',
+                'direccion' => 'Calle Campus 789',
                 'rol' => 'ESTUDIANTE',
             ],
         ];
+
 
         foreach ($usuarios as $data) {
             $user = User::firstOrCreate(

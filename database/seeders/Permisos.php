@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-
 class Permisos extends Seeder
 {
     public function run(): void
@@ -20,6 +19,7 @@ class Permisos extends Seeder
         // Lista de permisos
         $permissions = [
             'ver panel categorias',
+            'ver cualquier categoria', // Agregado el permiso faltante
             'crear categoria',
             'actualizar categoria',
             'eliminar categoria',
@@ -41,19 +41,19 @@ class Permisos extends Seeder
             'ver panel reservas',
             'crear reserva',
             'actualizar reserva',
+            'ver cualquier reserva',
+            'ver cualquier horario',
+            'ver cualquier laboratorio',
+            'ver cualquier producto',
+            'ver cualquier rol',
+            'ver cualquier usuario',
             'eliminar reserva',
             'ver panel roles',
+            'ver panel usuarios',
             'crear rol',
             'actualizar rol',
             'eliminar rol',
-            'ver panel solicitudes reservas',
-            'crear solicitud reserva',
-            'actualizar solicitud reserva',
-            'eliminar solicitud reserva',
-            'ver panel usuarios',
-            'crear usuario',
-            'actualizar usuario',
-            'eliminar usuario'
+            'ver panel solicitudes reservas'
         ];
 
         // Crear los permisos en la base de datos

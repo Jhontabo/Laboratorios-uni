@@ -48,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
                     ->shouldShowDeleteAccountForm(false)
                     ->shouldShowBrowserSessionsForm(false)
                     ->shouldShowEditPasswordForm(false)
+                    ->shouldShowEditProfileForm(true)
 
                     ->shouldShowAvatarForm(
                         value: true,

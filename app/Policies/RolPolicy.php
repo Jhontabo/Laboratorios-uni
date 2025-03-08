@@ -1,7 +1,5 @@
 <?php
 
-// app/Policies/RolPolicy.php
-
 namespace App\Policies;
 
 use App\Models\Rol;
@@ -12,23 +10,38 @@ class RolPolicy
 {
     use HandlesAuthorization;
 
+    /**
+     * Determina si el usuario puede ver cualquier rol.
+     */
     public function viewAny(User $user)
     {
-        return $user->hasPermissionTo('ver cualquier rol');
+        return $user->hasPermissionTo('ver panel roles');
     }
 
+    /**
+     * Determina si el usuario puede crear un rol.
+     */
     public function create(User $user)
     {
-        return $user->hasPermissionTo('crear rol');
+        // Verifica si el usuario tiene el rol de 'ADMIN' o el permiso correspondiente
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear rol');
     }
 
+    /**
+     * Determina si el usuario puede actualizar un rol.
+     */
     public function update(User $user, Rol $rol)
     {
-        return $user->hasPermissionTo('actualizar rol');
+        // Verifica si el usuario tiene el rol de 'ADMIN' o el permiso correspondiente
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar rol');
     }
 
+    /**
+     * Determina si el usuario puede eliminar un rol.
+     */
     public function delete(User $user, Rol $rol)
     {
-        return $user->hasPermissionTo('eliminar rol');
+        // Verifica si el usuario tiene el rol de 'ADMIN' o el permiso correspondiente
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar rol');
     }
 }

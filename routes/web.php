@@ -18,8 +18,19 @@ Route::get('auth/google/callback', [LoginController::class, 'handleGoogleCallbac
 
 // Rutas protegidas con el middleware 'auth'
 Route::middleware(['auth'])->group(function () {
-    // Ruta para el dashboard
     Route::get('/dashboard', function () {
-        return redirect()->route('filament.admin.pages.dashboard');
+        $user = Auth::user();
+
+        if ($user->hasRole('ADMIN')) {
+            return redirect('/admin');
+        } elseif ($user->hasRole('LABORATORISTA')) {
+            return redirect('/laboratorista');
+        } elseif ($user->hasRole('DOCENTE')) {
+            return redirect('/docente');
+        } elseif ($user->hasRole('ESTUDIANTE')) {
+            return redirect('/estudiante');
+        } else {
+            return redirect('/')->with('error', 'No tienes un rol asignado.');
+        }
     })->name('dashboard');
 });

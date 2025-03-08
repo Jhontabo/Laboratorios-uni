@@ -3,52 +3,53 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 use App\Models\Categoria;
-use App\Policies\CategoriaPolicy;
+use App\Models\Reserva;
+use App\Models\Horario;
 use App\Models\Laboratorio;
-use App\Policies\LaboratorioPolicy;
 use App\Models\Permiso;
-use App\Policies\PermisoPolicy;
 use App\Models\Producto;
-use App\Policies\ProductoPolicy;
 use App\Models\Rol;
-use App\Policies\RolPolicy;
+use App\Models\SolicitudReserva;
 use App\Models\User;
+use App\Policies\CategoriaPolicy;
+use App\Policies\ReservaPolicy;
+use App\Policies\HorarioPolicy;
+use App\Policies\LaboratorioPolicy;
+use App\Policies\PermisoPolicy;
+use App\Policies\ProductoPolicy;
+use App\Policies\RolPolicy;
+use App\Policies\SolicitudesReservasPolicy;
 use App\Policies\UserPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
+    /**
+     * The policy mappings for the application.
+     *
+     * @var array
+     */
     protected $policies = [
         Categoria::class => CategoriaPolicy::class,
+        Reserva::class => ReservaPolicy::class,
+        Horario::class => HorarioPolicy::class,
         Laboratorio::class => LaboratorioPolicy::class,
         Permiso::class => PermisoPolicy::class,
         Producto::class => ProductoPolicy::class,
         Rol::class => RolPolicy::class,
+        SolicitudReserva::class => SolicitudesReservasPolicy::class,
         User::class => UserPolicy::class,
     ];
 
+    /**
+     * Register any authentication / authorization services.
+     *
+     * @return void
+     */
     public function boot()
-{
-    $this->registerPolicies();
-
-    // Registrar las políticas
-    Gate::define('ver cualquier categoria', [CategoriaPolicy::class, 'viewAny']);
-    Gate::define('ver categoria', [CategoriaPolicy::class, 'view']);
-    Gate::define('crear categoria', [CategoriaPolicy::class, 'create']);
-    Gate::define('actualizar categoria', [CategoriaPolicy::class, 'update']);
-    Gate::define('eliminar categoria', [CategoriaPolicy::class, 'delete']);
-
-    Gate::define('ver cualquier horario', [HorarioPolicy::class, 'viewAny']);
-    Gate::define('ver horario', [HorarioPolicy::class, 'view']);
-    Gate::define('crear horario', [HorarioPolicy::class, 'create']);
-    Gate::define('actualizar horario', [HorarioPolicy::class, 'update']);
-    Gate::define('eliminar horario', [HorarioPolicy::class, 'delete']);
-
-    Gate::define('ver cualquier producto', [ProductoPolicy::class, 'viewAny']);
-    Gate::define('ver producto', [ProductoPolicy::class, 'view']);
-    Gate::define('crear producto', [ProductoPolicy::class, 'create']);
-    Gate::define('actualizar producto', [ProductoPolicy::class, 'update']);
-    Gate::define('eliminar producto', [ProductoPolicy::class, 'delete']);
-}
+    {
+        $this->registerPolicies();
+        
+        // No es necesario definir gates por ahora.
+    }
 }

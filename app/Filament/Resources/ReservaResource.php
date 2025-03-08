@@ -6,6 +6,7 @@ use App\Filament\Resources\ReservaResource\Pages\RecursoCalendar;
 use App\Models\Horario;
 use App\Models\Reserva;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 
 
 class ReservaResource extends Resource
@@ -16,7 +17,10 @@ class ReservaResource extends Resource
     protected static ?string $navigationLabel = 'Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
 
-
+    public static function canViewAny(): bool
+    {
+        return Auth::user()?->can('ver panel reservas') ?? false;
+    }
 
     
 

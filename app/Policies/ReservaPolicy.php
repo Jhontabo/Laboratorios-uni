@@ -1,7 +1,5 @@
 <?php
 
-// app/Policies/ReservaPolicy.php
-
 namespace App\Policies;
 
 use App\Models\Reserva;
@@ -12,23 +10,35 @@ class ReservaPolicy
 {
     use HandlesAuthorization;
 
+    
     public function viewAny(User $user)
     {
-        return $user->hasPermissionTo('ver cualquier reserva');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel reservas');
     }
 
+    public function view(User $user, Reserva $reserva)
+    {
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver cualquier reserva');
+    }
+
+   
     public function create(User $user)
     {
-        return $user->hasPermissionTo('crear reserva');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear reserva');
     }
 
+  
     public function update(User $user, Reserva $reserva)
     {
-        return $user->hasPermissionTo('actualizar reserva');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar reserva');
     }
 
+   
     public function delete(User $user, Reserva $reserva)
     {
-        return $user->hasPermissionTo('eliminar reserva');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar reserva');
     }
+
+
+   
 }

@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class SolicitudesReservasResource extends Resource
 {
@@ -19,9 +20,10 @@ class SolicitudesReservasResource extends Resource
     protected static ?string $navigationLabel = 'Solicitudes de Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
 
-
-
-    
+    public static function canViewAny(): bool
+{
+    return Auth::user()?->can('ver panel solicitudes reservas') ?? false;
+}
 
     public static function table(Table $table): Table
     {

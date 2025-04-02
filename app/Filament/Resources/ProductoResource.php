@@ -103,7 +103,8 @@ class ProductoResource extends Resource
                                     ->displayFormat('d/m/Y')
                                     ->native(false)
                                     ->required()
-                                    ->columns(3) // Para mostrar día, mes y año en columnas
+                                    ->columns(3)
+                                    ->helperText('Seleccione la fecha de adquisición del producto'),
                             ]),
                     ]),
                 Section::make('Ubicación y Estado')

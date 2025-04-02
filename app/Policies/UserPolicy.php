@@ -18,7 +18,7 @@ class UserPolicy
     }
 
     /**
-     * Determina si el usuario puede crear un usuario.
+     * Determina si el usuario puede crear un usuario.laravel-app
      */
     public function create(User $user)
     {

@@ -15,7 +15,6 @@ echo "🎨 Compilando assets con Vite..."
 npm install
 npm run build
 
-
 echo "⚡ Optimizando Laravel..."
 php artisan config:cache
 php artisan route:cache

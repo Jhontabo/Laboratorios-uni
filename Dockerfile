@@ -1,4 +1,4 @@
-# Imagen base de PHP con FPM (Actualizado a PHP 8.3)
+# Imagen base de PHP con FPM (PHP 8.3)
 FROM php:8.3-fpm
 
 # Instalar dependencias del sistema
@@ -24,8 +24,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Configurar directorio de trabajo
 WORKDIR /var/www
 
-# Copiar TODOS los archivos del proyecto
-COPY . /var/www
+# Copiar archivos del proyecto
+COPY . .
 
 # Aumentar el límite de memoria de PHP
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini
@@ -40,13 +40,16 @@ RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --n
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/vendor
 RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
-# Desactivar modo mantenimiento antes de publicar assets
+
+# Crear el enlace simbólico para almacenamiento de Laravel
+RUN php artisan storage:link
+
+
+# Ejecutar comandos de Laravel y Filament
 RUN php artisan down || true
 RUN php artisan vendor:publish --tag=livewire:assets --force --no-interaction
 RUN php artisan vendor:publish --tag=filament-assets --force --no-interaction
 RUN php artisan up
-
-# Optimizar Filament
 RUN php artisan filament:optimize
 RUN php artisan filament:optimize-clear
 

@@ -20,40 +20,68 @@ class Permisos extends Seeder
         $permissions = [
             'ver panel categorias',
             'ver cualquier categoria', // Agregado el permiso faltante
-            'crear categoria',
-            'actualizar categoria',
-            'eliminar categoria',
+            'ver panel productos',
             'ver panel historial reservas',
             'ver panel horarios',
-            'crear horario',
-            'actualizar horario',
-            'eliminar horario',
             'ver panel laboratorios',
-            'crear laboratorio',
-            'actualizar laboratorio',
-            'eliminar laboratorio',
             'ver panel permisos',
-            'asignar permisos',
-            'ver panel productos',
-            'crear producto',
-            'actualizar producto',
-            'eliminar producto',
-            'ver panel reservas',
-            'crear reserva',
-            'actualizar reserva',
             'ver cualquier reserva',
             'ver cualquier horario',
             'ver cualquier laboratorio',
             'ver cualquier producto',
             'ver cualquier rol',
             'ver cualquier usuario',
-            'eliminar reserva',
             'ver panel roles',
             'ver panel usuarios',
-            'crear rol',
+            'ver panel solicitudes reservas',
+            'ver cualquier solicitud reserva',
+            'ver cualquier permiso',
+            'ver permisos',
+            'ver rol',
+            'ver usuario',
+            'ver solicitud reserva',
+            'ver horario',
+            'ver laboratorio',
+            'ver categoria',
+            'ver producto',
+            'ver panel reservas',
+
+
+            'actualizar horario',
+            'actualizar laboratorio',
+            'actualizar categoria',
             'actualizar rol',
+            'actualizar producto',
+            'actualizar reserva',
+            'actualizar usuario',
+
+
+
+            'crear permisos',
+            'crear rol',
+            'crear usuario',
+            'crear categoria',
+            'crear horario',
+            'crear reserva',
+            'crear producto',
+            'crear laboratorio',
+            'crear solicitud reserva',
+
+
             'eliminar rol',
-            'ver panel solicitudes reservas'
+            'eliminar reserva',
+            'eliminar horario',
+            'eliminar categoria',
+            'eliminar usuario',
+            'eliminar permisos',
+            'eliminar solicitud reserva',
+            'eliminar producto',
+            'eliminar laboratorio',
+
+
+
+            'asignar permisos',
+
         ];
 
         // Crear los permisos en la base de datos

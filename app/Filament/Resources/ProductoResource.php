@@ -41,7 +41,7 @@ class ProductoResource extends Resource
     protected static ?string $navigationLabel = 'Productos';
     protected static ?string $navigationGroup = 'Inventario';
 
-    
+
 
     public static function form(Form $form): Form
     {
@@ -98,16 +98,12 @@ class ProductoResource extends Resource
                                     ->minValue(1)
                                     ->maxValue(1000000)
                                     ->helperText('Ingrese el costo unitario del producto'),
-                                DateTimePicker::make('fecha_adquisicion') // Nuevo campo de fecha
-                                    ->displayFormat('d/m/Y')
-                                    ->seconds(false)
-                                    ->native(false)
-                                    ->closeOnDateSelection()
-                                    ->minDate(now()->subYears(100))
-                                    ->maxDate(now())
+                                DatePicker::make('fecha_adquisicion')
                                     ->label('Fecha de Adquisición')
+                                    ->displayFormat('d/m/Y')
+                                    ->native(false)
                                     ->required()
-                                    ->helperText('Seleccione la fecha de adquisición del producto'),
+                                    ->columns(3) // Para mostrar día, mes y año en columnas
                             ]),
                     ]),
                 Section::make('Ubicación y Estado')

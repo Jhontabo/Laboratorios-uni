@@ -20,14 +20,19 @@ class HistorialReservasResource extends Resource
     protected static ?string $navigationLabel = 'Historial de Reservas';
     protected static ?string $pluralLabel = 'Historial de Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
-    
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function canViewAny(): bool
     {
         $user = Auth::user();
 
         return $user ? $user->can('ver panel historial reservas') : false;
     }
-    
+
     public static function query(Builder $query): Builder
     {
         return $query->where('id_usuario', Auth::id());
@@ -58,7 +63,7 @@ class HistorialReservasResource extends Resource
                         'rechazada' => 'danger',
                     ])
                     ->sortable(),
-                
+
                 TextColumn::make('created_at')->label('Fecha de Reserva')->dateTime(),
             ])
             ->filters([

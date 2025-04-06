@@ -25,7 +25,7 @@ class LaboratorioResource extends Resource
     protected static ?string $navigationLabel = 'laboratorios';
 
     protected static ?string $navigationGroup = 'Laboratorios';
-    
+
 
     public static function form(Forms\Form $form): Forms\Form
     {
@@ -34,10 +34,12 @@ class LaboratorioResource extends Resource
                 TextInput::make('nombre')
                     ->required()
                     ->maxLength(255)
+
                     ->helperText('Maximo 255 caracteres'),
                 TextInput::make('ubicacion')
                     ->required()
                     ->maxLength(255)
+
                     ->helperText('Maximo 255 caracteres'),
                 TextInput::make('capacidad')
                     ->numeric()
@@ -61,8 +63,10 @@ class LaboratorioResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nombre'),
-                TextColumn::make('ubicacion'),
+                TextColumn::make('nombre')
+                    ->searchable(),
+                TextColumn::make('ubicacion')
+                    ->searchable(),
                 TextColumn::make('capacidad'),
                 TextColumn::make('laboratorista.name')
                     ->label('Laboratorista Responsable')

@@ -18,6 +18,9 @@ class CategoriaResource extends Resource
     protected  static ?string $navigationLabel = 'Categorias producto';
     protected static ?string $navigationGroup = 'Inventario';
 
+
+
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
@@ -34,7 +37,8 @@ class CategoriaResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nombre_categoria')->label('Categoría'),
+                TextColumn::make('nombre_categoria')->label('Categoría')
+                    ->searchable(),
             ])
             ->filters([])
             ->actions([
@@ -52,5 +56,4 @@ class CategoriaResource extends Resource
             'edit' => Pages\EditCategoria::route('/{record}/edit'),
         ];
     }
-    
 }

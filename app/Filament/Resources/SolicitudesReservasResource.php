@@ -20,10 +20,15 @@ class SolicitudesReservasResource extends Resource
     protected static ?string $navigationLabel = 'Solicitudes de Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function canViewAny(): bool
-{
-    return Auth::user()?->can('ver panel solicitudes reservas') ?? false;
-}
+    {
+        return Auth::user()?->can('ver panel solicitudes reservas') ?? false;
+    }
 
     public static function table(Table $table): Table
     {

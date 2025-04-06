@@ -17,12 +17,17 @@ class ReservaResource extends Resource
     protected static ?string $navigationLabel = 'Reservas';
     protected static ?string $navigationGroup = 'Horarios y reservas';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function canViewAny(): bool
     {
         return Auth::user()?->can('ver panel reservas') ?? false;
     }
 
-    
+
 
     public static function getPages(): array
     {

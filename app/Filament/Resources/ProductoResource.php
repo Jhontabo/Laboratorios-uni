@@ -41,6 +41,10 @@ class ProductoResource extends Resource
     protected static ?string $navigationLabel = 'Productos';
     protected static ?string $navigationGroup = 'Inventario';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 
 
     public static function form(Form $form): Form
@@ -156,6 +160,7 @@ class ProductoResource extends Resource
                 TextColumn::make('cantidad_disponible')->label('Disponible'),
                 TextColumn::make('estado')
                     ->label('Estado')
+                    ->searchable()
                     ->formatStateUsing(function ($state) {
                         return match ($state) {
                             'nuevo' => 'Nuevo',
@@ -179,10 +184,12 @@ class ProductoResource extends Resource
                 TextColumn::make('costo_unitario')
                     ->label('Costo Unitario')
                     ->money('cop') // Formatea el valor como moneda colombiana
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
-                TextColumn::make('tipo_producto')->label('Tipo de producto'),
-                TextColumn::make('laboratorio.ubicacion')->label('Ubicación'),
+                TextColumn::make('tipo_producto')
+                    ->searchable()->label('Tipo de producto'),
+                TextColumn::make('laboratorio.ubicacion')->label('Ubicación')->searchable(),
                 TextColumn::make('fecha_adquisicion')->label('Fecha de Adquisición'),
                 TextColumn::make('created_at')->date()->label('fecha de cracion'),
 

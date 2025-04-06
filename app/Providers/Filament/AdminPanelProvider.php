@@ -46,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
                     ->setNavigationLabel('Mi perfil')
                     ->setIcon('heroicon-o-user')
                     ->shouldShowDeleteAccountForm(false)
-                    ->shouldShowBrowserSessionsForm(true)
+                    ->shouldShowBrowserSessionsForm(false)
                     ->shouldShowEditPasswordForm(false)
                     ->shouldShowEditProfileForm(true)
 

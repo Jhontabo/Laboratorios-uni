@@ -24,6 +24,8 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Columns\Column;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
+use Illuminate\Notifications\Messages\BroadcastMessage;
+
 
 class UserResource extends Resource
 {
@@ -34,6 +36,17 @@ class UserResource extends Resource
     protected static ?string $navigationLabel = 'Usuarios';
     protected static ?string $pluralLabel = 'Usuarios';
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public function toBroadcast(User $notifiable): BroadcastMessage
+    {
+        return Notification::make()
+            ->title('Usuario Creado')
+            ->getBroadcastMessage();
+    }
 
     public static function form(Form $form): Form
     {
@@ -74,7 +87,7 @@ class UserResource extends Resource
                     ->default('activo')
                     ->required(),
 
-                    
+
             ]);
     }
 
@@ -89,8 +102,7 @@ class UserResource extends Resource
                 TextColumn::make('roles')
                     ->label('Rol')
                     ->formatStateUsing(fn($state, $record) => $record->roles->pluck('name')->join(', '))
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->sortable()
@@ -102,6 +114,8 @@ class UserResource extends Resource
 
             ])
             ->filters([
+
+
                 Filter::make('estado')
                     ->label('Estado')
                     ->form([
@@ -194,6 +208,7 @@ class UserResource extends Resource
                 ),
             ]);
     }
+
 
 
 

@@ -10,7 +10,6 @@ use App\Models\Laboratorio;
 use App\Models\Permiso;
 use App\Models\Producto;
 use App\Models\Rol;
-use App\Models\SolicitudReserva;
 use App\Models\User;
 use App\Policies\CategoriaPolicy;
 use App\Policies\ReservaPolicy;
@@ -37,7 +36,6 @@ class AuthServiceProvider extends ServiceProvider
         Permiso::class => PermisoPolicy::class,
         Producto::class => ProductoPolicy::class,
         Rol::class => RolPolicy::class,
-        SolicitudReserva::class => SolicitudesReservasPolicy::class,
         User::class => UserPolicy::class,
     ];
 
@@ -49,7 +47,7 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-        
+
         // No es necesario definir gates por ahora.
     }
 }

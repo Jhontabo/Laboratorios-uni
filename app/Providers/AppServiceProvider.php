@@ -28,10 +28,5 @@ class AppServiceProvider extends ServiceProvider
 
         Model::unguard();
         App::setLocale('es');
-
-
-        if (env('APP_ENV') !== 'local') {
-            URL::forceScheme('https'); // 🔥 Fuerza HTTPS en producción
-        }
     }
 }

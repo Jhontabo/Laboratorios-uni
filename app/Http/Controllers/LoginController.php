@@ -6,88 +6,149 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
+
+    // Dominios de correo permitidos
+    protected $allowedDomains = ['umariana.edu.co'];
+
+    // Roles permitidos en el sistema
+    protected $allowedRoles = [
+        'ADMIN',
+        'LABORATORISTA',
+        'DOCENTE',
+        'ESTUDIANTE'
+    ];
+
     // Redirigir a Google
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['hd' => 'umariana.edu.co'])
+            ->redirect();
     }
 
     // Manejar el callback de Google
     public function handleGoogleCallback()
     {
         try {
-            // Obtener datos del usuario desde Google
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = $this->getGoogleUser();
+            $this->logAuthenticationAttempt($googleUser);
 
-            // Loguear los datos del usuario de Google para depuración
-            Log::info('Usuario autenticado con Google:', [
-                'email' => $googleUser->getEmail(),
-                'name' => $googleUser->getName(),
-                'avatar' => $googleUser->getAvatar(),
-            ]);
-
-            // Validar el dominio del correo electrónico
-            $emailDomain = substr(strrchr($googleUser->getEmail(), "@"), 1);
-            if ($emailDomain !== 'umariana.edu.co') {
-                // Redirigir con un mensaje de sesión si el dominio no es permitido
-                return redirect('/')
-                    ->with('error', 'El correo electrónico no pertenece a la Universidad Mariana.');
+            if (!$this->isValidDomain($googleUser->getEmail())) {
+                return $this->redirectWithError('Dominio de correo no permitido');
             }
 
-            // Intentar encontrar al usuario en la base de datos
-            $user = User::where('email', $googleUser->getEmail())->first();
+            $user = $this->findOrCreateUser($googleUser);
 
-            if ($user) {
-                // Iniciar sesión al usuario autorizado
-                Auth::login($user);
-
-                // Verificar permisos del usuario
-                if ($this->hasAccess($user)) {
-                    // Redirigir según el rol del usuario
-                    return $this->redirectUserBasedOnRole($user);
-                } else {
-                    return redirect('/')
-                        ->with('error', 'No tienes permisos para acceder al sistema.');
-                }
-            } else {
-                // Si el usuario no está registrado, mostrar un mensaje
-                return redirect('/')
-                    ->with('error', 'No estás autorizado para acceder al sistema.');
+            if (!$this->userHasValidRole($user)) {
+                return $this->redirectWithError('No tienes permisos para acceder');
             }
+
+            Auth::login($user, $remember = true);
+
+            return $this->redirectToDashboard($user);
         } catch (\Exception $e) {
-            // Manejo de errores
-            Log::error('Error en el inicio de sesión con Google:', [
+            Log::error('Error en autenticación Google', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect('/')
-                ->with('error', 'Hubo un problema al autenticar con Google.');
+            return $this->redirectWithError(
+                'Error en autenticación: ' . $e->getMessage()
+            );
         }
     }
 
-    // Verificar si el usuario tiene acceso
-    private function hasAccess(User $user)
+
+    /**
+     * Obtiene los datos del usuario desde Google
+     * 
+     * @return \Laravel\Socialite\Contracts\User
+     */
+    protected function getGoogleUser()
     {
-        // Verifica si el usuario tiene uno de los roles permitidos
-        return $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA') || $user->hasRole('DOCENTE') || $user->hasRole('ESTUDIANTE');
+        return Socialite::driver('google')->user();
     }
 
-    private function redirectUserBasedOnRole(User $user)
+    /**
+     * Registra el intento de autenticación
+     * 
+     * @param \Laravel\Socialite\Contracts\User $googleUser
+     */
+    protected function logAuthenticationAttempt($googleUser)
     {
-        if ($user->hasRole('ADMIN')) {
-            return redirect('/admin');
-        } elseif ($user->hasRole('LABORATORISTA')) {
-            return redirect('/laboratorista');
-        } elseif ($user->hasRole('DOCENTE')) {
-            return redirect('/docente');
-        } elseif ($user->hasRole('ESTUDIANTE')) {
-            return redirect('/estudiante');
-        } else {
-            return redirect('/')
-                ->with('error', 'No tienes un rol asignado.');
-        }
+        Log::info('Intento de autenticación Google', [
+            'email' => $googleUser->getEmail(),
+            'ip' => request()->ip(),
+            'user_agent' => request()->userAgent()
+        ]);
+    }
+
+    /**
+     * Valida el dominio del correo electrónico
+     * 
+     * @param string $email
+     * @return bool
+     */
+    protected function isValidDomain(string $email): bool
+    {
+        $domain = Str::afterLast($email, '@');
+        return in_array($domain, $this->allowedDomains);
+    }
+
+    /**
+     * Busca o crea un usuario basado en los datos de Google
+     * 
+     * @param \Laravel\Socialite\Contracts\User $googleUser
+     * @return \App\Models\User
+     */
+    protected function findOrCreateUser($googleUser): User
+    {
+        return User::updateOrCreate(
+            ['email' => $googleUser->getEmail()],
+        );
+    }
+
+    /**
+     * Verifica si el usuario tiene un rol válido
+     * 
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    protected function userHasValidRole(User $user): bool
+    {
+        return $user->roles()->whereIn('name', $this->allowedRoles)->exists();
+    }
+
+    /**
+     * Redirige al dashboard según el rol del usuario
+     * 
+     * @param \App\Models\User $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+
+
+    protected function redirectToDashboard(User $user)
+    {
+        $route = match (true) {
+            $user->hasRole('ADMIN') => 'admin.dashboard',
+            $user->hasRole('LABORATORISTA') => 'laboratorista.dashboard',
+            $user->hasRole('DOCENTE') => 'docente.dashboard',
+            $user->hasRole('ESTUDIANTE') => 'estudiante.dashboard',
+            default => 'home'
+        };
+
+        return redirect()->route($route);
+    }
+
+
+
+    protected function redirectWithError(string $message)
+    {
+        return redirect('/')
+            ->with('error', $message);
     }
 }

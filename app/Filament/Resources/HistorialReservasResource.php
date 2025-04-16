@@ -19,7 +19,7 @@ class HistorialReservasResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel = 'Historial de Reservas';
     protected static ?string $pluralLabel = 'Historial de Reservas';
-    protected static ?string $navigationGroup = 'Horarios y reservas';
+    protected static ?string $navigationGroup = 'Gestión Académica';
 
     public static function getNavigationBadge(): ?string
     {

@@ -35,7 +35,7 @@ class CalendarWidget extends FullCalendarWidget
     // Método para decidir si el widget debe ser visible
     public static function canView(): bool
     {
-       
+
         $routesToHideWidget = [
             'filament.admin.pages.dashboard',
             'filament.estudiante.pages.dashboard',
@@ -44,7 +44,7 @@ class CalendarWidget extends FullCalendarWidget
 
         ];
 
-       
+
         return !in_array(request()->route()->getName(), $routesToHideWidget);
     }
 
@@ -55,11 +55,10 @@ class CalendarWidget extends FullCalendarWidget
             'firstDay' => 1, // Inicia la semana en lunes
             'slotMinTime' => '06:00:00', // Hora mínima visible
             'slotMaxTime' => '22:00:00', // Hora máxima visible
-            'slotDuration' => '00:30:00', // Intervalo de tiempo de cada bloque
             'locale' => 'es',
             'initialView' => 'timeGridWeek', // Vista semanal predeterminada
             'headerToolbar' => [
-                'left' => 'prev,next today',
+                'left' => 'prev,next',
                 'center' => 'title',
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay', // Opciones de vista
             ],
@@ -75,23 +74,19 @@ class CalendarWidget extends FullCalendarWidget
         $labId = session()->get('lab');
         // Recupera el filtro widget, por defecto "Todos"
         $widgetFilter = request()->query('widget', 'Todos');
-    
+
         $query = Horario::query();
-    
+
         // Filtra por rango de fechas
         $query->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
-    
+
         // Si se ha seleccionado un laboratorio (id guardado en sesión), filtra por él
         if (!is_null($labId)) {
             $query->where('id_laboratorio', $labId);
         }
-    
-        // Si se selecciona "Reserva", filtra por los eventos reservados
-        if ($widgetFilter === 'Reserva') {
-            // Supongamos que un evento reservado es donde is_available es false
-            $query->where('is_available', false);
-        }
-    
+
+
+
         return $query->get()->map(function (Horario $horario) {
             return [
                 'id'    => $horario->id_horario,

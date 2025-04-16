@@ -16,48 +16,70 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Support\Enums\FontWeight;
 
 class RolResource extends Resource
 {
     protected static ?string $model = Rol::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-key';
-    protected static ?string $navigationGroup = 'Roles y Permisos';
-    protected static ?string $navigationLabel = 'Roles';
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+    protected static ?string $navigationGroup = 'Administración';
+    protected static ?string $navigationLabel = 'Gestión de Roles';
+    protected static ?string $modelLabel = 'Rol';
     protected static ?string $pluralLabel = 'Roles';
+    protected static ?int $navigationSort = 2;
 
-
-
-    
     public static function form(Form $form): Form
     {
         return $form
-        ->schema([
-            TextInput::make('name')
-                ->label('Nombre')
-                ->autocapitalize('words')
-                ->required()
-                ->unique(ignoreRecord: true)
-                ->maxLength(255)
-                ->helperText('Máximo 255 caracteres')
-                ->afterStateHydrated(function (TextInput $component, $state) {
-                    $component->state(strtoupper($state));
-                }),
+            ->schema([
+                Forms\Components\Grid::make()
+                    ->columns(2)
+                    ->schema([
 
-            Select::make('permissions')
-                ->label('Permisos disponibles')
-                ->multiple()
-                ->relationship('permissions', 'name')
-                ->preload(),
+                        Section::make('Asignación de Permisos')
+                            ->description('Seleccione los permisos asociados')
+                            ->icon('heroicon-o-lock-closed')
+                            ->schema([
+                                Select::make('permissions')
+                                    ->label('Seleccione los permisos')
+                                    ->placeholder('Busque y seleccione permisos')
+                                    ->multiple()
+                                    ->relationship('permissions', 'name')
+                                    ->preload()
+                                    ->searchable()
+                                    ->helperText('Use el buscador para encontrar permisos')
+                                    ->columnSpanFull()
+                                    ->loadingMessage('Cargando permisos...')
+                                    ->noSearchResultsMessage('No se encontraron permisos')
+                                    ->maxItems(50),
+                            ]),
+                        // Columna Izquierda - Información del Rol
+                        Section::make('Información del Rol')
+                            ->description('Defina los detalles básicos del rol')
+                            ->icon('heroicon-o-identification')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Nombre del Rol*')
+                                    ->placeholder('EJ: ADMINISTRADOR, USUARIO, ETC.')
+                                    ->autocapitalize('words')
+                                    ->required()
+                                    ->unique(ignoreRecord: true)
+                                    ->maxLength(255)
+                                    ->helperText('Nombre descriptivo en mayúsculas (máx. 255 caracteres)')
+                                    ->columnSpanFull()
+                                    ->afterStateHydrated(function (TextInput $component, $state) {
+                                        $component->state(strtoupper($state));
+                                    }),
+                            ]),
 
-            CheckboxList::make('permisos_asignados')
-                ->label('Permisos asignados')
-                ->options(fn ($record) => $record 
-                    ? $record->permissions->pluck('name', 'id')->toArray()
-                    : []
-                )
-                ->disabled(),
-        ]);
+                        // Columna Derecha - Asignación de Permisos
+
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -65,33 +87,64 @@ class RolResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nombre')
+                    ->label('NOMBRE DEL ROL')
                     ->sortable()
                     ->searchable()
-                    // Convertir el valor a mayúsculas al mostrarlo en la tabla
-                    ->formatStateUsing(function ($state) {
-                        return strtoupper($state);
+                    ->weight(FontWeight::Bold)
+                    ->formatStateUsing(fn($state) => strtoupper($state))
+                    ->description(fn(Rol $record) => $record->permissions->count() . ' permisos asignados'),
+
+                TextColumn::make('permissions_count')
+                    ->label('PERMISOS')
+                    ->counts('permissions')
+                    ->badge()
+                    ->color(fn(int $state): string => match (true) {
+                        $state === 0 => 'gray',
+                        $state <= 5 => 'info',
+                        $state <= 10 => 'primary',
+                        default => 'success',
                     }),
-                TextColumn::make('created_at')->label('Creado')->dateTime()->sortable(),
-                TextColumn::make('updated_at')->label('Actualizado')->dateTime()->sortable(),
+
+                TextColumn::make('created_at')
+                    ->label('CREACIÓN')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+
+                TextColumn::make('updated_at')
+                    ->label('ACTUALIZACIÓN')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
             ])
-            ->filters([
-                //
-            ])
+
+
+
+            ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\ViewAction::make()
+                    ->color('info'),
+                Tables\Actions\EditAction::make()
+                    ->color('warning'),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
+                Tables\Actions\RestoreBulkAction::make(),
+                Tables\Actions\ForceDeleteBulkAction::make(),
+            ])
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Crear Nuevo Rol')
+                    ->icon('heroicon-o-plus'),
+            ])
+            ->emptyStateDescription('No se encontraron roles registrados')
+            ->emptyStateIcon('heroicon-o-shield-exclamation')
+            ->deferLoading()
+            ->persistFiltersInSession()
+            ->persistSearchInSession();
     }
 
     public static function getPages(): array

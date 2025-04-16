@@ -15,7 +15,7 @@ class ReservaResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
     protected static ?string $navigationLabel = 'Reservas';
-    protected static ?string $navigationGroup = 'Horarios y reservas';
+    protected static ?string $navigationGroup = 'Gestión Académica';
 
     public static function getNavigationBadge(): ?string
     {

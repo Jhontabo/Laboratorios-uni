@@ -5,7 +5,7 @@ namespace App\Filament\Resources\HorarioResource\Pages;
 use App\Filament\Resources\HorarioResource;
 use Filament\Resources\Pages\Page;
 use App\Filament\Widgets\CalendarWidget;
-use App\Filament\Widgets\CalendarReserva;
+use App\Filament\Widgets\ReservaCalendar;
 use App\Models\Laboratorio; // Modelo del laboratorio
 
 class Calendar extends Page
@@ -19,7 +19,7 @@ class Calendar extends Page
     {
         $laboratorioParam = request()->query('laboratorio');
         $this->id_laboratorio = is_numeric($laboratorioParam) ? (int) $laboratorioParam : null;
-    
+
         logger()->info('id laboratorio Calendar mount', ['event_data' =>  $this->id_laboratorio]);
         session()->put('lab', $this->id_laboratorio);
     }
@@ -42,9 +42,7 @@ class Calendar extends Page
             return [CalendarWidget::class]; // Personaliza este widget si es necesario
         }
 
-        if ($selectedWidget === 'Reserva') {
-            return [CalendarReserva::class];
-        }
+
 
         // Retorna un widget por defecto si no se encuentra un laboratorio
         return [CalendarWidget::class];
@@ -56,7 +54,7 @@ class Calendar extends Page
         $laboratorios = Laboratorio::all()->pluck('nombre', 'id_laboratorio')->toArray();
         $options = [
             'Todos' => 'Todos',
-            'Reserva' => 'Reserva'
+
         ] + $laboratorios;
         return $options;
     }

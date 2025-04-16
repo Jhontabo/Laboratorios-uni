@@ -9,6 +9,7 @@ use App\Filament\Widgets\ReservaCalendar;
 
 
 use App\Models\Laboratorio;
+use App\Models\Reserva;
 
 class RecursoCalendar extends Page
 {
@@ -26,41 +27,40 @@ class RecursoCalendar extends Page
         session()->put('lab', $this->id_laboratorio);
     }
 
-        public function getFilteredReservas()
-        {
-            // Si tenemos $id_laboratorio, filtramos. De lo contrario, mostramos todo.
-            $query = Reserva::query();
-    
-            if ($this->id_laboratorio) {
-                $query->where('id_laboratorio', $this->id_laboratorio);
-            }
-    
-            return $query->get();
-        }
-    
+    public function getFilteredReservas()
+    {
+        // Si tenemos $id_laboratorio, filtramos. De lo contrario, mostramos todo.
+        $query = Reserva::query();
 
-        public function getFooterWidgets(): array
-        {
-            //logger()->info('id laboratorio RecursoCalendar getFooterWidgets', ['event_data' =>  $this->id_laboratorio]);
-            return [
-                ReservaCalendar::class,
-            ];
+        if ($this->id_laboratorio) {
+            $query->where('id_laboratorio', $this->id_laboratorio);
         }
-        
 
-        public function getDropdownOptions(): array
-        {
-            // Obtenemos los laboratorios y usamos el id como clave
-            $laboratorios = Laboratorio::all()->pluck('nombre', 'id_laboratorio')->toArray();
-        
-            // Agregamos las opciones adicionales
-            $options = [
-                'Todos' => 'Todos',
-                'Reserva' => 'Reserva',
-            ] + $laboratorios;
-        
-            return $options;
-        }
+        return $query->get();
+    }
+
+
+    public function getFooterWidgets(): array
+    {
+        //logger()->info('id laboratorio RecursoCalendar getFooterWidgets', ['event_data' =>  $this->id_laboratorio]);
+        return [
+            ReservaCalendar::class,
+        ];
+    }
+
+
+    public function getDropdownOptions(): array
+    {
+        // Obtenemos los laboratorios y usamos el id como clave
+        $laboratorios = Laboratorio::all()->pluck('nombre', 'id_laboratorio')->toArray();
+
+        // Agregamos las opciones adicionales
+        $options = [
+            'Todos' => 'Todos',
+        ] + $laboratorios;
+
+        return $options;
+    }
     /**
      * Método para obtener la lista de laboratorios
      */

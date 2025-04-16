@@ -228,7 +228,7 @@ class ProductoResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('imagen')
-                    ->label('')
+                    ->label('Img')
                     ->size(50)
                     ->circular()
                     ->toggleable(),
@@ -308,58 +308,15 @@ class ProductoResource extends Resource
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+
             ->filters([
                 Filter::make('stock_bajo')
-                    ->label('Stock bajo (<5)')
-                    ->query(fn(Builder $query): Builder => $query->where('cantidad_disponible', '<', 5))
+                    ->label('Stock bajo (<=10)')
+                    ->query(fn(Builder $query): Builder => $query->where('cantidad_disponible', '<=', 10))
                     ->toggle(),
 
-                Filter::make('tipo_producto')
-                    ->label('Tipo de Producto')
-                    ->form([
-                        Select::make('tipo_producto')
-                            ->options([
-                                'equipo' => 'Equipo',
-                                'suministro' => 'Suministro',
-                            ])
-                            ->native(false),
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data): Builder =>
-                        $query->when($data['tipo_producto'], fn($q) => $q->where('tipo_producto', $data['tipo_producto']))
-                    ),
 
-                Filter::make('estado')
-                    ->label('Estado del Producto')
-                    ->form([
-                        Select::make('estado')
-                            ->options([
-                                'nuevo' => 'Nuevo',
-                                'usado' => 'Usado',
-                                'dañado' => 'Dañado',
-                                'dado_de_baja' => 'Dado de baja',
-                                'perdido' => 'Perdido',
-                            ])
-                            ->native(false),
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data): Builder =>
-                        $query->when($data['estado'], fn($q) => $q->where('estado', $data['estado']))
-                    ),
 
-                Filter::make('categoria')
-                    ->label('Categoría')
-                    ->form([
-                        Select::make('id_categorias')
-                            ->options(Categoria::all()->pluck('nombre_categoria', 'id_categorias'))
-                            ->searchable()
-                            ->preload()
-                            ->native(false),
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data): Builder =>
-                        $query->when($data['id_categorias'], fn($q) => $q->where('id_categorias', $data['id_categorias']))
-                    ),
 
                 Filter::make('laboratorio')
                     ->label('Laboratorio')
@@ -375,38 +332,13 @@ class ProductoResource extends Resource
                         $query->when($data['id_laboratorio'], fn($q) => $q->where('id_laboratorio', $data['id_laboratorio']))
                     ),
 
-                Filter::make('fecha_adquisicion')
-                    ->label('Fecha de Adquisición')
-                    ->form([
-                        DatePicker::make('desde')
-                            ->label('Desde'),
-                        DatePicker::make('hasta')
-                            ->label('Hasta'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['desde'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_adquisicion', '>=', $date),
-                            )
-                            ->when(
-                                $data['hasta'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_adquisicion', '<=', $date),
-                            );
-                    }),
+
             ])
             ->actions([
                 EditAction::make()
                     ->icon('heroicon-o-pencil-square')
                     ->color('primary')
                     ->tooltip('Editar producto'),
-
-                Action::make('view')
-                    ->label('Ver')
-                    ->icon('heroicon-o-eye')
-                    ->color('secondary')
-                    ->url(fn(Producto $record): string => route('filament.admin.resources.productos.edit', $record))
-                    ->tooltip('Ver detalles'),
 
                 Action::make('darDeBaja')
                     ->label('Baja')

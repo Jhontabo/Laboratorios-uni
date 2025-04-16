@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Reserva;
 
 // Ruta principal - login
 Route::get('/', function () {

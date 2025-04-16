@@ -49,7 +49,6 @@ class SolicitudesReservasResource extends Resource
                 TextColumn::make('horario.laboratorio.nombre')
                     ->label('Laboratorio')
                     ->searchable()
-                    ->sortable()
                     ->description(fn($record) => $record->horario?->laboratorio?->ubicacion ?? 'Sin ubicación')
                     ->icon('heroicon-o-building-office'),
 
@@ -69,7 +68,6 @@ class SolicitudesReservasResource extends Resource
                             : 'No asignado'
                     )
                     ->description(fn($record) => $record->horario?->descripcion ?? 'Sin descripción')
-                    ->sortable()
                     ->icon('heroicon-o-clock'),
 
                 TextColumn::make('estado')
@@ -156,13 +154,10 @@ class SolicitudesReservasResource extends Resource
                     ->modalHeading('Rechazar Reserva')
                     ->modalDescription('Por favor indique el motivo del rechazo.'),
 
-                Action::make('Detalles')
-                    ->color('info')
+                Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye')
-                    ->modalContent(fn($record) => view('filament.resources.solicitudes-reservas.details', [
-                        'record' => $record
-                    ]))
-                    ->modalWidth('4xl'),
+                    ->color('info')
+                    ->label('Ver Detalles'),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
@@ -177,6 +172,7 @@ class SolicitudesReservasResource extends Resource
     {
         return [
             'index' => Pages\ListSolicitudesReservas::route('/'),
+            'view' => Pages\ViewSolicitudReserva::route('/{record}'), //
         ];
     }
 }

@@ -28,6 +28,12 @@ class CategoriaResource extends Resource
         return static::$pluralModelLabel;
     }
 
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -83,24 +89,7 @@ class CategoriaResource extends Resource
                     ->query(fn(Builder $query): Builder => $query->where('created_at', '>=', now()->subMonth()))
                     ->label('Recientes (último mes)'),
 
-                Tables\Filters\Filter::make('creado_entre')
-                    ->form([
-                        Forms\Components\DatePicker::make('desde')
-                            ->label('Desde'),
-                        Forms\Components\DatePicker::make('hasta')
-                            ->label('Hasta'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['desde'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
-                            )
-                            ->when(
-                                $data['hasta'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
-                            );
-                    }),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

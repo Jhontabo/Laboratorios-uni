@@ -32,6 +32,11 @@ class RolResource extends Resource
     protected static ?string $pluralLabel = 'Roles';
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -123,8 +128,7 @@ class RolResource extends Resource
 
             ->filters([])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->color('info'),
+
                 Tables\Actions\EditAction::make()
                     ->color('warning'),
                 Tables\Actions\DeleteAction::make(),

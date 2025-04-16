@@ -20,10 +20,7 @@ class ReservaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nombre_usuario';
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::where('estado', 'pendiente')->count();
-    }
+
 
     public static function getNavigationBadgeColor(): string
     {

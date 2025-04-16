@@ -130,8 +130,10 @@ class HistorialReservasResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye')
-                    ->color('info'),
+                    ->color('info')
+                    ->label('Ver Detalles'),
             ])
+
             ->bulkActions([])
             ->emptyStateHeading('No tienes reservas registradas')
             ->emptyStateDescription('Tus reservas aparecerán aquí cuando las realices')
@@ -143,6 +145,7 @@ class HistorialReservasResource extends Resource
     {
         return [
             'index' => Pages\ListHistorialReservas::route('/'),
+            'view' => Pages\ViewHistorialReserva::route('/{record}'),
         ];
     }
 }

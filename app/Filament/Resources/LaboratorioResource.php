@@ -152,12 +152,6 @@ class LaboratorioResource extends Resource
                     ->color('primary')
                     ->tooltip('Editar laboratorio'),
 
-                Action::make('view')
-                    ->label('Ver')
-                    ->icon('heroicon-o-eye')
-                    ->color('secondary')
-                    ->url(fn(Laboratorio $record): string => route('filament.admin.resources.laboratorios.edit', $record))
-                    ->tooltip('Ver detalles'),
 
                 Tables\Actions\DeleteAction::make()
                     ->icon('heroicon-o-trash')
@@ -196,12 +190,7 @@ class LaboratorioResource extends Resource
             ->striped();
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            // Aquí puedes agregar relaciones si es necesario
-        ];
-    }
+
 
     public static function getPages(): array
     {

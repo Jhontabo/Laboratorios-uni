@@ -5,7 +5,6 @@ namespace App\Filament\Resources\HorarioResource\Pages;
 use App\Filament\Resources\HorarioResource;
 use Filament\Resources\Pages\Page;
 use App\Filament\Widgets\CalendarWidget;
-use App\Filament\Widgets\ReservaCalendar;
 use App\Models\Laboratorio; // Modelo del laboratorio
 
 class Calendar extends Page

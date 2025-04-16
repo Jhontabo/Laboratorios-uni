@@ -14,6 +14,8 @@ class ReservasPorLaboratorioChart extends ChartWidget
 
     public ?int $id_laboratorio = null;
 
+
+
     protected function getData(): array
     {
         // Obtener el laboratorio de la sesión si está disponible
@@ -52,7 +54,7 @@ class ReservasPorLaboratorioChart extends ChartWidget
 
     protected function getType(): string
     {
-        return $this->id_laboratorio ? 'bar' : 'pie';
+        return 'bar';
     }
 
     protected function generateColors(int $count): array
@@ -78,8 +80,6 @@ class ReservasPorLaboratorioChart extends ChartWidget
 
     public function getDescription(): ?string
     {
-        return $this->id_laboratorio
-            ? 'Reservas para este laboratorio'
-            : 'Distribución de reservas por laboratorio';
+        return 'Distribución de reservas por laboratorio';
     }
 }

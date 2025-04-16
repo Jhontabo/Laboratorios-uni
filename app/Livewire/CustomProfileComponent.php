@@ -2,39 +2,38 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Livewire\Component;
-use Illuminate\Contracts\View\View;
-
-use Illuminate\Support\Facades\Auth;
-
-use App\Models\User; // Importa el modelo User
 use Filament\Notifications\Notification;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 use Joaopaulolndev\FilamentEditProfile\Concerns\HasSort;
 
 class CustomProfileComponent extends Component implements HasForms
 {
-    use InteractsWithForms;
+    use Forms\Concerns\InteractsWithForms;
     use HasSort;
 
     public ?array $data = [];
-
     protected static int $sort = 0;
 
     public function mount(): void
     {
-        // Obtén los datos del usuario autenticado
+        $this->fillFormWithUserData();
+    }
+
+    protected function fillFormWithUserData(): void
+    {
         $user = Auth::user();
 
-        // Prellena los campos con los datos del usuario
         $this->form->fill([
-            'telefono' => $user->telefono, // Campo de teléfono en la tabla users
-            'direccion' => $user->direccion, // Campo de dirección en la tabla users
+            'telefono' => $user->telefono,
+            'direccion' => $user->direccion,
         ]);
     }
 
@@ -42,43 +41,74 @@ class CustomProfileComponent extends Component implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Información de contacto')
-                    ->aside()
-                    ->description('Actualiza tu número telefónico y dirección de residencia.')
-                    ->schema([
-                        TextInput::make('telefono')
-                            ->label('Teléfono')
-                            ->placeholder('Ingresa tu número telefónico')
-                            ->required()
-                            ->maxLength(15),
-
-                        TextInput::make('direccion')
-                            ->label('Dirección')
-                            ->placeholder('Ingresa tu dirección de residencia')
-                            ->required()
-                            ->maxLength(255),
-                    ]),
+                $this->getContactInformationSection(),
             ])
             ->statePath('data');
     }
 
+    protected function getContactInformationSection(): Section
+    {
+        return Section::make('Información de contacto')
+            ->aside()
+            ->description('Actualiza tu número telefónico y dirección de residencia.')
+            ->schema([
+                $this->getPhoneInput(),
+                $this->getAddressInput(),
+            ]);
+    }
+
+    protected function getPhoneInput(): TextInput
+    {
+        return TextInput::make('telefono')
+            ->label('Teléfono')
+            ->placeholder('Ejemplo: +57 314 567 8900')
+            ->required()
+            ->maxLength(15)
+            ->tel() // Agrega validación específica para teléfonos
+            ->helperText('Ingresa tu número con código de país');
+    }
+
+    protected function getAddressInput(): TextInput
+    {
+        return TextInput::make('direccion')
+            ->label('Dirección')
+            ->placeholder('Ejemplo: Calle Principal #123, Ciudad')
+            ->required()
+            ->maxLength(255)
+            ->columnSpanFull();
+    }
+
     public function save(): void
     {
-        // Obtén el estado del formulario
-        $data = $this->form->getState();
-        /** @var \App\Models\User $user */
-        // Guarda los datos en la tabla users para el usuario autenticado
-        $user = Auth::user();
-        $user->update([
-            'telefono' => $data['telefono'], // Actualiza el campo teléfono
-            'direccion' => $data['direccion'], // Actualiza el campo dirección
-        ]);
+        try {
+            $data = $this->form->getState();
 
-        // Enviar una notificación de éxito con Filament
+            /** @var User $user */
+            $user = Auth::user();
+
+            $user->update($data);
+
+            $this->sendSuccessNotification();
+        } catch (\Exception $e) {
+            $this->sendErrorNotification();
+        }
+    }
+
+    protected function sendSuccessNotification(): void
+    {
         Notification::make()
-            ->title('Información actualizada')
+            ->title('Información actualizada exitosamente')
             ->success()
-            ->body('Tu número de teléfono y dirección han sido actualizados correctamente.')
+            ->body('Tus datos de contacto han sido guardados correctamente.')
+            ->send();
+    }
+
+    protected function sendErrorNotification(): void
+    {
+        Notification::make()
+            ->title('Error al actualizar')
+            ->danger()
+            ->body('Ocurrió un error al intentar guardar tus datos. Por favor intenta nuevamente.')
             ->send();
     }
 

@@ -13,7 +13,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Support\Facades\Storage;
 
 // usa esto para production 'class User extends Authenticatable implements FilamentUser'
-class User extends Authenticatable implements HasAvatar, filamentUser
+class User extends Authenticatable implements HasAvatar, FilamentUser
 {
     use Notifiable, HasRoles;
 

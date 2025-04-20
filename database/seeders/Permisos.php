@@ -16,8 +16,12 @@ class Permisos extends Seeder
         $docente = Role::firstOrCreate(['name' => 'DOCENTE', 'guard_name' => 'web']);
         $estudiante = Role::firstOrCreate(['name' => 'ESTUDIANTE', 'guard_name' => 'web']);
 
+
         // Lista de permisos
         $permissions = [
+
+            #paneles
+            'ver panel dashboard',
             'ver panel categorias',
             'ver cualquier categoria', // Agregado el permiso faltante
             'ver panel productos',
@@ -77,19 +81,16 @@ class Permisos extends Seeder
             'eliminar solicitud reserva',
             'eliminar producto',
             'eliminar laboratorio',
-
-
-
-            'asignar permisos',
-
         ];
 
         // Crear los permisos en la base de datos
-        foreach ($permissions as $permission) {
+        foreach (array_merge($permissions) as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
         // Asignar TODOS los permisos al rol ADMIN
-        $admin->syncPermissions(Permission::all());
+        $admin
+            ->syncPermissions(Permission::all());     // paneles
+
     }
 }

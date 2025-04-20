@@ -20,6 +20,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use Hasnayeen\Themes\Http\Middleware\SetTheme;
+use Illuminate\Support\Facades\Auth;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 
 class DocentePanelProvider extends PanelProvider
@@ -50,27 +51,28 @@ class DocentePanelProvider extends PanelProvider
                     ])
             ])
             ->plugin(\Hasnayeen\Themes\ThemesPlugin::make())
-            ->plugin(FilamentFullCalendarPlugin::make()
-                ->schedulerLicenseKey('')
-                ->selectable(true)
-                ->editable(true)
-                ->timezone(config('app.timezone'))
-                ->locale(config('app.locale'))
-                ->plugins(['dayGrid', 'timeGrid'])
-                ->config([
-                    'dayMaxEvents' => true,
-                    'moreLinkClick' => 'day'
-                ])
+            ->plugin(
+                FilamentFullCalendarPlugin::make()
+                    ->schedulerLicenseKey('')
+                    ->selectable(true)
+                    ->editable(true)
+                    ->timezone(config('app.timezone'))
+                    ->locale(config('app.locale'))
+                    ->plugins(['dayGrid', 'timeGrid'])
+                    ->config([
+                        'dayMaxEvents' => true,
+                        'moreLinkClick' => 'day'
+                    ])
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources') // Mismos recursos
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                Pages\Dashboard::class,
-            ])
+            // ->pages([
+            //     Pages\Dashboard::class,
+            // ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

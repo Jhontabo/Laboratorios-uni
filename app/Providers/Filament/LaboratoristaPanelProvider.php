@@ -50,17 +50,18 @@ class LaboratoristaPanelProvider extends PanelProvider
                     ])
             ])
             ->plugin(\Hasnayeen\Themes\ThemesPlugin::make())
-            ->plugin(FilamentFullCalendarPlugin::make()
-                ->schedulerLicenseKey('')
-                ->selectable(true)
-                ->editable(true)
-                ->timezone(config('app.timezone'))
-                ->locale(config('app.locale'))
-                ->plugins(['dayGrid', 'timeGrid'])
-                ->config([
-                    'dayMaxEvents' => true,
-                    'moreLinkClick' => 'day'
-                ])
+            ->plugin(
+                FilamentFullCalendarPlugin::make()
+                    ->schedulerLicenseKey('')
+                    ->selectable(true)
+                    ->editable(true)
+                    ->timezone(config('app.timezone'))
+                    ->locale(config('app.locale'))
+                    ->plugins(['dayGrid', 'timeGrid'])
+                    ->config([
+                        'dayMaxEvents' => true,
+                        'moreLinkClick' => 'day'
+                    ])
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources') // Mismos recursos
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -69,8 +70,8 @@ class LaboratoristaPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

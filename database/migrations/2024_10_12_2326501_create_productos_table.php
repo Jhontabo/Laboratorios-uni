@@ -19,11 +19,16 @@ return new class extends Migration
                 $table->foreignId('id_categorias')->constrained('categorias', 'id_categorias')->onDelete('cascade')->onUpdate('cascade');
                 $table->string('numero_serie')->nullable();
                 $table->date('fecha_adicion')->nullable();
+                $table->boolean('disponible_para_prestamo')
+                    ->default(false);
+                $table->boolean('is_selected')->default(false);
                 $table->date('fecha_adquisicion')->nullable();
                 $table->decimal('costo_unitario', 8, 2)->nullable();
+
                 $table->string('ubicacion')->nullable();
                 $table->enum('tipo_producto', ['equipo', 'suministro'])->default('equipo');
-                $table->enum('estado', ['nuevo', 'usado', 'dañado', 'dado_de_baja', 'perdido'])->default('nuevo');
+                $table->enum('estado_producto', ['nuevo', 'usado', 'dañado', 'dado_de_baja', 'perdido'])->default('nuevo');
+                $table->string('estado_prestamo', 20)->default('pendiente')->comment('Estado del prestamo');
                 $table->string('imagen')->nullable(); // Nueva columna para la imagen del producto
                 $table->timestamps();
             });

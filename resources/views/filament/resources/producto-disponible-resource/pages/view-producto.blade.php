@@ -50,10 +50,10 @@
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</p>
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                @if ($record->estado == 'nuevo') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                @elseif($record->estado == 'usado') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                @if ($record->estado_producto == 'nuevo') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                @elseif($record->estado_producto == 'usado') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                                 @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 @endif">
-                                {{ ucfirst($record->estado) }}
+                                {{ ucfirst($record->estado_producto) }}
                             </span>
                         </div>
 

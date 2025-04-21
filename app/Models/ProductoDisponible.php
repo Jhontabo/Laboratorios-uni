@@ -19,12 +19,16 @@ class ProductoDisponible extends Model
         'cantidad_disponible',
         'id_laboratorio',
         'id_categorias',
+        'id_productos',
         'numero_serie',
+        'is_selected',
         'fecha_adicion',
         'fecha_adquisicion',
         'costo_unitario',
-        'estado',
+        'estado_producto',
+        'estado_prestamo',
         'tipo_producto',
+        'disponible_para_prestamo',
         'imagen',
 
     ];

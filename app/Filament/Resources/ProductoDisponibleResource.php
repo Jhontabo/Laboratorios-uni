@@ -3,54 +3,115 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductoDisponibleResource\Pages;
-use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\Laboratorio;
 use App\Models\ProductoDisponible;
-use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Columns\Layout\Stack;
 
 class ProductoDisponibleResource extends Resource
 {
     protected static ?string $model = ProductoDisponible::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('disponible_para_prestamo', true);
+    }
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                //
-            ]);
+        return $form->schema([
+            // Esquema del formulario con todos los campos
+            Select::make('id_laboratorio')
+                ->label('Laboratorio')
+                ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio'))
+                ->required(),
+
+            Select::make('id_categorias')
+                ->label('Categoría')
+                ->options(Categoria::all()->pluck('nombre_categoria', 'id'))
+                ->required(),
+
+            TextInput::make('nombre')
+                ->label('Nombre del Producto')
+                ->required(),
+
+            Textarea::make('descripcion')
+                ->label('Descripción')
+                ->required(),
+
+            TextInput::make('numero_serie')
+                ->label('Número de Serie')
+                ->required(),
+
+            TextInput::make('costo_unitario')
+                ->label('Costo Unitario')
+                ->numeric()
+                ->required(),
+
+            TextInput::make('cantidad_disponible')
+                ->label('Cantidad Disponible')
+                ->numeric()
+                ->required(),
+
+            DatePicker::make('fecha_adquisicion')
+                ->label('Fecha de Adquisición')
+                ->required(),
+
+            Select::make('estado_producto')
+                ->label('Estado del Producto')
+                ->options([
+                    'nuevo' => 'Nuevo',
+                    'usado' => 'Usado',
+                    'dañado' => 'Dañado',
+                    'dado_de_baja' => 'Dado de Baja',
+                    'perdido' => 'Perdido',
+                ])
+                ->required(),
+
+            Select::make('tipo_producto')
+                ->label('Tipo de Producto')
+                ->options([
+                    'equipo' => 'Equipo',
+                    'suministro' => 'Suministro',
+                ])
+                ->required(),
+
+            TextInput::make('imagen')
+                ->label('Imagen del Producto')
+                ->url()
+                ->required(),
+
+            Select::make('disponible_para_prestamo')
+                ->label('Disponible para Préstamo')
+                ->options([true => 'Sí', false => 'No'])
+                ->required(),
+        ]);
     }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+
+
                 ImageColumn::make('imagen')
-                    ->label('Img')
+                    ->label('Imagen')
                     ->size(50)
                     ->circular()
                     ->toggleable(),
@@ -59,22 +120,21 @@ class ProductoDisponibleResource extends Resource
                     ->label('Producto')
                     ->searchable()
                     ->sortable()
-                    ->description(fn(ProductoDisponible $record) => substr($record->descripcion, 0, 50) . '...')
+                    ->description(fn($record) => substr($record->descripcion, 0, 50) . '...')
                     ->weight('medium')
-                    ->color('primary')
-                    ->url(fn(ProductoDisponible $record): string => static::getUrl('view', ['record' => $record])),
+                    ->color('primary'),
 
                 TextColumn::make('cantidad_disponible')
                     ->label('Stock')
                     ->sortable()
                     ->alignCenter()
-                    ->color(fn(ProductoDisponible $record) => $record->cantidad_disponible > 10 ? 'success' : ($record->cantidad_disponible > 0 ? 'warning' : 'danger'))
-                    ->icon(fn(ProductoDisponible $record) => $record->cantidad_disponible > 10 ? 'heroicon-o-check-circle' : ($record->cantidad_disponible > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
+                    ->color(fn($record) => $record->cantidad_disponible > 10 ? 'success' : ($record->cantidad_disponible > 0 ? 'warning' : 'danger'))
+                    ->icon(fn($record) => $record->cantidad_disponible > 10 ? 'heroicon-o-check-circle' : ($record->cantidad_disponible > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
 
-                TextColumn::make('estado')
+                TextColumn::make('estado_producto')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'nuevo' => 'success',
                         'usado' => 'warning',
                         'dañado' => 'danger',
@@ -82,7 +142,7 @@ class ProductoDisponibleResource extends Resource
                         'perdido' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
                         'nuevo' => 'Nuevo',
                         'usado' => 'Usado',
                         'dañado' => 'Dañado',
@@ -95,12 +155,12 @@ class ProductoDisponibleResource extends Resource
                 TextColumn::make('tipo_producto')
                     ->label('Tipo')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'equipo' => 'info',
                         'suministro' => 'primary',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
                         'equipo' => 'Equipo',
                         'suministro' => 'Suministro',
                         default => $state,
@@ -134,7 +194,7 @@ class ProductoDisponibleResource extends Resource
             ->filters([
                 Filter::make('stock_bajo')
                     ->label('Stock bajo (<=10)')
-                    ->query(fn(Builder $query): Builder => $query->where('cantidad_disponible', '<=', 10))
+                    ->query(fn(Builder $query) => $query->where('cantidad_disponible', '<=', 10))
                     ->toggle(),
 
                 Filter::make('laboratorio')
@@ -147,30 +207,60 @@ class ProductoDisponibleResource extends Resource
                             ->native(false),
                     ])
                     ->query(
-                        fn(Builder $query, array $data): Builder =>
+                        fn(Builder $query, array $data) =>
                         $query->when($data['id_laboratorio'], fn($q) => $q->where('id_laboratorio', $data['id_laboratorio']))
                     ),
             ])
-
-            ->recordUrl(fn(ProductoDisponible $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateHeading('No hay productos registrados')
-            ->emptyStateDescription('Crea tu primer producto haciendo clic en el botón de arriba')
-            ->emptyStateIcon('heroicon-o-cube')
-            ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Crear producto')
-                    ->icon('heroicon-o-plus'),
-            ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('') // Oculta el texto
-                    ->icon('heroicon-o-eye'), // Icono de vista
+                    ->label('')
+                    ->icon('heroicon-o-eye'),
             ])
-            ->defaultSort('nombre', 'asc')
-            ->deferLoading()
+
+            ->headerActions([
+                // Acción para mostrar el modal con las instrucciones de cómo solicitar productos
+                Tables\Actions\Action::make('infoSeleccion')
+                    ->label('¿Cómo solicitar productos?')
+                    ->color('gray')
+                    ->icon('heroicon-o-question-mark-circle')
+                    // Esto abre un modal con el contenido de instrucciones
+                    ->modalContent(view('filament.pages.instrucciones-pedido'))
+                    ->modalSubmitAction(false)  // Desactivar acción de envío
+                    ->modalCancelActionLabel('Entendido')  // Etiqueta para el botón de cancelar
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkAction::make('solicitarPrestamo')
+                    ->label('Solicitar productos')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirmar solicitud de préstamo')
+                    ->modalDescription('¿Estás seguro de solicitar los productos seleccionados?')
+                    ->action(function ($records) {
+                        // Validar cantidad máxima
+                        if ($records->count() > 5) {
+                            throw new \Exception('No puedes solicitar más de 5 productos a la vez');
+                        }
+
+                        // Procesar solicitud
+                        $records->each(function ($record) {
+                            $record->update([
+                                'estado_prestamo' => 'pendiente',
+
+                            ]);
+                        });
+
+                        // Notificación de éxito
+                        Notification::make()
+                            ->title('Solicitud enviada')
+                            ->body('Has solicitado ' . $records->count() . ' productos')
+                            ->success()
+                            ->send();
+                    })
+                    ->deselectRecordsAfterCompletion(),
+            ])
+            ->emptyState(view('filament.pages.empty-state-productos'))
             ->persistFiltersInSession()
-            ->persistSearchInSession()
-            ->striped();
+            ->persistSearchInSession();
     }
 
     public static function getPages(): array
@@ -178,7 +268,6 @@ class ProductoDisponibleResource extends Resource
         return [
             'index' => Pages\ListProductoDisponibles::route('/'),
             'view' => Pages\ViewProductoDisponible::route('/{record}'),
-
         ];
     }
 }

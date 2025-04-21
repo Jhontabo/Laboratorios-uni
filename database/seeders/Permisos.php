@@ -21,7 +21,6 @@ class Permisos extends Seeder
         $permissions = [
 
             #paneles
-            'ver panel dashboard',
             'ver panel categorias',
             'ver cualquier categoria', // Agregado el permiso faltante
             'ver panel productos',
@@ -92,5 +91,91 @@ class Permisos extends Seeder
         $admin
             ->syncPermissions(Permission::all());     // paneles
 
+        // LABORATORISTA: su panel + acceso a productos
+        $laboratorista
+            ->syncPermissions([
+                'ver panel categorias',
+                'ver cualquier categoria', // Agregado el permiso faltante
+                'ver panel productos',
+                'ver panel historial reservas',
+                'ver panel horarios',
+                'ver panel laboratorios',
+                'ver panel permisos',
+                'ver cualquier reserva',
+                'ver cualquier horario',
+                'ver cualquier laboratorio',
+                'ver cualquier producto',
+                'ver cualquier rol',
+                'ver cualquier usuario',
+                'ver panel roles',
+                'ver panel usuarios',
+                'ver panel solicitudes reservas',
+                'ver cualquier solicitud reserva',
+                'ver cualquier permiso',
+                'ver permisos',
+                'ver rol',
+                'ver usuario',
+                'ver solicitud reserva',
+                'ver horario',
+                'ver laboratorio',
+                'ver categoria',
+                'ver producto',
+                'ver panel reservas',
+
+
+                'actualizar horario',
+                'actualizar laboratorio',
+                'actualizar categoria',
+                'actualizar rol',
+                'actualizar producto',
+                'actualizar reserva',
+                'actualizar usuario',
+
+
+
+                'crear permisos',
+                'crear rol',
+                'crear usuario',
+                'crear categoria',
+                'crear horario',
+                'crear reserva',
+                'crear producto',
+                'crear laboratorio',
+                'crear solicitud reserva',
+
+
+                'eliminar rol',
+                'eliminar reserva',
+                'eliminar horario',
+                'eliminar categoria',
+                'eliminar usuario',
+                'eliminar permisos',
+                'eliminar solicitud reserva',
+                'eliminar producto',
+                'eliminar laboratorio'
+            ]);
+
+
+        // DOCENTE: solo su panel (añade más si luego lo necesitas)
+        $docente
+            ->syncPermissions([
+                'ver panel historial reservas',
+                'ver panel laboratorios',
+                'ver cualquier solicitud reserva',
+                'ver panel reservas',
+                'crear solicitud reserva',
+            ]);
+
+        // ESTUDIANTE: su panel + productos + reservas
+        $estudiante
+            ->syncPermissions([
+
+
+                'ver panel historial reservas',
+                'ver panel laboratorios',
+                'ver cualquier solicitud reserva',
+                'ver panel reservas',
+                'crear solicitud reserva',
+            ]);
     }
 }

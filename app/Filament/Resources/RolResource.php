@@ -69,16 +69,16 @@ class RolResource extends Resource
                             ->schema([
                                 TextInput::make('name')
                                     ->label('Nombre del Rol*')
-                                    ->placeholder('EJ: ADMINISTRADOR, USUARIO, ETC.')
+                                    ->placeholder('Ejemplo: ADMINISTRADOR, USUARIO, INVITADO')
                                     ->autocapitalize('words')
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255)
-                                    ->helperText('Nombre descriptivo en mayúsculas (máx. 255 caracteres)')
+                                    ->helperText('Use solo mayúsculas y guiones bajos (ej: ADMIN_USUARIOS)')
                                     ->columnSpanFull()
-                                    ->afterStateHydrated(function (TextInput $component, $state) {
-                                        $component->state(strtoupper($state));
-                                    }),
+                                    ->afterStateUpdated(function ($state, $set) {
+                                        $set('name', strtoupper($state)); // Auto-mayúsculas al escribir
+                                    })
                             ]),
 
                         // Columna Derecha - Asignación de Permisos

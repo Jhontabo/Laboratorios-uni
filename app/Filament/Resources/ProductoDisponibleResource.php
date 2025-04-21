@@ -167,17 +167,8 @@ class ProductoDisponibleResource extends Resource
                     })
                     ->sortable(),
 
-                TextColumn::make('costo_unitario')
-                    ->label('Precio')
-                    ->money('COP')
-                    ->sortable()
-                    ->alignRight(),
 
-                TextColumn::make('fecha_adquisicion')
-                    ->label('Adquisición')
-                    ->date('d/m/Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+
 
                 TextColumn::make('laboratorio.ubicacion')
                     ->label('Ubicación')
@@ -191,26 +182,7 @@ class ProductoDisponibleResource extends Resource
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                Filter::make('stock_bajo')
-                    ->label('Stock bajo (<=10)')
-                    ->query(fn(Builder $query) => $query->where('cantidad_disponible', '<=', 10))
-                    ->toggle(),
 
-                Filter::make('laboratorio')
-                    ->label('Laboratorio')
-                    ->form([
-                        Select::make('id_laboratorio')
-                            ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio'))
-                            ->searchable()
-                            ->preload()
-                            ->native(false),
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data) =>
-                        $query->when($data['id_laboratorio'], fn($q) => $q->where('id_laboratorio', $data['id_laboratorio']))
-                    ),
-            ])
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('')
@@ -229,33 +201,31 @@ class ProductoDisponibleResource extends Resource
                     ->modalCancelActionLabel('Entendido')  // Etiqueta para el botón de cancelar
             ])
             ->bulkActions([
+
                 Tables\Actions\BulkAction::make('solicitarPrestamo')
-                    ->label('Solicitar productos')
+                    ->label('Solicitar productos (máx. 5)')
                     ->icon('heroicon-o-clipboard-document-list')
-                    ->requiresConfirmation()
-                    ->modalHeading('Confirmar solicitud de préstamo')
-                    ->modalDescription('¿Estás seguro de solicitar los productos seleccionados?')
                     ->action(function ($records) {
-                        // Validar cantidad máxima
                         if ($records->count() > 5) {
-                            throw new \Exception('No puedes solicitar más de 5 productos a la vez');
+                            Notification::make()
+                                ->title('Límite excedido')
+                                ->body('Solo puedes seleccionar hasta 5 productos')
+                                ->danger()
+                                ->send();
+                            return;
                         }
 
-                        // Procesar solicitud
-                        $records->each(function ($record) {
-                            $record->update([
-                                'estado_prestamo' => 'pendiente',
+                        $records->each->update(['estado_prestamo' => 'pendiente']);
 
-                            ]);
-                        });
-
-                        // Notificación de éxito
                         Notification::make()
-                            ->title('Solicitud enviada')
-                            ->body('Has solicitado ' . $records->count() . ' productos')
+                            ->title('Solicitud registrada')
+                            ->body("{$records->count()} productos solicitados correctamente")
                             ->success()
                             ->send();
                     })
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirmar solicitud')
+                    ->modalDescription(fn($records) => "¿Confirmas la solicitud de {$records->count()} productos?")
                     ->deselectRecordsAfterCompletion(),
             ])
             ->emptyState(view('filament.pages.empty-state-productos'))

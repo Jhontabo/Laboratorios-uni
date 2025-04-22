@@ -35,6 +35,7 @@ class GestionPrestamoResource extends Resource
     {
 
         return $table
+            ->actionsPosition(Tables\Enums\ActionsPosition::BeforeColumns)
             ->columns([
                 ImageColumn::make('imagen')
                     ->label('Imagen')
@@ -133,21 +134,43 @@ class GestionPrestamoResource extends Resource
                             ->displayFormat('d M Y')
                     ])
                     ->action(function (ProductoDisponible $record, array $data) {
+                        // Validar que haya suficiente cantidad disponible
+                        if ($record->cantidad_disponible <= 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('No hay stock disponible')
+                                ->body('No se puede aprobar el préstamo porque no hay unidades disponibles')
+                                ->send();
+                            return;
+                        }
+
                         $fechaDevolucion = \Carbon\Carbon::parse($data['fecha_devolucion_estimada']);
+                        $nuevaCantidad = $record->cantidad_disponible - 1;
+
                         $record->update([
                             'estado_prestamo' => 'aprobado',
                             'fecha_aprobacion' => now(),
                             'fecha_devolucion_estimada' => $fechaDevolucion,
-                            'disponible_para_prestamo' => true
+                            'cantidad_disponible' => $nuevaCantidad,
+                            'disponible_para_prestamo' => $nuevaCantidad >= 5 // Solo disponible si hay 5+ unidades
                         ]);
 
-                        Notification::make()
-                            ->success()
-                            ->title('Préstamo aprobado')
-                            ->body("Fecha límite: " . $fechaDevolucion->format('d/m/Y'))
-                            ->send();
+                        // Notificación condicional
+                        if ($nuevaCantidad < 5) {
+                            Notification::make()
+                                ->warning()
+                                ->title('Préstamo aprobado - Stock bajo')
+                                ->body("Producto marcado como no disponible. Stock actual: {$nuevaCantidad}")
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->success()
+                                ->title('Préstamo aprobado')
+                                ->body("Fecha límite: " . $fechaDevolucion->format('d/m/Y'))
+                                ->send();
+                        }
                     })
-                    ->visible(fn($record) => $record->estado_prestamo === 'pendiente'),
+                    ->visible(fn($record) => $record->estado_prestamo === 'pendiente' && $record->cantidad_disponible > 0),
 
                 Tables\Actions\Action::make('rechazar')
                     ->label('Rechazar')

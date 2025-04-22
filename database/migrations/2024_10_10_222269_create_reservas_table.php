@@ -25,10 +25,10 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 
-            // ✅ Corregir la clave foránea de `id_usuario`
-            $table->unsignedBigInteger('id_usuario')->nullable(); // Permitir NULL para usuarios no autenticados
-            $table->foreign('id_usuario')
-                ->references('id_usuario') // 🔥 Referenciar `id_usuario` en `users`
+            // ✅ Corregir la clave foránea de `user_id`
+            $table->unsignedBigInteger('user_id')->nullable(); // Permitir NULL para usuarios no autenticados
+            $table->foreign('user_id')
+                ->references('user_id') // 🔥 Referenciar `user_id` en `users`
                 ->on('users')
                 ->nullOnDelete(); // Si el usuario es eliminado, se pone NULL
 

@@ -35,11 +35,12 @@ class User extends Authenticatable implements HasAvatar, FilamentUser
     protected $table = 'users';
 
     // Clave primaria de la tabla
-    protected $primaryKey = 'id_usuario';
+    protected $primaryKey = 'user_id';
+    public $incrementing = true;
 
     // Atributos asignables en masa
     protected $fillable = [
-        'id_usuario',
+        'user_id',
         'name',
         'apellido',
         'email',

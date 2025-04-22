@@ -200,7 +200,7 @@ class ReservaCalendar extends FullCalendarWidget
             }
 
             $datosReserva = [
-                'id_usuario' => auth()->id(),
+                'user_id' => auth()->id(),
                 'id_horario' => $this->eventId ?? null,
                 'id_laboratorio' => $this->id_laboratorio ?? null,
                 'nombre_usuario' => auth()->user()->name ?? 'Sin nombre',

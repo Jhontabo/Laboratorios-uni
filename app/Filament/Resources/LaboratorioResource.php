@@ -83,9 +83,9 @@ class LaboratorioResource extends Resource
                 Section::make('Responsable')
                     ->icon('heroicon-o-user')
                     ->schema([
-                        Select::make('id_usuario')
+                        Select::make('user_id')
                             ->label('Laboratorista')
-                            ->options(User::role('LABORATORISTA')->get()->pluck('name', 'id_usuario'))
+                            ->options(User::role('LABORATORISTA')->get()->pluck('name', 'user_id'))
                             ->searchable()
                             ->preload()
                             ->required()

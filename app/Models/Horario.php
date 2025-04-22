@@ -24,7 +24,7 @@ class Horario extends Model
         'is_available',
         'reservation_status',
         'id_laboratorio',
-        'id_usuario',
+        'user_id',
     ];
 
     // Asegúrate de que los campos de fecha se interpreten como objetos Carbon
@@ -40,31 +40,31 @@ class Horario extends Model
             $existe = self::where('id_laboratorio', $horario->id_laboratorio)
                 ->where(function ($query) use ($horario) {
                     $query->whereBetween('start_at', [$horario->start_at, $horario->end_at])
-                          ->orWhereBetween('end_at', [$horario->start_at, $horario->end_at])
-                          ->orWhere(function ($query) use ($horario) {
-                              $query->where('start_at', '<=', $horario->start_at)
-                                    ->where('end_at', '>=', $horario->end_at);
-                          });
+                        ->orWhereBetween('end_at', [$horario->start_at, $horario->end_at])
+                        ->orWhere(function ($query) use ($horario) {
+                            $query->where('start_at', '<=', $horario->start_at)
+                                ->where('end_at', '>=', $horario->end_at);
+                        });
                 })
                 ->exists();
 
-                if ($existe) {
-                    Notification::make()
-                        ->title('Error')
-                        ->body('Ya existe un horario en este rango de tiempo para este laboratorio.')
-                        ->danger()
-                        ->send();
-        
-                    throw ValidationException::withMessages([
-                        'error' => 'Ya existe un horario en este rango de tiempo para este laboratorio.'
-                    ]);
-                }
+            if ($existe) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Ya existe un horario en este rango de tiempo para este laboratorio.')
+                    ->danger()
+                    ->send();
+
+                throw ValidationException::withMessages([
+                    'error' => 'Ya existe un horario en este rango de tiempo para este laboratorio.'
+                ]);
+            }
         });
     }
 
     public function laboratorista()
     {
-        return $this->belongsTo(User::class, 'id_usuario'); // 'id_usuario' debe ser la clave que conecta con el usuario
+        return $this->belongsTo(User::class, 'user_id'); // 'user_id' debe ser la clave que conecta con el usuario
     }
     // Relación con laboratorio
     public function laboratorio()

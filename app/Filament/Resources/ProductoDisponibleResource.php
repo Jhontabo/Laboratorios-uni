@@ -33,76 +33,7 @@ class ProductoDisponibleResource extends Resource
             ->where('disponible_para_prestamo', true);
     }
 
-    public static function form(Form $form): Form
-    {
-        return $form->schema([
-            // Esquema del formulario con todos los campos
-            Select::make('id_laboratorio')
-                ->label('Laboratorio')
-                ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio'))
-                ->required(),
 
-            Select::make('id_categorias')
-                ->label('Categoría')
-                ->options(Categoria::all()->pluck('nombre_categoria', 'id'))
-                ->required(),
-
-            TextInput::make('nombre')
-                ->label('Nombre del Producto')
-                ->required(),
-
-            Textarea::make('descripcion')
-                ->label('Descripción')
-                ->required(),
-
-            TextInput::make('numero_serie')
-                ->label('Número de Serie')
-                ->required(),
-
-            TextInput::make('costo_unitario')
-                ->label('Costo Unitario')
-                ->numeric()
-                ->required(),
-
-            TextInput::make('cantidad_disponible')
-                ->label('Cantidad Disponible')
-                ->numeric()
-                ->required(),
-
-            DatePicker::make('fecha_adquisicion')
-                ->label('Fecha de Adquisición')
-                ->required(),
-
-            Select::make('estado_producto')
-                ->label('Estado del Producto')
-                ->options([
-                    'nuevo' => 'Nuevo',
-                    'usado' => 'Usado',
-                    'dañado' => 'Dañado',
-                    'dado_de_baja' => 'Dado de Baja',
-                    'perdido' => 'Perdido',
-                ])
-                ->required(),
-
-            Select::make('tipo_producto')
-                ->label('Tipo de Producto')
-                ->options([
-                    'equipo' => 'Equipo',
-                    'suministro' => 'Suministro',
-                ])
-                ->required(),
-
-            TextInput::make('imagen')
-                ->label('Imagen del Producto')
-                ->url()
-                ->required(),
-
-            Select::make('disponible_para_prestamo')
-                ->label('Disponible para Préstamo')
-                ->options([true => 'Sí', false => 'No'])
-                ->required(),
-        ]);
-    }
 
     public static function table(Table $table): Table
     {
@@ -215,7 +146,15 @@ class ProductoDisponibleResource extends Resource
                             return;
                         }
 
-                        $records->each->update(['estado_prestamo' => 'pendiente']);
+                        $records->each(function ($record) {
+                            $record->update([
+                                'estado_prestamo' => 'pendiente',
+                                'user_id' => auth()->id(),
+                                'fecha_solicitud' => now(),
+                                'cantidad_disponible' => $record->cantidad_disponible,
+                                'imagen' => $record->imagen,
+                            ]);
+                        });
 
                         Notification::make()
                             ->title('Solicitud registrada')

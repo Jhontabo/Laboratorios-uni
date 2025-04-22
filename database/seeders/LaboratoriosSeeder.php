@@ -24,7 +24,7 @@ class LaboratoriosSeeder extends Seeder
                 'nombre' => "Laboratorio $i",
                 'ubicacion' => "Edificio $i, Piso $i",
                 'capacidad' => rand(10, 50),
-                'id_usuario' => $laboratoristas->random()->id_usuario, // Asigna un laboratorista aleatorio
+                'user_id' => $laboratoristas->random()->user_id, // Asigna un laboratorista aleatorio
             ]);
         }
     }

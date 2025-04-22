@@ -27,26 +27,23 @@ class HistorialReservasResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('id_usuario', Auth::id())->count();
+        return static::getModel()::where('user_id', Auth::id())->count();
     }
 
     public static function getNavigationBadgeColor(): string
     {
-        $pendientes = static::getModel()::where('id_usuario', Auth::id())
+        $pendientes = static::getModel()::where('user_id', Auth::id())
             ->where('estado', 'pendiente')
             ->count();
 
         return $pendientes > 0 ? 'warning' : 'success';
     }
 
-    public static function canViewAny(): bool
-    {
-        return Auth::user()?->can('ver panel historial reservas') ?? false;
-    }
+
 
     public static function query(Builder $query): Builder
     {
-        return $query->where('id_usuario', Auth::id())
+        return $query->where('user_id', Auth::id())
             ->with(['horario', 'laboratorio'])
             ->latest();
     }

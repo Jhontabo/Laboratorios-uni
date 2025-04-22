@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->bigIncrements('id_usuario'); // Clave primaria personalizada
+            $table->bigIncrements('user_id'); // Clave primaria personalizada
             $table->string('name'); // Nombre del usuario
             $table->string('apellido'); // Apellido del usuario
             $table->string('email')->unique(); // Correo único

@@ -53,7 +53,7 @@ class ProductosSeeder extends Seeder
         ];
 
         // Crear solo 10 productos
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 100; $i++) {
             $productoData = $productos[$i % count($productos)];
             $productoData['numero_serie'] = $productoData['numero_serie'] . '-' . ($i + 1);
 

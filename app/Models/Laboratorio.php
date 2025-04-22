@@ -27,6 +27,6 @@ class Laboratorio extends Model
 
     public function laboratorista()
     {
-        return $this->belongsTo(User::class, 'id_usuario');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

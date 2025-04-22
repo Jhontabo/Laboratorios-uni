@@ -30,6 +30,7 @@ class ProductoDisponible extends Model
         'tipo_producto',
         'disponible_para_prestamo',
         'imagen',
+        'user_id',
 
     ];
 
@@ -37,6 +38,11 @@ class ProductoDisponible extends Model
     public function laboratorio()
     {
         return $this->belongsTo(Laboratorio::class, 'id_laboratorio');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function categoria()

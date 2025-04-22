@@ -18,6 +18,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
@@ -108,7 +109,7 @@ class ProductoResource extends Resource
                                     ->required()
                                     ->native(false),
 
-                                Select::make('estado')
+                                Select::make('estado_producto')
                                     ->label('Estado Actual')
                                     ->options([
                                         'nuevo' => 'Nuevo',
@@ -119,6 +120,12 @@ class ProductoResource extends Resource
                                     ])
                                     ->required()
                                     ->native(false),
+                                Toggle::make('disponible_para_prestamo')
+                                    ->label('Disponible para Préstamo')
+                                    ->default(false)
+                                    ->helperText('Marque si el producto está disponible para préstamo')
+                                    ->columnSpan(2)
+
                             ]),
                     ]),
 
@@ -149,9 +156,8 @@ class ProductoResource extends Resource
                                 DatePicker::make('fecha_adquisicion')
                                     ->label('Fecha de Adquisición')
                                     ->displayFormat('d/m/Y')
-                                    ->native(false)
-                                    ->required()
-                                    ->helperText('Fecha cuando se adquirió el producto'),
+                                    ->helperText('Fecha cuando se adquirió el producto')
+                                    ->required(),
                             ]),
                     ]),
 
@@ -248,8 +254,8 @@ class ProductoResource extends Resource
                     ->color(fn(Producto $record) => $record->cantidad_disponible > 10 ? 'success' : ($record->cantidad_disponible > 0 ? 'warning' : 'danger'))
                     ->icon(fn(Producto $record) => $record->cantidad_disponible > 10 ? 'heroicon-o-check-circle' : ($record->cantidad_disponible > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
 
-                TextColumn::make('estado')
-                    ->label('Estado')
+                TextColumn::make('estado_producto')
+                    ->label('Estado del producto')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'nuevo' => 'success',

@@ -12,7 +12,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             LaboratoriosSeeder::class,
             Permisos::class,
-        
+            ProductosSeeder::class,
+
         ]);
     }
 }

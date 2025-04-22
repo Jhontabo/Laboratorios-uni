@@ -15,9 +15,9 @@ return new class extends Migration
             $table->integer('capacidad')->nullable(); // Capacidad máxima del laboratorio
 
             // Clave foránea para el usuario asignado al laboratorio
-            $table->foreignId('id_usuario')
+            $table->foreignId('user_id')
                 ->nullable() // Permitir que no haya usuario asignado inicialmente
-                ->constrained('users', 'id_usuario') // Relación con la tabla users
+                ->constrained('users', 'user_id') // Relación con la tabla users
                 ->onDelete('cascade') // Eliminar laboratorio si el usuario es eliminado
                 ->onUpdate('cascade'); // Actualizar clave si el usuario es actualizado
 

@@ -27,9 +27,9 @@ return new class extends Migration
                 ->comment('Relación con la tabla laboratorios');
 
             // Clave foránea para la tabla users
-            $table->foreignId('id_usuario')
+            $table->foreignId('user_id')
                 ->nullable()
-                ->constrained('users', 'id_usuario') // Relación con users.id_usuario
+                ->constrained('users', 'user_id') // Relación con users.user_id
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate()
                 ->comment('Relación con la tabla usuarios');

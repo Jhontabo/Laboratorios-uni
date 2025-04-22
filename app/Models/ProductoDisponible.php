@@ -19,13 +19,18 @@ class ProductoDisponible extends Model
         'cantidad_disponible',
         'id_laboratorio',
         'id_categorias',
+        'id_productos',
         'numero_serie',
+        'is_selected',
         'fecha_adicion',
         'fecha_adquisicion',
         'costo_unitario',
-        'estado',
+        'estado_producto',
+        'estado_prestamo',
         'tipo_producto',
+        'disponible_para_prestamo',
         'imagen',
+        'user_id',
 
     ];
 
@@ -33,6 +38,11 @@ class ProductoDisponible extends Model
     public function laboratorio()
     {
         return $this->belongsTo(Laboratorio::class, 'id_laboratorio');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function categoria()

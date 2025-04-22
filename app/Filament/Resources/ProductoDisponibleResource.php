@@ -3,54 +3,46 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductoDisponibleResource\Pages;
-use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\Laboratorio;
 use App\Models\ProductoDisponible;
-use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Columns\Layout\Stack;
 
 class ProductoDisponibleResource extends Resource
 {
     protected static ?string $model = ProductoDisponible::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function getEloquentQuery(): Builder
     {
-        return $form
-            ->schema([
-                //
-            ]);
+        return parent::getEloquentQuery()
+            ->where('disponible_para_prestamo', true);
     }
+
+
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+
+
                 ImageColumn::make('imagen')
-                    ->label('Img')
+                    ->label('Imagen')
                     ->size(50)
                     ->circular()
                     ->toggleable(),
@@ -59,22 +51,21 @@ class ProductoDisponibleResource extends Resource
                     ->label('Producto')
                     ->searchable()
                     ->sortable()
-                    ->description(fn(ProductoDisponible $record) => substr($record->descripcion, 0, 50) . '...')
+                    ->description(fn($record) => substr($record->descripcion, 0, 50) . '...')
                     ->weight('medium')
-                    ->color('primary')
-                    ->url(fn(ProductoDisponible $record): string => static::getUrl('view', ['record' => $record])),
+                    ->color('primary'),
 
                 TextColumn::make('cantidad_disponible')
                     ->label('Stock')
                     ->sortable()
                     ->alignCenter()
-                    ->color(fn(ProductoDisponible $record) => $record->cantidad_disponible > 10 ? 'success' : ($record->cantidad_disponible > 0 ? 'warning' : 'danger'))
-                    ->icon(fn(ProductoDisponible $record) => $record->cantidad_disponible > 10 ? 'heroicon-o-check-circle' : ($record->cantidad_disponible > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
+                    ->color(fn($record) => $record->cantidad_disponible > 10 ? 'success' : ($record->cantidad_disponible > 0 ? 'warning' : 'danger'))
+                    ->icon(fn($record) => $record->cantidad_disponible > 10 ? 'heroicon-o-check-circle' : ($record->cantidad_disponible > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
 
-                TextColumn::make('estado')
+                TextColumn::make('estado_producto')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'nuevo' => 'success',
                         'usado' => 'warning',
                         'dañado' => 'danger',
@@ -82,7 +73,7 @@ class ProductoDisponibleResource extends Resource
                         'perdido' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
                         'nuevo' => 'Nuevo',
                         'usado' => 'Usado',
                         'dañado' => 'Dañado',
@@ -95,29 +86,20 @@ class ProductoDisponibleResource extends Resource
                 TextColumn::make('tipo_producto')
                     ->label('Tipo')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'equipo' => 'info',
                         'suministro' => 'primary',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn($state) => match ($state) {
                         'equipo' => 'Equipo',
                         'suministro' => 'Suministro',
                         default => $state,
                     })
                     ->sortable(),
 
-                TextColumn::make('costo_unitario')
-                    ->label('Precio')
-                    ->money('COP')
-                    ->sortable()
-                    ->alignRight(),
 
-                TextColumn::make('fecha_adquisicion')
-                    ->label('Adquisición')
-                    ->date('d/m/Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+
 
                 TextColumn::make('laboratorio.ubicacion')
                     ->label('Ubicación')
@@ -131,46 +113,63 @@ class ProductoDisponibleResource extends Resource
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                Filter::make('stock_bajo')
-                    ->label('Stock bajo (<=10)')
-                    ->query(fn(Builder $query): Builder => $query->where('cantidad_disponible', '<=', 10))
-                    ->toggle(),
 
-                Filter::make('laboratorio')
-                    ->label('Laboratorio')
-                    ->form([
-                        Select::make('id_laboratorio')
-                            ->options(Laboratorio::all()->pluck('ubicacion', 'id_laboratorio'))
-                            ->searchable()
-                            ->preload()
-                            ->native(false),
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data): Builder =>
-                        $query->when($data['id_laboratorio'], fn($q) => $q->where('id_laboratorio', $data['id_laboratorio']))
-                    ),
-            ])
-
-            ->recordUrl(fn(ProductoDisponible $record): string => static::getUrl('view', ['record' => $record]))
-            ->emptyStateHeading('No hay productos registrados')
-            ->emptyStateDescription('Crea tu primer producto haciendo clic en el botón de arriba')
-            ->emptyStateIcon('heroicon-o-cube')
-            ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('Crear producto')
-                    ->icon('heroicon-o-plus'),
-            ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('') // Oculta el texto
-                    ->icon('heroicon-o-eye'), // Icono de vista
+                    ->label('')
+                    ->icon('heroicon-o-eye'),
             ])
-            ->defaultSort('nombre', 'asc')
-            ->deferLoading()
+
+            ->headerActions([
+                // Acción para mostrar el modal con las instrucciones de cómo solicitar productos
+                Tables\Actions\Action::make('infoSeleccion')
+                    ->label('¿Cómo solicitar productos?')
+                    ->color('gray')
+                    ->icon('heroicon-o-question-mark-circle')
+                    // Esto abre un modal con el contenido de instrucciones
+                    ->modalContent(view('filament.pages.instrucciones-pedido'))
+                    ->modalSubmitAction(false)  // Desactivar acción de envío
+                    ->modalCancelActionLabel('Entendido')  // Etiqueta para el botón de cancelar
+            ])
+            ->bulkActions([
+
+                Tables\Actions\BulkAction::make('solicitarPrestamo')
+                    ->label('Solicitar productos (máx. 5)')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->action(function ($records) {
+                        if ($records->count() > 5) {
+                            Notification::make()
+                                ->title('Límite excedido')
+                                ->body('Solo puedes seleccionar hasta 5 productos')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        $records->each(function ($record) {
+                            $record->update([
+                                'estado_prestamo' => 'pendiente',
+                                'user_id' => auth()->id(),
+                                'fecha_solicitud' => now(),
+                                'cantidad_disponible' => $record->cantidad_disponible,
+                                'imagen' => $record->imagen,
+                            ]);
+                        });
+
+                        Notification::make()
+                            ->title('Solicitud registrada')
+                            ->body("{$records->count()} productos solicitados correctamente")
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirmar solicitud')
+                    ->modalDescription(fn($records) => "¿Confirmas la solicitud de {$records->count()} productos?")
+                    ->deselectRecordsAfterCompletion(),
+            ])
+            ->emptyState(view('filament.pages.empty-state-productos'))
             ->persistFiltersInSession()
-            ->persistSearchInSession()
-            ->striped();
+            ->persistSearchInSession();
     }
 
     public static function getPages(): array
@@ -178,7 +177,6 @@ class ProductoDisponibleResource extends Resource
         return [
             'index' => Pages\ListProductoDisponibles::route('/'),
             'view' => Pages\ViewProductoDisponible::route('/{record}'),
-
         ];
     }
 }

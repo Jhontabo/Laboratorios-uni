@@ -23,7 +23,7 @@ class Reserva extends Model
 
     // Campos que se pueden asignar masivamente
     protected $fillable = [
-        'id_usuario',
+        'user_id',
         'id_laboratorio',
         'id_horario',
         'id_laboratorista',
@@ -42,7 +42,7 @@ class Reserva extends Model
     // Relación con el modelo de usuarios (estudiantes o quien realiza la reserva)
     public function usuario()
     {
-        return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     // Relación con el modelo de laboratorios
@@ -60,7 +60,7 @@ class Reserva extends Model
     // Relación con el modelo de laboratoristas (si aplica)
     public function laboratorista()
     {
-        return $this->belongsTo(User::class, 'id_laboratorista', 'id_usuario');
+        return $this->belongsTo(User::class, 'id_laboratorista', 'user_id');
     }
 
     // Método para obtener un estado legible

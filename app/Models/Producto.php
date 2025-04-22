@@ -11,7 +11,7 @@ class Producto extends Model
 
     protected $table = 'productos';
 
-    protected $primaryKey = 'id_productos';
+    protected $primaryKey = 'id_producto';
 
     protected $fillable = [
         'nombre',
@@ -19,7 +19,7 @@ class Producto extends Model
         'cantidad_disponible',
         'id_laboratorio',
         'id_categorias',
-        'id_productos',
+        'id_producto',
         'numero_serie',
         'is_selected',
         'fecha_adicion',
@@ -38,6 +38,12 @@ class Producto extends Model
     public function laboratorio()
     {
         return $this->belongsTo(Laboratorio::class, 'id_laboratorio');
+    }
+
+    public function prestamos()
+    {
+        return $this->hasMany(Prestamo::class, 'id_producto', 'id_producto');
+        // Especifica ambas claves: local key y foreign key
     }
 
     public function usuario()

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\GestionPrestamoResource\Pages;
-use App\Models\ProductoDisponible;
+use App\Models\Prestamo;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -14,10 +14,12 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class GestionPrestamoResource extends Resource
 {
-    protected static ?string $model = ProductoDisponible::class;
+    protected static ?string $model = Prestamo::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationLabel = 'Gestión de Préstamos';
     protected static ?string $modelLabel = 'Gestion de préstamos';
@@ -27,7 +29,8 @@ class GestionPrestamoResource extends Resource
     {
 
         return parent::getEloquentQuery()
-            ->whereIn('estado_prestamo', ['pendiente', 'aprobado', 'devuelto'])
+            ->with(['producto', 'usuario']) // Carga las relaciones anticipadamente
+            ->whereIn('estado', ['pendiente', 'aprobado', 'devuelto'])
             ->whereNotNull('user_id');
     }
 
@@ -35,17 +38,18 @@ class GestionPrestamoResource extends Resource
     {
 
         return $table
+            ->actionsPosition(Tables\Enums\ActionsPosition::BeforeColumns)
             ->columns([
-                ImageColumn::make('imagen')
+                ImageColumn::make('producto.imagen')
                     ->label('Imagen')
                     ->size(50)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('nombre')
+                TextColumn::make('producto.nombre')
                     ->label('Equipo')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('cantidad_disponible')
+                TextColumn::make('producto.cantidad_disponible')
                     ->label('Stock')
                     ->sortable()
                     ->color('success')
@@ -72,7 +76,7 @@ class GestionPrestamoResource extends Resource
 
                     ]),
 
-                TextColumn::make('estado_prestamo')
+                TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -108,7 +112,7 @@ class GestionPrestamoResource extends Resource
                     ->dateTime('d M Y')
                     ->color(
                         fn($record) =>
-                        $record->estado_prestamo === 'aprobado' &&
+                        $record->estado === 'aprobado' &&
                         $record->fecha_devolucion_estimada < now()
                         ? 'danger'
                         : 'success'
@@ -117,7 +121,7 @@ class GestionPrestamoResource extends Resource
                     ->placeholder('No asignada')
                     ->toggleable(isToggledHiddenByDefault: false),
 
-                TextColumn::make('fecha_devolucion_real')->label('Devuelto')->dateTime('d M Y H:i')->sortable()->placeholder('No devuelto'),
+                TextColumn::make('fecha_devolucion_real')->label('Devuelto')->dateTime('d M Y')->sortable()->placeholder('No devuelto'),
             ])
             ->actions([
                 Tables\Actions\Action::make('aprobar')
@@ -132,22 +136,42 @@ class GestionPrestamoResource extends Resource
                             ->default(now()->addWeek())
                             ->displayFormat('d M Y')
                     ])
-                    ->action(function (ProductoDisponible $record, array $data) {
-                        $fechaDevolucion = \Carbon\Carbon::parse($data['fecha_devolucion_estimada']);
-                        $record->update([
-                            'estado_prestamo' => 'aprobado',
-                            'fecha_aprobacion' => now(),
-                            'fecha_devolucion_estimada' => $fechaDevolucion,
-                            'disponible_para_prestamo' => true
-                        ]);
+                    ->action(function (Prestamo $record, array $data) {
+                        DB::transaction(function () use ($record, $data) {
+                            $producto = $record->producto;
+                            $fechaDevolucionEstimada = \Carbon\Carbon::parse($data['fecha_devolucion_estimada']);
 
-                        Notification::make()
-                            ->success()
-                            ->title('Préstamo aprobado')
-                            ->body("Fecha límite: " . $fechaDevolucion->format('d/m/Y'))
-                            ->send();
+                            // Validar stock
+                            if ($producto->cantidad_disponible <= 0) {
+                                throw new \Exception('No hay unidades disponibles');
+                            }
+
+                            // Actualizar préstamo
+                            $record->update([
+                                'estado' => 'aprobado',
+                                'fecha_aprobacion' => now(),
+                                'fecha_devolucion_estimada' => $fechaDevolucionEstimada
+                            ]);
+
+                            // Actualizar producto
+                            $producto->decrement('cantidad_disponible');
+                            $producto->update([
+                                'disponible_para_prestamo' => $producto->cantidad_disponible >= 5
+                            ]);
+
+                            // Notificación
+                            $message = $producto->cantidad_disponible < 5
+                                ? "Producto marcado como no disponible. Stock actual: {$producto->cantidad_disponible}"
+                                : "Fecha límite: " . $fechaDevolucionEstimada->format('d/m/Y');
+
+                            Notification::make()
+                                ->success()
+                                ->title('Préstamo aprobado')
+                                ->body($message)
+                                ->send();
+                        });
                     })
-                    ->visible(fn($record) => $record->estado_prestamo === 'pendiente'),
+                    ->visible(fn(Prestamo $record) => $record->estado === 'pendiente'),
 
                 Tables\Actions\Action::make('rechazar')
                     ->label('Rechazar')
@@ -156,19 +180,19 @@ class GestionPrestamoResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading('Rechazar préstamo')
                     ->modalDescription('¿Estás seguro de rechazar este préstamo?')
-                    ->action(function (ProductoDisponible $record) {
+                    ->action(function (Prestamo $record) {
                         $record->update([
-                            'estado_prestamo' => 'rechazado',
-                            'disponible_para_prestamo' => true,
+                            'estado' => 'rechazado',
                             'fecha_devolucion_estimada' => null
                         ]);
 
+                        // No modificamos el producto al rechazar
                         Notification::make()
                             ->danger()
                             ->title('Préstamo rechazado')
                             ->send();
                     })
-                    ->visible(fn($record) => $record->estado_prestamo === 'pendiente'),
+                    ->visible(fn(Prestamo $record) => $record->estado === 'pendiente'),
 
                 Tables\Actions\Action::make('devolver')
                     ->label('Marcar como devuelto')
@@ -182,47 +206,31 @@ class GestionPrestamoResource extends Resource
                             ->maxDate(now())
                             ->displayFormat('d M Y')
                     ])
-                    ->action(function (ProductoDisponible $record, array $data) {
-                        $fechaDevolucionReal = \Carbon\Carbon::parse($data['fecha_devolucion_real']);
-                        $record->update([
-                            'estado_prestamo' => 'devuelto',
-                            'disponible_para_prestamo' => true,
-                            'fecha_devolucion_real' => $fechaDevolucionReal
-                        ]);
+                    ->action(function (Prestamo $record, array $data) {
+                        DB::transaction(function () use ($record, $data) {
+                            $fechaDevolucionReal = \Carbon\Carbon::parse($data['fecha_devolucion_real']);
+                            $producto = $record->producto;
 
-                        Notification::make()
-                            ->success()
-                            ->title('Equipo devuelto')
-                            ->body("Fecha de devolución: {$fechaDevolucionReal->format('d/m/Y')}")
-                            ->send();
+                            // Actualizar préstamo
+                            $record->update([
+                                'estado' => 'devuelto',
+                                'fecha_devolucion_real' => $fechaDevolucionReal
+                            ]);
+
+                            // Actualizar producto
+                            $producto->increment('cantidad_disponible');
+                            $producto->update([
+                                'disponible_para_prestamo' => true
+                            ]);
+
+                            Notification::make()
+                                ->success()
+                                ->title('Equipo devuelto')
+                                ->body("Fecha de devolución: {$fechaDevolucionReal->format('d/m/Y')}")
+                                ->send();
+                        });
                     })
-                    ->visible(fn($record) => $record->estado_prestamo === 'aprobado'),
-            ])
-            ->filters([
-                SelectFilter::make('estado_prestamo')
-                    ->label('Estado')
-                    ->options([
-                        'pendiente' => 'Pendientes',
-                        'aprobado' => 'Aprobados',
-                        'rechazado' => 'Rechazados',
-                        'devuelto' => 'Devueltos',
-                    ]),
-
-                Tables\Filters\Filter::make('prestamos_vencidos')
-                    ->label('Préstamos vencidos')
-                    ->query(
-                        fn(Builder $query): Builder => $query
-                            ->where('estado_prestamo', 'aprobado')
-                            ->where('fecha_devolucion_estimada', '<', now())
-                    ),
-
-                Tables\Filters\Filter::make('prestamos_por_vencer')
-                    ->label('Por vencer (3 días)')
-                    ->query(
-                        fn(Builder $query): Builder => $query
-                            ->where('estado_prestamo', 'aprobado')
-                            ->whereBetween('fecha_devolucion_estimada', [now(), now()->addDays(3)])
-                    ),
+                    ->visible(fn(Prestamo $record) => $record->estado === 'aprobado'),
             ])
 
             ->bulkActions([

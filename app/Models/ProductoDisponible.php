@@ -11,7 +11,7 @@ class ProductoDisponible extends Model
 
     protected $table = 'productos';
 
-    protected $primaryKey = 'id_productos';
+    protected $primaryKey = 'id_producto';
 
     protected $fillable = [
         'nombre',
@@ -19,7 +19,7 @@ class ProductoDisponible extends Model
         'cantidad_disponible',
         'id_laboratorio',
         'id_categorias',
-        'id_productos',
+        'id_producto',
         'numero_serie',
         'is_selected',
         'fecha_adicion',
@@ -43,6 +43,16 @@ class ProductoDisponible extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function prestamos()
+    {
+        return $this->hasMany(Prestamo::class);
+    }
+
+    public function prestamosPendientes()
+    {
+        return $this->prestamos()->where('estado', 'pendiente');
     }
 
     public function categoria()

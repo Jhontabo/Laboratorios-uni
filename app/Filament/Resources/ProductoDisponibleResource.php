@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductoDisponibleResource\Pages;
 use App\Models\Categoria;
 use App\Models\Laboratorio;
+use App\Models\Prestamo;
 use App\Models\ProductoDisponible;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
@@ -132,7 +133,6 @@ class ProductoDisponibleResource extends Resource
                     ->modalCancelActionLabel('Entendido')  // Etiqueta para el botón de cancelar
             ])
             ->bulkActions([
-
                 Tables\Actions\BulkAction::make('solicitarPrestamo')
                     ->label('Solicitar productos (máx. 5)')
                     ->icon('heroicon-o-clipboard-document-list')
@@ -146,15 +146,26 @@ class ProductoDisponibleResource extends Resource
                             return;
                         }
 
-                        $records->each(function ($record) {
-                            $record->update([
-                                'estado_prestamo' => 'pendiente',
+                        foreach ($records as $record) {
+                            if ($record->cantidad_disponible <= 0) {
+                                Notification::make()
+                                    ->title("{$record->nombre} no disponible")
+                                    ->danger()
+                                    ->send();
+                                continue;
+                            }
+
+                            // Crear registro en préstamos
+                            Prestamo::create([
+                                'id_producto' => $record->id_producto,
                                 'user_id' => auth()->id(),
+                                'estado' => 'pendiente',
                                 'fecha_solicitud' => now(),
-                                'cantidad_disponible' => $record->cantidad_disponible,
-                                'imagen' => $record->imagen,
+
                             ]);
-                        });
+
+
+                        }
 
                         Notification::make()
                             ->title('Solicitud registrada')

@@ -16,7 +16,7 @@ class ReservaResource extends Resource
     protected static ?string $modelLabel = 'Reserva';
     protected static ?string $pluralModelLabel = 'Gestión de Reservas';
     protected static ?string $navigationGroup = 'Gestión Académica';
-    protected static ?int $navigationSort = 2;
+
 
     protected static ?string $recordTitleAttribute = 'nombre_usuario';
 

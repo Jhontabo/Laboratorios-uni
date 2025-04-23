@@ -22,7 +22,7 @@ class SolicitudesReservasResource extends Resource
     protected static ?string $modelLabel = 'Solicitud de Reserva';
     protected static ?string $pluralModelLabel = 'Solicitudes de Reservas';
     protected static ?string $navigationGroup = 'Gestión Académica';
-    protected static ?int $navigationSort = 3;
+
 
     public static function getNavigationBadge(): ?string
     {
@@ -64,8 +64,8 @@ class SolicitudesReservasResource extends Resource
                     ->label('Horario')
                     ->getStateUsing(
                         fn($record) => $record->horario && $record->horario->start_at && $record->horario->end_at
-                            ? $record->horario->start_at->format('d M Y, H:i') . ' - ' . $record->horario->end_at->format('H:i')
-                            : 'No asignado'
+                        ? $record->horario->start_at->format('d M Y, H:i') . ' - ' . $record->horario->end_at->format('H:i')
+                        : 'No asignado'
                     )
                     ->description(fn($record) => $record->horario?->descripcion ?? 'Sin descripción')
                     ->icon('heroicon-o-clock'),

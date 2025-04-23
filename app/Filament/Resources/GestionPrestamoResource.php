@@ -23,7 +23,7 @@ class GestionPrestamoResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationLabel = 'Gestión de Préstamos';
     protected static ?string $modelLabel = 'Gestion de préstamos';
-    protected static ?string $navigationGroup = 'Préstamos';
+    protected static ?string $navigationGroup = 'Prestamos';
 
     public static function getEloquentQuery(): Builder
     {

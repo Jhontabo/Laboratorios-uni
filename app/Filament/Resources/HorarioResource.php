@@ -16,7 +16,7 @@ class HorarioResource extends Resource
     protected static ?string $navigationLabel = 'Administrar Horarios';
     protected static ?string $modelLabel = 'Horario';
     protected static ?string $pluralModelLabel = 'Horarios';
-    protected static ?int $navigationSort = 2;
+
 
     public static function getPages(): array
     {

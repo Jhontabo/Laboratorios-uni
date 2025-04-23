@@ -23,7 +23,7 @@ class HistorialReservasResource extends Resource
     protected static ?string $modelLabel = 'Reserva';
     protected static ?string $pluralModelLabel = 'Mis Reservas';
     protected static ?string $navigationGroup = 'Gestión Académica';
-    protected static ?int $navigationSort = 4;
+
 
     public static function getNavigationBadge(): ?string
     {
@@ -68,7 +68,8 @@ class HistorialReservasResource extends Resource
                 TextColumn::make('intervalo')
                     ->label('Horario')
                     ->getStateUsing(function ($record) {
-                        if (!$record->horario) return 'No asignado';
+                        if (!$record->horario)
+                            return 'No asignado';
 
                         $start = $record->horario->start_at->format('d M Y, H:i');
                         $end = $record->horario->end_at->format('H:i');

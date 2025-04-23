@@ -20,8 +20,7 @@ class PrestamoResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationLabel = 'Mis Préstamos';
-    protected static ?string $modelLabel = 'Mi Préstamo';
-    protected static ?string $navigationGroup = 'Préstamos';
+    protected static ?string $navigationGroup = 'Prestamos';
 
     public static function getEloquentQuery(): Builder
     {

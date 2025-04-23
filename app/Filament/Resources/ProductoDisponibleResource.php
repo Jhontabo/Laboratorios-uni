@@ -26,8 +26,9 @@ use Filament\Tables\Columns\Layout\Stack;
 class ProductoDisponibleResource extends Resource
 {
     protected static ?string $model = ProductoDisponible::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-m-shopping-cart';
+    protected static ?string $title = 'Productos Disponibles';
+    protected static ?string $navigationGroup = 'Prestamos';
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

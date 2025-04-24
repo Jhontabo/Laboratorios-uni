@@ -146,16 +146,7 @@ class CategoriaResource extends Resource
         ];
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['nombre_categoria'];
-    }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            'Categoría' => $record->nombre_categoria,
-            'Creado' => $record->created_at->format('d/m/Y'),
-        ];
-    }
+
+
 }

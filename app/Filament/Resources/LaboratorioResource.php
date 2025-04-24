@@ -201,17 +201,5 @@ class LaboratorioResource extends Resource
         ];
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['nombre', 'ubicacion', 'laboratorista.name'];
-    }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            'Ubicación' => $record->ubicacion,
-            'Responsable' => $record->laboratorista->name ?? 'Sin asignar',
-            'Capacidad' => "{$record->capacidad} personas",
-        ];
-    }
 }

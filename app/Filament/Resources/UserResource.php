@@ -342,17 +342,7 @@ class UserResource extends Resource
         ];
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'apellido', 'email'];
-    }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            'Correo' => $record->email,
-            'Estado' => $record->estado === 'activo' ? 'Activo' : 'Inactivo',
-            'Roles' => $record->roles->pluck('name')->join(', '),
-        ];
-    }
+
+
 }

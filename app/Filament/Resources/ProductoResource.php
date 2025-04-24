@@ -463,24 +463,7 @@ class ProductoResource extends Resource
         ];
     }
 
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['nombre', 'numero_serie', 'descripcion'];
-    }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            'Categoría' => $record->categoria->nombre_categoria ?? '-',
-            'Ubicación' => $record->laboratorio->ubicacion ?? '-',
-            'Estado' => match ($record->estado) {
-                'nuevo' => 'Nuevo',
-                'usado' => 'Usado',
-                'dañado' => 'Dañado',
-                'dado_de_baja' => 'Dado de baja',
-                'perdido' => 'Perdido',
-                default => $record->estado,
-            },
-        ];
-    }
+
+
 }

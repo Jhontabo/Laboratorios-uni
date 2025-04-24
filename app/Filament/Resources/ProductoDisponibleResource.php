@@ -3,25 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductoDisponibleResource\Pages;
-use App\Models\Categoria;
-use App\Models\Laboratorio;
 use App\Models\Prestamo;
 use App\Models\ProductoDisponible;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Tables\Columns\Layout\Stack;
 
 class ProductoDisponibleResource extends Resource
 {
@@ -164,8 +154,6 @@ class ProductoDisponibleResource extends Resource
                                 'fecha_solicitud' => now(),
 
                             ]);
-
-
                         }
 
                         Notification::make()

@@ -3,12 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
-use App\Filament\Resources\ReservaResource\Widgets\CalendarWidget;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {

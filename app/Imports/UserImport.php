@@ -7,9 +7,8 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Illuminate\Validation\Rule;
 
-class UsuariosImport implements ToCollection, WithHeadingRow
+class UserImport implements ToCollection, WithHeadingRow
 {
     /**
      * Procesa la colección de datos

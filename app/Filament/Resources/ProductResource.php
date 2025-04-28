@@ -40,7 +40,7 @@ class ProductResource extends Resource
     protected static ?string $pluralModelLabel = 'Products';
     protected static ?string $navigationGroup = 'Inventory and Laboratory';
     protected static ?int $navigationSort = 1;
-    protected static ?string $recordTitleAttribute = 'nombre'; // Aún depende de tu base de datos
+    protected static ?string $recordTitleAttribute = 'name'; // Still depends on your database
 
     public static function getNavigationBadge(): ?string
     {
@@ -60,13 +60,13 @@ class ProductResource extends Resource
                 ->schema([
                     Grid::make(2)
                         ->schema([
-                            TextInput::make('nombre')
+                            TextInput::make('name')
                                 ->label('Product Name')
                                 ->required()
                                 ->maxLength(255)
                                 ->placeholder('e.g., Microscope')
                                 ->helperText('Maximum 255 characters.'),
-                            Textarea::make('descripcion')
+                            Textarea::make('description')
                                 ->label('Product Description')
                                 ->maxLength(500)
                                 ->rows(4)
@@ -80,30 +80,30 @@ class ProductResource extends Resource
                 ->schema([
                     Grid::make(3)
                         ->schema([
-                            TextInput::make('numero_serie')
+                            TextInput::make('serial_number')
                                 ->label('Serial Number')
                                 ->required()
                                 ->maxLength(255),
-                            Select::make('tipo_producto')
+                            Select::make('product_type')
                                 ->label('Product Type')
                                 ->options([
-                                    'suministro' => 'Supply',
-                                    'equipo' => 'Equipment',
+                                    'supply' => 'Supply',
+                                    'equipment' => 'Equipment',
                                 ])
                                 ->required()
                                 ->native(false),
-                            Select::make('estado_producto')
+                            Select::make('product_condition')
                                 ->label('Product Condition')
                                 ->options([
-                                    'nuevo' => 'New',
-                                    'usado' => 'Used',
-                                    'dañado' => 'Damaged',
-                                    'dado_de_baja' => 'Decommissioned',
-                                    'perdido' => 'Lost',
+                                    'new' => 'New',
+                                    'used' => 'Used',
+                                    'damaged' => 'Damaged',
+                                    'decommissioned' => 'Decommissioned',
+                                    'lost' => 'Lost',
                                 ])
                                 ->required()
                                 ->native(false),
-                            Toggle::make('disponible_para_prestamo')
+                            Toggle::make('available_for_loan')
                                 ->label('Available for Loan')
                                 ->default(false),
                         ]),
@@ -114,16 +114,16 @@ class ProductResource extends Resource
                 ->schema([
                     Grid::make(3)
                         ->schema([
-                            TextInput::make('cantidad_disponible')
+                            TextInput::make('available_quantity')
                                 ->label('Stock Quantity')
                                 ->numeric()
                                 ->required(),
-                            TextInput::make('costo_unitario')
+                            TextInput::make('unit_cost')
                                 ->label('Unit Cost (COP)')
                                 ->numeric()
                                 ->prefix('$')
                                 ->required(),
-                            DatePicker::make('fecha_adquisicion')
+                            DatePicker::make('acquisition_date')
                                 ->label('Acquisition Date')
                                 ->required()
                                 ->displayFormat('d/m/Y'),
@@ -135,15 +135,15 @@ class ProductResource extends Resource
                 ->schema([
                     Grid::make(2)
                         ->schema([
-                            Select::make('id_categorias')
+                            Select::make('category_id')
                                 ->label('Category')
-                                ->options(Category::all()->pluck('nombre_categoria', 'id_categorias'))
+                                ->options(Category::all()->pluck('category_name', 'id'))
                                 ->searchable()
                                 ->preload()
                                 ->required(),
-                            Select::make('id_laboratorio')
+                            Select::make('laboratory_id')
                                 ->label('Laboratory Location')
-                                ->options(Laboratory::all()->pluck('ubicacion', 'id_laboratorio'))
+                                ->options(Laboratory::all()->pluck('location', 'id'))
                                 ->searchable()
                                 ->preload()
                                 ->required(),
@@ -153,7 +153,7 @@ class ProductResource extends Resource
             Section::make('Product Image')
                 ->icon('heroicon-o-photo')
                 ->schema([
-                    FileUpload::make('imagen')
+                    FileUpload::make('image')
                         ->image()
                         ->imageEditor()
                         ->directory('products')
@@ -167,90 +167,89 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            ImageColumn::make('imagen')
+            ImageColumn::make('image')
                 ->label('Image')
                 ->size(50)
                 ->circular()
                 ->toggleable(),
 
-            TextColumn::make('nombre')
+            TextColumn::make('name')
                 ->label('Product')
                 ->searchable()
                 ->sortable(),
 
-            TextColumn::make('cantidad_disponible')
+            TextColumn::make('available_quantity')
                 ->label('Stock')
                 ->sortable(),
 
-            TextColumn::make('estado_producto')
+            TextColumn::make('product_condition')
                 ->label('Condition')
                 ->badge(),
 
-            TextColumn::make('tipo_producto')
+            TextColumn::make('product_type')
                 ->label('Type')
                 ->badge(),
 
-            TextColumn::make('costo_unitario')
+            TextColumn::make('unit_cost')
                 ->label('Price')
                 ->money('COP')
                 ->sortable(),
 
-            TextColumn::make('fecha_adquisicion')
+            TextColumn::make('acquisition_date')
                 ->label('Acquisition')
                 ->date('d/m/Y')
                 ->sortable(),
 
-            TextColumn::make('laboratorio.ubicacion')
+            TextColumn::make('laboratory.location')
                 ->label('Location')
                 ->searchable()
                 ->sortable(),
 
-            TextColumn::make('categoria.nombre_categoria')
+            TextColumn::make('category.category_name')
                 ->label('Category')
                 ->sortable()
                 ->searchable()
                 ->toggleable(isToggledHiddenByDefault: true),
         ])
-        ->filters([
-            Filter::make('low_stock')
-                ->label('Low Stock (<=10)')
-                ->query(fn(Builder $query) => $query->where('cantidad_disponible', '<=', 10))
-                ->toggle(),
+            ->filters([
+                Filter::make('low_stock')
+                    ->label('Low Stock (<=10)')
+                    ->query(fn(Builder $query) => $query->where('available_quantity', '<=', 10))
+                    ->toggle(),
 
-            Filter::make('by_laboratory')
-                ->label('By Laboratory')
-                ->form([
-                    Select::make('id_laboratorio')
-                        ->options(Laboratory::all()->pluck('ubicacion', 'id_laboratorio'))
-                        ->searchable()
-                        ->preload(),
-                ])
-                ->query(fn(Builder $query, array $data) => $query->when($data['id_laboratorio'], fn($q) => $q->where('id_laboratorio', $data['id_laboratorio']))),
-        ])
-        ->actions([
-            EditAction::make()->tooltip('Edit product'),
-            DeleteBulkAction::make()->tooltip('Delete selected'),
-        ])
-        ->bulkActions([
-            BulkAction::make('markAsLost')
-                ->label('Mark as Lost')
-                ->action(fn(Collection $records) => $records->each->update(['estado_producto' => 'perdido']))
-                ->requiresConfirmation()
-                ->modalHeading('Mark selected as lost'),
+                Filter::make('by_laboratory')
+                    ->label('By Laboratory')
+                    ->form([
+                        Select::make('laboratory_id')
+                            ->options(Laboratory::all()->pluck('location', 'id'))
+                            ->searchable()
+                            ->preload(),
+                    ])
+                    ->query(fn(Builder $query, array $data) => $query->when($data['laboratory_id'], fn($q) => $q->where('laboratory_id', $data['laboratory_id']))),
+            ])
+            ->actions([  // Actions for individual rows
+                EditAction::make()->tooltip('Edit product'),
+            ])
+            ->bulkActions([  // Bulk actions for selected rows
+                BulkAction::make('markAsLost')
+                    ->label('Mark as Lost')
+                    ->action(fn(Collection $records) => $records->each->update(['product_condition' => 'lost']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Mark selected as lost'),
 
-            BulkAction::make('decommissionSelected')
-                ->label('Decommission')
-                ->action(fn(Collection $records) => $records->each->update(['estado_producto' => 'dado_de_baja']))
-                ->requiresConfirmation()
-                ->modalHeading('Decommission selected products'),
+                BulkAction::make('decommissionSelected')
+                    ->label('Decommission')
+                    ->action(fn(Collection $records) => $records->each->update(['product_condition' => 'decommissioned']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Decommission selected products'),
 
-            DeleteBulkAction::make(),
-        ])
-        ->defaultSort('nombre', 'asc')
-        ->deferLoading()
-        ->persistFiltersInSession()
-        ->persistSearchInSession()
-        ->striped();
+                DeleteBulkAction::make(),  // Bulk delete action
+            ])
+            ->defaultSort('name', 'asc')
+            ->deferLoading()  // Delayed loading
+            ->persistFiltersInSession()  // Persist filters in session
+            ->persistSearchInSession()  // Persist search in session
+            ->striped();  // Striped table rows
     }
 
     public static function getRelations(): array
@@ -267,4 +266,3 @@ class ProductResource extends Resource
         ];
     }
 }
-

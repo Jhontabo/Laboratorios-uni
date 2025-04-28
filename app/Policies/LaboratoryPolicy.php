@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Laboratorio;
+use App\Models\Laboratory;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class LaboratoryPolicy
@@ -15,7 +15,7 @@ class LaboratoryPolicy
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('view laboratory panel');
     }
 
-    public function view(User $user, Laboratorio $laboratorio): bool
+    public function view(User $user, Laboratory $laboratory): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('view laboratory');
     }
@@ -25,12 +25,12 @@ class LaboratoryPolicy
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('create laboratory');
     }
 
-    public function update(User $user, Laboratorio $laboratorio): bool
+    public function update(User $user, Laboratory $laboratory): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('update laboratory');
     }
 
-    public function delete(User $user, Laboratorio $laboratorio): bool
+    public function delete(User $user, Laboratory $laboratory): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete laboratory');
     }

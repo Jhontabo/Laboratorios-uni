@@ -25,7 +25,7 @@ class CalendarWidget extends FullCalendarWidget
 {
     protected static ?string $heading = 'Schedule Calendar';
 
-    public Model | string | null $model = Schedule::class;
+    public Model|string|null $model = Schedule::class;
 
     public static function canView(): bool
     {
@@ -68,10 +68,10 @@ class CalendarWidget extends FullCalendarWidget
 
         return $query->get()->map(function (Schedule $schedule) {
             return [
-                'id'    => $schedule->id,
+                'id' => $schedule->id,
                 'title' => $schedule->title,
                 'start' => $schedule->start_at,
-                'end'   => $schedule->end_at,
+                'end' => $schedule->end_at,
                 'color' => $schedule->color,
             ];
         })->toArray();
@@ -193,4 +193,3 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 }
-

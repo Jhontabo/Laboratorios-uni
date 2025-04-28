@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Filament\Notifications\Notification;
 
-class Horario extends Model
+class Schedule extends Model
 {
     use HasFactory;
 
-
-    protected $table = 'horarios'; // Nombre de la tabla
-    protected $primaryKey = 'id_horario'; // Clave primaria
+    protected $table = 'schedules'; // Table name
+    protected $primaryKey = 'id'; // Primary key
 
     protected $fillable = [
         'title',
@@ -23,63 +22,63 @@ class Horario extends Model
         'description',
         'is_available',
         'reservation_status',
-        'id_laboratorio',
+        'id_laboratory',
         'user_id',
     ];
 
-    // Asegúrate de que los campos de fecha se interpreten como objetos Carbon
+    // Ensure that date fields are cast to Carbon objects
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
     ];
+
     public static function boot()
     {
         parent::boot();
 
-        static::creating(function ($horario) {
-            $existe = self::where('id_laboratorio', $horario->id_laboratorio)
-                ->where(function ($query) use ($horario) {
-                    $query->whereBetween('start_at', [$horario->start_at, $horario->end_at])
-                        ->orWhereBetween('end_at', [$horario->start_at, $horario->end_at])
-                        ->orWhere(function ($query) use ($horario) {
-                            $query->where('start_at', '<=', $horario->start_at)
-                                ->where('end_at', '>=', $horario->end_at);
+        static::creating(function ($schedule) {
+            $exists = self::where('id_laboratory', $schedule->id_laboratory)
+                ->where(function ($query) use ($schedule) {
+                    $query->whereBetween('start_at', [$schedule->start_at, $schedule->end_at])
+                        ->orWhereBetween('end_at', [$schedule->start_at, $schedule->end_at])
+                        ->orWhere(function ($query) use ($schedule) {
+                            $query->where('start_at', '<=', $schedule->start_at)
+                                ->where('end_at', '>=', $schedule->end_at);
                         });
                 })
                 ->exists();
 
-            if ($existe) {
+            if ($exists) {
                 Notification::make()
                     ->title('Error')
-                    ->body('Ya existe un horario en este rango de tiempo para este laboratorio.')
+                    ->body('A schedule already exists in this time range for this laboratory.')
                     ->danger()
                     ->send();
 
                 throw ValidationException::withMessages([
-                    'error' => 'Ya existe un horario en este rango de tiempo para este laboratorio.'
+                    'error' => 'A schedule already exists in this time range for this laboratory.'
                 ]);
             }
         });
     }
 
-    public function laboratorista()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id'); // 'user_id' debe ser la clave que conecta con el usuario
-    }
-    // Relación con laboratorio
-    public function laboratorio()
-    {
-        return $this->belongsTo(Laboratorio::class, 'id_laboratorio');
+        return $this->belongsTo(User::class, 'user_id'); // 'user_id' is the key that connects to the user
     }
 
-
-    public function reservas()
+    // Relationship with laboratory
+    public function laboratory()
     {
-        return $this->hasMany(Reserva::class, 'id_horario', 'id_horario');
+        return $this->belongsTo(Laboratory::class, 'id_laboratory');
     }
 
+    public function Bookings()
+    {
+        return $this->hasMany(Booking::class, 'id', 'id');
+    }
 
-    // Accesor para el rango de tiempo (opcional)
+    // Accessor for the time range (optional)
     public function getTimeRangeAttribute(): string
     {
         return $this->start_at . ' - ' . $this->end_at;

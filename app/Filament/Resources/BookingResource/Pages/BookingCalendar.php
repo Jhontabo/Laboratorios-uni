@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\BookingResource\Pages;
 
 use App\Filament\Resources\ReservationResource;
-use App\Filament\Widgets\ReservationCalendar;
+use App\Filament\Widgets\CalendarWidget;
 use App\Models\Reservation;
 use App\Models\Laboratory;
 use Filament\Resources\Pages\Page;
@@ -12,9 +12,16 @@ class BookingCalendar extends Page
 {
     protected static string $resource = ReservationResource::class;
 
-    protected static string $view = 'filament.resources.reservation-resource.pages.reservation';
+    protected static string $view = 'filament.pages.reservation';
 
     public ?int $laboratoryId = null;
+
+
+    public static function canView(): bool
+    {
+        // Aquí puedes controlar la visibilidad de la página según los permisos del usuario
+        return auth()->user()->hasRole('admin');  // Ejemplo de control de visibilidad basado en roles
+    }
 
     public function mount()
     {
@@ -37,7 +44,7 @@ class BookingCalendar extends Page
     public function getFooterWidgets(): array
     {
         return [
-            ReservationCalendar::class,
+            BookingCalendar::class,
         ];
     }
 
@@ -54,6 +61,7 @@ class BookingCalendar extends Page
 
     public function getLaboratories(): array
     {
-        return Laboratory::pluck('name', 'id_laboratory')->toArray();
+        return Laboratory::pluck('name', 'id')->toArray();
     }
+
 }

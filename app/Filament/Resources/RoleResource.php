@@ -80,7 +80,7 @@ class RoleResource extends Resource
                     ->searchable()
                     ->weight(FontWeight::Bold)
                     ->formatStateUsing(fn($state) => strtoupper($state))
-                    ->description(fn(Rol $record) => $record->permissions->count() . ' permissions assigned'),
+                    ->description(fn(Role $record) => $record->permissions->count() . ' permissions assigned'),
 
                 TextColumn::make('permissions_count')
                     ->label('Permissions')

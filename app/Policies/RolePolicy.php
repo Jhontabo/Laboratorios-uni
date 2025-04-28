@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Rol;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -21,7 +21,7 @@ class RolePolicy
     /**
      * Determine whether the user can view a specific role.
      */
-    public function view(User $user, Rol $rol): bool
+    public function view(User $user, Role $role): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('view role');
     }
@@ -37,7 +37,7 @@ class RolePolicy
     /**
      * Determine whether the user can update a role.
      */
-    public function update(User $user, Rol $rol): bool
+    public function update(User $user, Role $role): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('update role');
     }
@@ -45,7 +45,7 @@ class RolePolicy
     /**
      * Determine whether the user can delete a role.
      */
-    public function delete(User $user, Rol $rol): bool
+    public function delete(User $user, Role $role): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete role');
     }

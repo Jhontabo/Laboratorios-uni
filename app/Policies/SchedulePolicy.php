@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Horario;
+use App\Models\Schedule;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class SchedulePolicy
@@ -21,7 +21,7 @@ class SchedulePolicy
     /**
      * Determine whether the user can view a specific schedule.
      */
-    public function view(User $user, Horario $horario): bool
+    public function view(User $user, Schedule $schedule): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('view schedule');
     }
@@ -37,7 +37,7 @@ class SchedulePolicy
     /**
      * Determine whether the user can update a schedule.
      */
-    public function update(User $user, Horario $horario): bool
+    public function update(User $user, Schedule $schedule): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('update schedule');
     }
@@ -45,7 +45,7 @@ class SchedulePolicy
     /**
      * Determine whether the user can delete a schedule.
      */
-    public function delete(User $user, Horario $horario): bool
+    public function delete(User $user, Schedule $schedule): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete schedule');
     }

@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Producto;
+use App\Models\Product;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProductPolicy
@@ -21,7 +21,7 @@ class ProductPolicy
     /**
      * Determine if the user can view a specific product.
      */
-    public function view(User $user, Producto $producto): bool
+    public function view(User $user, Product $product): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('view product');
     }
@@ -37,7 +37,7 @@ class ProductPolicy
     /**
      * Determine if the user can update a product.
      */
-    public function update(User $user, Producto $producto): bool
+    public function update(User $user, Product $product): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('update product');
     }
@@ -45,7 +45,7 @@ class ProductPolicy
     /**
      * Determine if the user can delete a product.
      */
-    public function delete(User $user, Producto $producto): bool
+    public function delete(User $user, Product $product): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete product');
     }

@@ -11,7 +11,7 @@ class ScheduleCalendar extends Page
 {
     protected static string $resource = ScheduleResource::class;
 
-    protected static string $view = 'filament.resources.schedule-resource.pages.calendar';
+    protected static string $view = 'filament.pages.calendar';
 
     public ?int $laboratoryId = null;
 

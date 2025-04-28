@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Reserva;
+use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -21,11 +21,11 @@ class ReservationPolicy
     /**
      * Determine if the user can view a specific reservation.
      */
-    public function view(User $user, Reserva $reserva): bool
+    public function view(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
             || $user->hasPermissionTo('view any reservation')
-            || $reserva->user_id === $user->user_id;
+            || $booking->user_id === $user->user_id;
     }
 
     /**
@@ -39,21 +39,21 @@ class ReservationPolicy
     /**
      * Determine if the user can update a reservation.
      */
-    public function update(User $user, Reserva $reserva): bool
+    public function update(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
             || $user->hasPermissionTo('update reservation')
-            || ($reserva->user_id === $user->user_id && $reserva->estado === 'pendiente');
+            || ($booking->user_id === $user->user_id && $booking->estado === 'pendiente');
     }
 
     /**
      * Determine if the user can delete a reservation.
      */
-    public function delete(User $user, Reserva $reserva): bool
+    public function delete(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
             || $user->hasPermissionTo('delete reservation')
-            || ($reserva->user_id === $user->user_id && $reserva->estado === 'pendiente');
+            || ($booking->user_id === $user->user_id && $booking->estado === 'pendiente');
     }
 
     /**
@@ -67,7 +67,7 @@ class ReservationPolicy
     /**
      * Determine if the user can manage a specific reservation request.
      */
-    public function manageRequest(User $user, Reserva $reserva): bool
+    public function manageRequest(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN') || $user->hasPermissionTo('manage reservation requests');
     }

@@ -9,13 +9,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->bigIncrements('user_id'); // Clave primaria personalizada
+            $table->id();
             $table->string('name'); // Nombre del usuario
-            $table->string('apellido'); // Apellido del usuario
+            $table->string('last_name'); // Apellido del usuario
             $table->string('email')->unique(); // Correo único
-            $table->string('telefono')->nullable(); // Teléfono opcional
-            $table->string('direccion'); // Dirección
-            $table->enum('estado', ['activo', 'inactivo'])->default('activo'); // Estado del usuario
+            $table->string('phone')->nullable(); // Teléfono opcional
+            $table->string('address'); // Dirección
+            $table->enum('status', ['active', 'inactive'])->default('active');
+
             $table->rememberToken(); // Token para recordar sesión
             $table->timestamps(); // Timestamps created_at y updated_at
         });

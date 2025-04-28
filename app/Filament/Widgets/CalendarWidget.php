@@ -2,200 +2,172 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\Widget;
-use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
-use App\Models\Horario;
-use App\Filament\Resources\HorarioResource;
-use App\Models\Laboratorio;
+use App\Models\Schedule;
+use App\Models\Laboratory;
 use Carbon\Carbon;
-use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
+use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
+use Saade\FilamentFullCalendar\Actions\CreateAction;
 use Saade\FilamentFullCalendar\Actions\DeleteAction;
 use Saade\FilamentFullCalendar\Actions\EditAction;
-use Saade\FilamentFullCalendar\Actions\CreateAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 
 class CalendarWidget extends FullCalendarWidget
 {
-    protected static ?string $heading = 'Calendario Horarios';
+    protected static ?string $heading = 'Schedule Calendar';
 
-    // Modelo para el widget
-    public Model | string | null $model = Horario::class;
+    public Model | string | null $model = Schedule::class;
 
-
-
-    // Método para decidir si el widget debe ser visible
     public static function canView(): bool
     {
-
         $routesToHideWidget = [
             'filament.admin.pages.dashboard',
-            'filament.estudiante.pages.dashboard',
-            'filament.docente.pages.dashboard',
-            'filament.laboratorista.pages.dashboard'
-
+            'filament.student.pages.dashboard',
+            'filament.teacher.pages.dashboard',
+            'filament.laboratorian.pages.dashboard',
         ];
-
 
         return !in_array(request()->route()->getName(), $routesToHideWidget);
     }
 
-    // Configuración de FullCalendar
     public function config(): array
     {
         return [
-            'firstDay' => 1, // Inicia la semana en lunes
-            'slotMinTime' => '06:00:00', // Hora mínima visible
-            'slotMaxTime' => '22:00:00', // Hora máxima visible
-            'locale' => 'es',
-            'initialView' => 'timeGridWeek', // Vista semanal predeterminada
+            'firstDay' => 1,
+            'slotMinTime' => '06:00:00',
+            'slotMaxTime' => '22:00:00',
+            'locale' => 'en',
+            'initialView' => 'timeGridWeek',
             'headerToolbar' => [
                 'left' => 'prev,next',
                 'center' => 'title',
-                'right' => 'dayGridMonth,timeGridWeek,timeGridDay', // Opciones de vista
+                'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
-
         ];
     }
 
-
-
     public function fetchEvents(array $fetchInfo): array
     {
-        // Recupera el id del laboratorio desde la sesión
         $labId = session()->get('lab');
-        // Recupera el filtro widget, por defecto "Todos"
-        $widgetFilter = request()->query('widget', 'Todos');
+        $query = Schedule::query();
 
-        $query = Horario::query();
-
-        // Filtra por rango de fechas
         $query->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
 
-        // Si se ha seleccionado un laboratorio (id guardado en sesión), filtra por él
         if (!is_null($labId)) {
-            $query->where('id_laboratorio', $labId);
+            $query->where('laboratory_id', $labId);
         }
 
-
-
-        return $query->get()->map(function (Horario $horario) {
+        return $query->get()->map(function (Schedule $schedule) {
             return [
-                'id'    => $horario->id_horario,
-                'title' => $horario->title,
-                'start' => $horario->start_at,
-                'end'   => $horario->end_at,
-                'color' => $horario->color,
+                'id'    => $schedule->id,
+                'title' => $schedule->title,
+                'start' => $schedule->start_at,
+                'end'   => $schedule->end_at,
+                'color' => $schedule->color,
             ];
         })->toArray();
     }
-
 
     protected function modalActions(): array
     {
         return [
             EditAction::make()
-                ->mountUsing(
-                    function (Horario $record, Form $form, array $arguments) {
-                        // Llena el formulario con los valores actuales del registro
-                        $form->fill([
-                            'title' => $record->title, // Título del evento
-                            'start_at' => $arguments['event']['start'] ?? $record->start_at, // Usa la fecha inicial del evento o del registro
-                            'end_at' => $arguments['event']['end'] ?? $record->end_at, // Usa la fecha de fin del evento o del registro
-                            'color' => $record->color, // Color del evento
-                            'is_available' => $record->is_available, // Disponibilidad
-                            'id_laboratorio' => $record->id_laboratorio, // Relación con el laboratorio
-                        ]);
-                    }
-                )
-                ->action(
-                    function (Horario $record, array $data) {
-                        // Actualiza los datos del evento en la base de datos
-                        $record->update([
-                            'title' => $data['title'], // Actualiza el título
-                            'start_at' => $data['start_at'], // Actualiza la fecha de inicio
-                            'end_at' => $data['end_at'], // Actualiza la fecha de fin
-                            'color' => $data['color'], // Actualiza el color
-                            'is_available' => $data['is_available'], // Actualiza la disponibilidad
-                            'id_laboratorio' => $data['id_laboratorio'], // Actualiza el laboratorio
-                        ]);
-                    }
-                ),
+                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
+                    $form->fill([
+                        'title' => $record->title,
+                        'start_at' => $arguments['event']['start'] ?? $record->start_at,
+                        'end_at' => $arguments['event']['end'] ?? $record->end_at,
+                        'color' => $record->color,
+                        'is_available' => $record->is_available,
+                        'laboratory_id' => $record->laboratory_id,
+                    ]);
+                })
+                ->action(function (Schedule $record, array $data) {
+                    $record->update([
+                        'title' => $data['title'],
+                        'start_at' => $data['start_at'],
+                        'end_at' => $data['end_at'],
+                        'color' => $data['color'],
+                        'is_available' => $data['is_available'],
+                        'laboratory_id' => $data['laboratory_id'],
+                    ]);
+                }),
             DeleteAction::make(),
         ];
     }
-
 
     protected function headerActions(): array
     {
         return [
             CreateAction::make()
-                ->mountUsing(
-                    function (Form $form, array $arguments) {
-                        $form->fill([
-                            'start_at' => $arguments['start'] ?? null,
-                            'end_at' => $arguments['end'] ?? null
-                        ]);
-                    }
-                )
+                ->mountUsing(function (Form $form, array $arguments) {
+                    $form->fill([
+                        'start_at' => $arguments['start'] ?? null,
+                        'end_at' => $arguments['end'] ?? null,
+                    ]);
+                }),
         ];
     }
 
     public function getFormSchema(): array
     {
         return [
-            Section::make('Información General')
+            Section::make('General Information')
                 ->schema([
                     TextInput::make('title')
                         ->required()
-                        ->label('Nombre')
-                        ->placeholder('Ingrese el nombre del evento'),
+                        ->label('Event Name')
+                        ->placeholder('Enter event name'),
 
-                    TextArea::make('description')
-                        ->label('Descripción')
+                    Textarea::make('description')
+                        ->label('Description')
                         ->maxLength(500)
-                        ->placeholder('Ejemplo: Clase de programación avanzada')
-                        ->helperText('La descripción no debe exceder los 500 caracteres'),
+                        ->placeholder('e.g., Advanced programming class')
+                        ->helperText('Maximum 500 characters allowed.'),
                 ])
                 ->columns(2),
 
-            Section::make('Disponibilidad y color')
+            Section::make('Availability and Color')
                 ->schema([
                     Toggle::make('is_available')
-                        ->label('Disponibilidad para reserva')
+                        ->label('Available for Reservation')
                         ->onColor('success')
                         ->offColor('danger')
-                        ->helperText('Elige si el espacio estará disponible para reserva.')
+                        ->helperText('Toggle if this space is available for reservation.')
                         ->default(false),
-                    ColorPicker::make('color')
-                        ->label('Color del evento')
-                        ->helperText('Elige un color para representar este evento.'),
-                    Select::make('id_laboratorio')
-                        ->label('Laboratorio')
-                        ->options(Laboratorio::pluck('nombre', 'id_laboratorio')->toArray())
-                        ->required(),
-                ])->columns(3),
 
-            Section::make('Horario')
+                    ColorPicker::make('color')
+                        ->label('Event Color')
+                        ->helperText('Select a color for the event.'),
+
+                    Select::make('laboratory_id')
+                        ->label('Laboratory')
+                        ->options(Laboratory::pluck('name', 'id')->toArray())
+                        ->required(),
+                ])
+                ->columns(3),
+
+            Section::make('Schedule')
                 ->schema([
                     Grid::make(2)
                         ->schema([
                             DateTimePicker::make('start_at')
                                 ->required()
-                                ->label('Fecha y hora de inicio')
-                                ->placeholder('Seleccione la fecha y hora de inicio')
-                                ->displayFormat('H:i')
+                                ->label('Start Date and Time')
+                                ->placeholder('Select start date and time')
+                                ->displayFormat('d/m/Y H:i')
                                 ->native(false)
-                                ->minDate(Carbon::now()) // 🔹 Evita fechas pasadas
-                                ->helperText('No se puede seleccionar una fecha pasada')
+                                ->minDate(Carbon::now())
+                                ->helperText('Cannot select a past date.')
                                 ->afterStateUpdated(function ($state, callable $set) {
                                     if ($state && Carbon::parse($state)->isPast()) {
                                         $set('start_at', null);
@@ -204,12 +176,12 @@ class CalendarWidget extends FullCalendarWidget
 
                             DateTimePicker::make('end_at')
                                 ->required()
-                                ->label('Fecha y hora de fin')
-                                ->placeholder('Seleccione la fecha y hora de fin')
-                                ->displayFormat('H:i')
+                                ->label('End Date and Time')
+                                ->placeholder('Select end date and time')
+                                ->displayFormat('d/m/Y H:i')
                                 ->native(false)
-                                ->minDate(Carbon::now()) // 🔹 Evita fechas pasadas
-                                ->helperText('Debe ser posterior a la fecha de inicio')
+                                ->minDate(Carbon::now())
+                                ->helperText('Must be after the start date.')
                                 ->afterStateUpdated(function ($state, callable $set, $get) {
                                     if ($state && Carbon::parse($state)->lessThan(Carbon::parse($get('start_at')))) {
                                         $set('end_at', null);
@@ -221,3 +193,4 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 }
+

@@ -21,17 +21,17 @@ class BookingByLaboratoryChart extends ChartWidget
 
         // Query to count bookings per laboratory
         $query = Laboratory::query()
-            ->leftJoin('bookings', 'laboratories.id_laboratory', '=', 'bookings.id_laboratory')
+            ->leftJoin('bookings', 'laboratories.id', '=', 'bookings.id')
             ->select(
                 'laboratories.name',
-                DB::raw('COUNT(bookings.id_booking) as total_bookings')
+                DB::raw('COUNT(bookings.id) as total_bookings')
             )
-            ->groupBy('laboratories.id_laboratory', 'laboratories.name')
+            ->groupBy('laboratories.id', 'laboratories.name')
             ->orderBy('total_bookings', 'desc');
 
         // Filter by laboratory if specified
         if ($this->laboratoryId) {
-            $query->where('laboratories.id_laboratory', $this->laboratoryId);
+            $query->where('laboratories.id', $this->laboratoryId);
         }
 
         $data = $query->get();

@@ -34,7 +34,7 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-o-building-office')
                 ->color('warning'),
 
-            Stat::make('Active Users', User::where('estado', true)->count())
+            Stat::make('Active Users', User::where('status', true)->count())
                 ->description('Total: ' . User::count())
                 ->descriptionIcon('heroicon-o-users')
                 ->color('success'),

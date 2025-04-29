@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\ValidationException;
-use Filament\Notifications\Notification;
 
 class Schedule extends Model
 {
@@ -22,7 +20,7 @@ class Schedule extends Model
         'description',
         'is_available',
         'reservation_status',
-        'id_laboratory',
+        'laboratory_id',
         'user_id',
     ];
 
@@ -41,12 +39,13 @@ class Schedule extends Model
     // Relationship with laboratory
     public function laboratory()
     {
-        return $this->belongsTo(Laboratory::class, 'id_laboratory');
+        return $this->belongsTo(Laboratory::class, 'laboratory_id');
     }
 
-    public function Bookings()
+
+    public function bookings()
     {
-        return $this->hasMany(Booking::class, 'id', 'id');
+        return $this->hasMany(Booking::class, 'schedule_id');
     }
 
     // Accessor for the time range (optional)

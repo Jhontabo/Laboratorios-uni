@@ -29,5 +29,10 @@ class Laboratory extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-}
 
+    // En el modelo Laboratory
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'laboratory_id'); // 'id_laboratory' es la clave foránea en la tabla schedules
+    }
+}

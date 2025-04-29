@@ -159,7 +159,6 @@ class BookingCalendar extends FullCalendarWidget
 
     public function reserveSchedule()
     {
-        //logger()->info('🔔 Reserving schedule...');
 
         try {
             // Check if the schedule is already reserved
@@ -252,23 +251,22 @@ class BookingCalendar extends FullCalendarWidget
 
             TextInput::make('user.name')
                 ->label('First Name')
-                ->default($this->booking?->user_first_name ?? auth()->user()->name ?? '')
+                ->default($this->booking?->first_name ?? auth()->user()->name ?? '')
                 ->disabled()
                 ->required(),
 
             TextInput::make('user.last_name')
                 ->label('Last Name')
-                ->default($this->booking?->user_last_name ?? auth()->user()->last_name ?? '')
+                ->default($this->booking?->last_name ?? auth()->user()->last_name ?? '')
                 ->disabled()
                 ->required(),
 
             TextInput::make('user.email')
                 ->label('Email')
-                ->default($this->booking?->user_email ?? auth()->user()->email ?? '')
+                ->default($this->booking?->email ?? auth()->user()->email ?? '')
                 ->disabled()
                 ->email()
                 ->required(),
         ];
     }
-
 }

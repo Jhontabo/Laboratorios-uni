@@ -11,7 +11,6 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Auth;
 
 class ReservationRequestResource extends Resource
 {
@@ -38,17 +37,16 @@ class ReservationRequestResource extends Resource
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('schedule.lab.name') // Changed 'horario.laboratorio.nombre' to 'schedule.lab.name'
+
+                TextColumn::make('schedule.laboratory.location') // Asegúrate de que 'schedule.laboratory.location' sea la ruta correcta
                     ->label('Laboratory')
-                    ->description(fn($record) => $record->schedule?->lab?->location ?? 'No location')
+                    ->description(fn($record) => $record->schedule?->laboratory?->location ?? 'No location') // Usa 'schedule.laboratory.location'
                     ->searchable()
                     ->icon('heroicon-o-building-office'),
-
-                TextColumn::make('user.name') // Changed 'usuario.name' to 'user.name'
+                TextColumn::make('user.name') // Usamos 'user.name' para acceder al nombre completo
                     ->label('Applicant')
-                    ->formatStateUsing(fn($record) => "{$record->user_first_name} {$record->user_last_name}")
-                    ->description(fn($record) => $record->user_email)
-                    ->searchable(['user_first_name', 'user_last_name'])
+                    ->formatStateUsing(fn($record) => "{$record->user->name} {$record->user->last_name}")
+                    ->description(fn($record) => $record->user->email ?? 'No email')
                     ->icon('heroicon-o-user'),
 
                 TextColumn::make('interval')

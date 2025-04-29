@@ -16,12 +16,15 @@ class Booking extends Model
         'laboratory_id',
         'schedule_id',
         'lab_technician_id',
-        'user_first_name',
-        'user_last_name',
-        'user_email',
+        'first_name',
+        'last_name',
+        'email',
         'rejection_reason',
         'status',
     ];
+
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_PENDING = 'pending';
 
     public function user()
     {
@@ -37,8 +40,4 @@ class Booking extends Model
     {
         return $this->belongsTo(Schedule::class, 'schedule_id');
     }
-
-
-
 }
-

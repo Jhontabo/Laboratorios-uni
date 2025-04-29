@@ -23,16 +23,13 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('laboratories') // References laboratories.id
                 ->cascadeOnDelete()
-                ->cascadeOnUpdate()
-                ->comment('Related to laboratories');
-
+                ->cascadeOnUpdate();
             // Foreign Key for user
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained('users') // References users.id
                 ->cascadeOnDelete()
-                ->cascadeOnUpdate()
-                ->comment('Related to users');
+                ->cascadeOnUpdate();
 
             $table->timestamps(); // created_at and updated_at
 
@@ -46,4 +43,3 @@ return new class extends Migration
         Schema::dropIfExists('schedules');
     }
 };
-

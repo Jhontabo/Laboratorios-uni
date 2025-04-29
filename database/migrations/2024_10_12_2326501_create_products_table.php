@@ -26,7 +26,7 @@ return new class extends Migration {
 
             // Technical details
             $table->string('serial_number')->nullable()->unique();
-            $table->decimal('unit_cost', 8, 2)->nullable();
+            $table->decimal('unit_cost')->nullable();
             $table->string('location')->nullable();
             $table->date('acquisition_date')->nullable();
 

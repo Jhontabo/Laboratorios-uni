@@ -129,8 +129,9 @@ class AvailableProductResource extends Resource
                                 'product_id' => $record->id,
                                 'user_id' => auth()->id(),
                                 'status' => 'pending',
-                                'request_date' => now(),
+                                'requested_at' => now(), // Change this from 'request_date' to 'requested_at'
                             ]);
+
                         }
 
                         Notification::make()

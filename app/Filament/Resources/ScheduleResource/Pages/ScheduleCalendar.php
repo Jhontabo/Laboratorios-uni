@@ -43,7 +43,7 @@ class ScheduleCalendar extends Page
 
     public function getDropdownOptions(): array
     {
-        $laboratories = Laboratory::all()->pluck('name', 'id_laboratory')->toArray();
+        $laboratories = Laboratory::all()->pluck('name', 'id')->toArray();
 
         return [
             'All' => 'All',

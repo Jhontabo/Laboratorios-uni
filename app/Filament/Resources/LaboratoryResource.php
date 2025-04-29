@@ -106,12 +106,15 @@ class LaboratoryResource extends Resource
                     })
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('manager.name')
+                Tables\Columns\TextColumn::make('user.name')
                     ->label('Manager')
                     ->sortable()
-                    ->searchable()
-                    ->description(fn(Laboratory $record) => $record->manager?->email ?? ''),
-
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('user.last_name')
+                    ->label('Last Name')
+                    ->getStateUsing(fn(Laboratory $record): string => trim($record->user->first_name . ' ' . $record->user->last_name))
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime('d/m/Y')

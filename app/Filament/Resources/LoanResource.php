@@ -26,42 +26,10 @@ class LoanResource extends Resource
     {
         return parent::getEloquentQuery()
             ->with(['product'])
-            ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc');
+            ->where('user_id', Auth::id());
     }
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('product_id')
-                    ->relationship('product', 'name')
-                    ->required()
-                    ->disabled(),
 
-                Forms\Components\Select::make('status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
-                        'returned' => 'Returned',
-                    ])
-                    ->required()
-                    ->disabled(),
-
-                Forms\Components\DateTimePicker::make('request_date')
-                    ->disabled(),
-
-                Forms\Components\DateTimePicker::make('approval_date')
-                    ->disabled(),
-
-                Forms\Components\DateTimePicker::make('estimated_return_date')
-                    ->disabled(),
-
-                Forms\Components\DateTimePicker::make('real_return_date')
-                    ->disabled(),
-            ]);
-    }
 
     public static function table(Table $table): Table
     {
@@ -88,23 +56,23 @@ class LoanResource extends Resource
                     })
                     ->formatStateUsing(fn(string $state): string => ucfirst($state)),
 
-                TextColumn::make('request_date')
+                TextColumn::make('requested_at')
                     ->label('Request Date')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
 
-                TextColumn::make('approval_date')
+                TextColumn::make('approved_at')
                     ->label('Approval Date')
                     ->dateTime('d M Y H:i')
                     ->placeholder('Not approved')
                     ->sortable(),
 
-                TextColumn::make('estimated_return_date')
+                TextColumn::make('estimated_return_at')
                     ->label('Estimated Return')
                     ->dateTime('d M Y')
                     ->placeholder('Not assigned'),
 
-                TextColumn::make('real_return_date')
+                TextColumn::make('actual_return_at')
                     ->label('Returned')
                     ->dateTime('d M Y H:i')
                     ->placeholder('Not returned'),

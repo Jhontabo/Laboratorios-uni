@@ -12,20 +12,19 @@ class Loan extends Model
     protected $fillable = [
         'product_id',
         'user_id',
-        'quantity',
         'status',
-        'request_date',
-        'approval_date',
-        'estimated_return_date',
-        'real_return_date',
+        'requested_at', // Changed from 'request_date' to 'requested_at'
+        'approved_at', // Changed from 'approval_date' to 'approved_at'
+        'estimated_return_at',
+        'actual_return_at', // Changed from 'real_return_date' to 'actual_return_at'
         'observations',
     ];
 
     protected $casts = [
-        'request_date' => 'datetime',
-        'approval_date' => 'datetime',
-        'estimated_return_date' => 'datetime',
-        'real_return_date' => 'datetime',
+        'requested_at' => 'datetime', // Changed from 'request_date' to 'requested_at'
+        'approved_at' => 'datetime', // Changed from 'approval_date' to 'approved_at'
+        'estimated_return_at' => 'datetime',
+        'actual_return_at' => 'datetime', // Changed from 'real_return_date' to 'actual_return_at'
     ];
 
     public function product()
@@ -38,4 +37,3 @@ class Loan extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 }
-

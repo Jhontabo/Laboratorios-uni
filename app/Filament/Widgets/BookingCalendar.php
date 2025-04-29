@@ -1,39 +1,36 @@
 <?php
 
 namespace App\Filament\Widgets;
-use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
+
 use App\Models\Booking;
+use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
+use App\Models\Schedule;
 use App\Models\Laboratory;
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 
 class BookingCalendar extends FullCalendarWidget
 {
-    protected static ?string $heading = 'Booking Calendar';
-    public Model|string|null $model = Booking::class;
-    public ?Booking $booking = null;
+    protected static ?string $heading = 'Reservation Calendar';
+    public Model|string|null $model = Schedule::class;
     public ?string $start_at = null;
     public ?string $end_at = null;
-    public ?int $laboratoryId = null;
-    public ?string $userFirstName = null;
-    public ?string $userLastName = null;
-    public ?string $userEmail = null;
+    public ?int $laboratory_id = null;
+    public ?string $user_first_name = null;
+    public ?string $user_last_name = null;
+    public ?string $user_email = null;
     public ?int $eventId = null;
 
     public function mount()
     {
-        $this->laboratoryId = session()->get('lab');
+        $this->laboratory_id = session()->get('lab');
+        //logger()->info('from BookingCalendar mount', ['event_data' =>  $this->laboratory_id]);
     }
 
     // Method to decide if the widget should be visible
@@ -41,9 +38,9 @@ class BookingCalendar extends FullCalendarWidget
     {
         $routesToHideWidget = [
             'filament.admin.pages.dashboard',
-            'filament.student.pages.dashboard',
-            'filament.teacher.pages.dashboard',
-            'filament.laboratory.pages.dashboard'
+            'filament.estudiante.pages.dashboard',
+            'filament.docente.pages.dashboard',
+            'filament.laboratorista.pages.dashboard'
         ];
 
         return !in_array(request()->route()->getName(), $routesToHideWidget);
@@ -58,11 +55,11 @@ class BookingCalendar extends FullCalendarWidget
             'slotMaxTime' => '22:00:00',
             'slotDuration' => '00:30:00',
             'locale' => 'en',
-            'initialView' => 'timeGridWeek',
+            'initialView' => 'timeGridWeek', // Default weekly view
             'headerToolbar' => [
                 'left' => 'prev,next today',
                 'center' => 'title',
-                'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
+                'right' => 'dayGridMonth,timeGridWeek,timeGridDay', // View options
             ],
             'selectable' => false,
         ];
@@ -71,28 +68,30 @@ class BookingCalendar extends FullCalendarWidget
     // Method to fetch events from the database
     public function fetchEvents(array $fetchInfo): array
     {
-        $this->laboratoryId = $this->laboratoryId ?? request()->query('laboratory');
+        $this->laboratory_id = $this->laboratory_id ?? request()->query('laboratory');
 
-        $query = Booking::query()
+
+        $query = Schedule::query()
             ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
-            ->when($this->laboratoryId, function ($query) {
-                return $query->where('laboratory_id', $this->laboratoryId);
+            ->when($this->laboratory_id, function ($query) {
+                return $query->where('laboratory_id', $this->laboratory_id);
             })
-            ->with('bookings');
+            ->with('Bookings'); // Aquí cambiamos 'reservations' por 'Bookings'
 
         return $query->get()
-            ->map(function (Booking $booking) {
-                $reserved = $booking->bookings()->where('status', '!=', Booking::STATUS_REJECTED)->count() > 0;
+            ->map(function (Schedule $schedule) {
+                $reserved = $schedule->Bookings()->where('status', '!=', Booking::STATUS_REJECTED)->count() > 0;
                 return [
-                    'id' => $booking->id,
+                    'id' => $schedule->id,
                     'title' => $reserved ? 'Reserved' : 'Available',
-                    'start' => $booking->start_at,
-                    'end' => $booking->end_at,
+                    'start' => $schedule->start_at,
+                    'end' => $schedule->end_at,
                     'color' => $reserved ? '#dc3545' : '#28a745',
                 ];
             })
             ->toArray();
     }
+
 
     protected function headerActions(): array
     {
@@ -101,46 +100,49 @@ class BookingCalendar extends FullCalendarWidget
 
     public function onEventClick(array $event): void
     {
+        //logger()->info('🔔 Event clicked:', ['event_data' => json_encode($event)]);
+
         if (!isset($event['id'])) {
-            logger()->error('⚠️ No valid time slot selected.');
+            logger()->error('⚠️ No valid schedule selected.');
             return;
         }
 
-        $booking = Booking::find($event['id']);
+        $schedule = Schedule::find($event['id']);
 
-        if (!$booking) {
-            logger()->error('❌ Selected booking not found.');
+        if (!$schedule) {
+            logger()->error('❌ Schedule not found.');
             return;
         }
 
-        $existingBooking = Booking::where('schedule_id', $booking->schedule_id)
-            ->where('status', '!=', Booking::STATUS_REJECTED)
-            ->exists();
+        // Check if the schedule is already reserved before opening the modal
+        $existingBooking = $schedule->Bookings()->where('status', '!=', Booking::STATUS_REJECTED)->exists();
 
         if ($existingBooking) {
             Notification::make()
                 ->title('Space already reserved')
-                ->body('This space has already been reserved and cannot be booked again.')
+                ->body('This space has already been reserved and cannot be reserved again.')
                 ->danger()
                 ->send();
-            return;
+            return; // Stops execution and doesn't open the modal
         }
 
-        $this->eventId = $booking->id;
-        $this->laboratoryId = $booking->laboratory_id;
+        // If the schedule is available, assign values and open the modal
+        $this->eventId = $schedule->id;
+        $this->laboratory_id = $schedule->laboratory_id;
 
-        logger()->info('Selected event:', [
+        logger()->info('Event selected:', [
             'eventId' => $this->eventId,
-            'laboratoryId' => $this->laboratoryId
+            'laboratory_id' => $this->laboratory_id
         ]);
 
-        $this->dispatch('refresh');
+        $this->dispatch('refresh'); // Refresh the view if necessary
         usleep(300000); // Short pause to avoid conflicts
-        $this->mountAction('reserve');
+        $this->mountAction('reserve'); // Opens the modal only if it's available
     }
 
     protected function modalActions(): array
     {
+
         return [
             Action::make('reserve')
                 ->label('Reserve')
@@ -148,22 +150,27 @@ class BookingCalendar extends FullCalendarWidget
                 ->color('primary')
                 ->form(fn() => $this->getFormSchema())
                 ->action(function () {
-                    $this->reserveTimeSlot();
+                    $this->reserveSchedule();
                 }),
         ];
     }
 
-    public function reserveTimeSlot()
+
+
+    public function reserveSchedule()
     {
+        //logger()->info('🔔 Reserving schedule...');
+
         try {
+            // Check if the schedule is already reserved
             $existingBooking = Booking::where('schedule_id', $this->eventId)
-                ->where('status', '!=', Booking::STATUS_REJECTED)
+                ->where('status', '!=', Booking::STATUS_REJECTED) // Ignore rejected bookings
                 ->exists();
 
             if ($existingBooking) {
                 Notification::make()
                     ->title('Error')
-                    ->body('This space has already been reserved.')
+                    ->body('This space is already reserved.')
                     ->danger()
                     ->send();
                 return;
@@ -172,41 +179,49 @@ class BookingCalendar extends FullCalendarWidget
             $bookingData = [
                 'user_id' => auth()->id(),
                 'schedule_id' => $this->eventId ?? null,
-                'laboratory_id' => $this->laboratoryId ?? null,
-                'user_first_name' => auth()->user()->name ?? 'No name',
-                'user_last_name' => auth()->user()->last_name ?? 'No last name',
-                'user_email' => auth()->user()->email ?? 'email@example.com',
+                'laboratory_id' => $this->laboratory_id ?? null,
+                'first_name' => auth()->user()->name ?? 'No name',
+                'last_name' => auth()->user()->last_name ?? 'No last name',
+                'email' => auth()->user()->email ?? 'email@example.com',
                 'status' => Booking::STATUS_PENDING,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
 
+            // Create the booking
             $booking = Booking::create($bookingData);
 
             Notification::make()
                 ->title('Booking created')
-                ->body('The time slot has been successfully reserved.')
+                ->body('The schedule has been successfully reserved.')
                 ->success()
                 ->send();
 
             $this->dispatch('refresh');
         } catch (\Exception $e) {
+            // Log the error and show it in the notification
+            logger()->error('❌ Error creating booking:', ['error' => $e->getMessage(), 'stack' => $e->getTraceAsString()]);
+
             Notification::make()
                 ->title('Error')
-                ->body('Could not complete the booking.')
+                ->body('Could not complete the booking. Error: ' . $e->getMessage())
                 ->danger()
                 ->send();
         }
     }
 
+
     public function getFormSchema(): array
     {
-        $booking = Booking::find($this->eventId);
+        //logger()->info('📌 getFormSchema() has been executed');
+        $schedule = Schedule::find($this->eventId);
 
-        if (!$booking) {
-            logger()->error('❌ Booking not found with ID:', ['id' => $this->eventId]);
+        if (!$schedule) {
+            logger()->error('❌ Schedule not found with ID:', ['id' => $this->eventId]);
             return [];
         }
+
+        $this->Booking = Booking::where('schedule_id', $schedule->id_schedule)->first();
 
         return [
             Section::make('Schedule')
@@ -214,12 +229,12 @@ class BookingCalendar extends FullCalendarWidget
                     Grid::make(2)
                         ->schema([
                             DateTimePicker::make('start_at')
-                                ->default($booking->start_at)
+                                ->default($schedule->start_at)
                                 ->label('Start Date and Time')
                                 ->required(),
 
                             DateTimePicker::make('end_at')
-                                ->default($booking->end_at)
+                                ->default($schedule->end_at)
                                 ->label('End Date and Time')
                                 ->required(),
                         ]),
@@ -228,32 +243,32 @@ class BookingCalendar extends FullCalendarWidget
             Select::make('laboratory_id')
                 ->label('Laboratory')
                 ->options(Laboratory::pluck('name', 'id')->toArray())
-                ->default($this->laboratoryId)
+                ->default($this->laboratory_id)
                 ->disabled(),
 
             TextInput::make('schedule_id')
-                ->default($booking->id)
+                ->default($schedule->id_schedule)
                 ->hidden(),
 
-            TextInput::make('user_first_name')
+            TextInput::make('user.name')
                 ->label('First Name')
-                ->default($booking->user_first_name ?? auth()->user()->name ?? '')
+                ->default($this->booking?->user_first_name ?? auth()->user()->name ?? '')
                 ->disabled()
                 ->required(),
 
-            TextInput::make('user_last_name')
+            TextInput::make('user.last_name')
                 ->label('Last Name')
-                ->default($booking->user_last_name ?? auth()->user()->last_name ?? '')
+                ->default($this->booking?->user_last_name ?? auth()->user()->last_name ?? '')
                 ->disabled()
                 ->required(),
 
-            TextInput::make('user_email')
+            TextInput::make('user.email')
                 ->label('Email')
-                ->default($booking->user_email ?? auth()->user()->email ?? '')
+                ->default($this->booking?->user_email ?? auth()->user()->email ?? '')
                 ->disabled()
                 ->email()
                 ->required(),
         ];
     }
-}
 
+}

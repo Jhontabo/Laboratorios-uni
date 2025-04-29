@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReservationRequestResource\Pages;
-use App\Models\Reserva;
+use App\Models\Booking; // Ensure you're using the correct model
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ReservationRequestResource extends Resource
 {
-    protected static ?string $model = Reserva::class;
+    protected static ?string $model = Booking::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
     protected static ?string $navigationLabel = 'Reservation Requests';
@@ -25,17 +25,12 @@ class ReservationRequestResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('estado', 'pendiente')->count();
+        return static::getModel()::where('status', 'pending')->count();
     }
 
     public static function getNavigationBadgeColor(): string
     {
-        return static::getModel()::where('estado', 'pendiente')->count() > 0 ? 'warning' : 'success';
-    }
-
-    public static function canViewAny(): bool
-    {
-        return Auth::user()?->can('ver panel solicitudes reservas') ?? false;
+        return static::getModel()::where('status', 'pending')->count() > 0 ? 'warning' : 'success';
     }
 
     public static function table(Table $table): Table
@@ -43,45 +38,45 @@ class ReservationRequestResource extends Resource
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('horario.laboratorio.nombre')
+                TextColumn::make('schedule.lab.name') // Changed 'horario.laboratorio.nombre' to 'schedule.lab.name'
                     ->label('Laboratory')
-                    ->description(fn($record) => $record->horario?->laboratorio?->ubicacion ?? 'No location')
+                    ->description(fn($record) => $record->schedule?->lab?->location ?? 'No location')
                     ->searchable()
                     ->icon('heroicon-o-building-office'),
 
-                TextColumn::make('usuario.name')
+                TextColumn::make('user.name') // Changed 'usuario.name' to 'user.name'
                     ->label('Applicant')
-                    ->formatStateUsing(fn($record) => "{$record->nombre_usuario} {$record->apellido_usuario}")
-                    ->description(fn($record) => $record->correo_usuario)
-                    ->searchable(['nombre_usuario', 'apellido_usuario'])
+                    ->formatStateUsing(fn($record) => "{$record->user_first_name} {$record->user_last_name}")
+                    ->description(fn($record) => $record->user_email)
+                    ->searchable(['user_first_name', 'user_last_name'])
                     ->icon('heroicon-o-user'),
 
-                TextColumn::make('intervalo')
+                TextColumn::make('interval')
                     ->label('Schedule')
-                    ->getStateUsing(fn($record) => $record->horario && $record->horario->start_at && $record->horario->end_at
-                        ? $record->horario->start_at->format('d M Y, H:i') . ' - ' . $record->horario->end_at->format('H:i')
+                    ->getStateUsing(fn($record) => $record->schedule && $record->schedule->start_at && $record->schedule->end_at
+                        ? $record->schedule->start_at->format('d M Y, H:i') . ' - ' . $record->schedule->end_at->format('H:i')
                         : 'Not assigned')
-                    ->description(fn($record) => $record->horario?->descripcion ?? 'No description')
+                    ->description(fn($record) => $record->schedule?->description ?? 'No description')
                     ->icon('heroicon-o-clock'),
 
-                TextColumn::make('estado')
+                TextColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'pendiente' => 'Pending Review',
-                        'aceptada' => 'Approved',
-                        'rechazada' => 'Rejected',
+                        'pending' => 'Pending Review',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
                         default => ucfirst($state),
                     })
                     ->badge()
                     ->colors([
-                        'warning' => 'pendiente',
-                        'success' => 'aceptada',
-                        'danger' => 'rechazada',
+                        'warning' => 'pending',
+                        'success' => 'approved',
+                        'danger' => 'rejected',
                     ])
                     ->icon(fn($state) => match ($state) {
-                        'pendiente' => 'heroicon-o-clock',
-                        'aceptada' => 'heroicon-o-check-circle',
-                        'rechazada' => 'heroicon-o-x-circle',
+                        'pending' => 'heroicon-o-clock',
+                        'approved' => 'heroicon-o-check-circle',
+                        'rejected' => 'heroicon-o-x-circle',
                         default => null,
                     }),
 
@@ -91,32 +86,20 @@ class ReservationRequestResource extends Resource
                     ->sortable()
                     ->icon('heroicon-o-calendar'),
             ])
-            ->filters([
-                Tables\Filters\SelectFilter::make('estado')
-                    ->options([
-                        'pendiente' => 'Pending',
-                        'aceptada' => 'Approved',
-                        'rechazada' => 'Rejected',
-                    ])
-                    ->label('Reservation Status'),
 
-                Tables\Filters\SelectFilter::make('laboratorio')
-                    ->relationship('horario.laboratorio', 'nombre')
-                    ->label('Filter by Laboratory'),
-            ])
             ->actions([
                 Action::make('Approve')
-                    ->action(function (Reserva $record) {
-                        $record->estado = 'aceptada';
+                    ->action(function (Booking $record) { // Ensure you're using the correct model Booking
+                        $record->status = 'approved';
                         $record->save();
 
                         Notification::make()
                             ->success()
                             ->title('Reservation Approved')
-                            ->body("Reservation for {$record->nombre_usuario} has been approved.")
+                            ->body("Reservation for {$record->user_first_name} has been approved.")
                             ->send();
                     })
-                    ->visible(fn(Reserva $record) => $record->estado === 'pendiente')
+                    ->visible(fn(Booking $record) => $record->status === 'pending')
                     ->color('success')
                     ->icon('heroicon-o-check')
                     ->modalHeading('Approve Reservation')
@@ -125,24 +108,24 @@ class ReservationRequestResource extends Resource
 
                 Action::make('Reject')
                     ->form([
-                        Textarea::make('razon_rechazo')
+                        Textarea::make('rejection_reason') // Changed 'razon_rechazo' to 'rejection_reason'
                             ->label('Reason for Rejection')
                             ->required()
                             ->placeholder('State the reason for rejecting this request')
                             ->maxLength(500),
                     ])
-                    ->action(function (Reserva $record, array $data) {
-                        $record->estado = 'rechazada';
-                        $record->razon_rechazo = $data['razon_rechazo'];
+                    ->action(function (Booking $record, array $data) { // Using Booking instead of Reserva
+                        $record->status = 'rejected';
+                        $record->rejection_reason = $data['rejection_reason']; // Changed 'razon_rechazo' to 'rejection_reason'
                         $record->save();
 
                         Notification::make()
                             ->danger()
                             ->title('Reservation Rejected')
-                            ->body("Reservation rejected. Reason: {$data['razon_rechazo']}")
+                            ->body("Reservation rejected. Reason: {$data['rejection_reason']}")
                             ->send();
                     })
-                    ->visible(fn(Reserva $record) => $record->estado === 'pendiente')
+                    ->visible(fn(Booking $record) => $record->status === 'pending')
                     ->color('danger')
                     ->icon('heroicon-o-x-mark')
                     ->modalHeading('Reject Reservation')
@@ -170,4 +153,3 @@ class ReservationRequestResource extends Resource
         ];
     }
 }
-

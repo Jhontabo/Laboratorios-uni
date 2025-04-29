@@ -21,7 +21,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class UserResource extends Resource
 {
@@ -58,7 +57,7 @@ class UserResource extends Resource
                                 ->required()
                                 ->maxLength(255),
 
-                            TextInput::make('apellido')
+                            TextInput::make('last_name')
                                 ->label('Last Name')
                                 ->required()
                                 ->maxLength(255),
@@ -72,13 +71,13 @@ class UserResource extends Resource
                                 ->maxLength(255)
                                 ->unique(ignoreRecord: true),
 
-                            TextInput::make('telefono')
+                            TextInput::make('phone')
                                 ->label('Phone')
                                 ->tel()
                                 ->required()
                                 ->maxLength(15),
                         ]),
-                    TextInput::make('direccion')
+                    TextInput::make('address')
                         ->label('Address')
                         ->required()
                         ->maxLength(255),
@@ -95,13 +94,13 @@ class UserResource extends Resource
                                 ->preload()
                                 ->required(),
 
-                            Select::make('estado')
+                            Select::make('status')
                                 ->label('Account Status')
                                 ->options([
-                                    'activo' => 'Active',
-                                    'inactivo' => 'Inactive',
+                                    'Active' => 'Active',
+                                    'Inactive' => 'Inactive',
                                 ])
-                                ->default('activo')
+                                ->default('Active')
                                 ->required()
                                 ->native(false),
                         ])
@@ -114,38 +113,38 @@ class UserResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->label('First Name')->searchable()->sortable(),
-                TextColumn::make('apellido')->label('Last Name')->searchable()->sortable(),
+                TextColumn::make('last_name')->label('Last Name')->searchable()->sortable(),
                 TextColumn::make('email')->label('Email')->searchable()->sortable(),
                 TextColumn::make('roles.name')->label('Roles')->badge()->color('primary')->sortable(),
-                TextColumn::make('estado')
+                TextColumn::make('status')
                     ->label('Status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
-                        'activo' => 'success',
-                        'inactivo' => 'danger',
+                        'active' => 'success',
+                        'inactive' => 'danger',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'activo' => 'Active',
-                        'inactivo' => 'Inactive',
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
                         default => $state,
                     })
                     ->sortable(),
             ])
             ->filters([
-                Filter::make('estado')
+                Filter::make('status')
                     ->label('Account Status')
                     ->form([
-                        Select::make('estado')
+                        Select::make('status')
                             ->options([
-                                'activo' => 'Active',
-                                'inactivo' => 'Inactive',
+                                'active' => 'Active',
+                                'inactive' => 'Inactive',
                             ])
                             ->native(false),
                     ])
                     ->query(
                         fn(Builder $query, array $data): Builder =>
-                        $query->when($data['estado'], fn($q) => $q->where('estado', $data['estado']))
+                        $query->when($data['status'], fn($q) => $q->where('status', $data['status']))
                     ),
                 Filter::make('roles')
                     ->label('Roles')
@@ -163,59 +162,45 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()->icon('heroicon-o-pencil')->color('primary'),
-                Action::make('toggleEstado')
-                    ->label(fn(Model $record) => $record->estado === 'activo' ? 'Deactivate' : 'Activate')
-                    ->icon(fn(Model $record) => $record->estado === 'activo' ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn(Model $record) => $record->estado === 'activo' ? 'danger' : 'success')
+                Action::make('togglestatus')
+                    ->label(fn(Model $record) => $record->status === 'active' ? 'Deactivate' : 'Activate')
+                    ->icon(fn(Model $record) => $record->status === 'active' ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn(Model $record) => $record->status === 'active' ? 'danger' : 'success')
                     ->action(function (Model $record) {
-                        $record->estado = $record->estado === 'activo' ? 'inactivo' : 'activo';
+                        // Cambio aquí: usé $record->status en lugar de $record->estado
+                        $record->status = $record->status === 'active' ? 'inactive' : 'active'; // Cambié 'estado' a 'status'
                         $record->save();
 
                         Notification::make()
-                            ->title($record->estado === 'activo' ? 'User activated' : 'User deactivated')
+                            ->title($record->status === 'active' ? 'User activated' : 'User deactivated')
                             ->success()
                             ->send();
                     })
                     ->requiresConfirmation()
-                    ->modalHeading(fn(Model $record) => $record->estado === 'activo' ? 'Deactivate user' : 'Activate user')
-                    ->modalDescription(fn(Model $record) => $record->estado === 'activo'
+                    ->modalHeading(fn(Model $record) => $record->status === 'active' ? 'Deactivate user' : 'Activate user')
+                    ->modalDescription(fn(Model $record) => $record->status === 'active'
                         ? 'Are you sure you want to deactivate this user?'
                         : 'Are you sure you want to activate this user?')
-                    ->modalSubmitActionLabel(fn(Model $record) => $record->estado === 'activo' ? 'Yes, deactivate' : 'Yes, activate'),
+                    ->modalSubmitActionLabel(fn(Model $record) => $record->status === 'active' ? 'Yes, deactivate' : 'Yes, activate'),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    ExportBulkAction::make()
-                        ->label('Export selected')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->exports([
-                            ExcelExport::make('users')
-                                ->fromTable()
-                                ->withFilename('Users_' . date('d-m-Y'))
-                                ->askForWriterType(),
-                        ]),
-                    BulkAction::make('activate')
-                        ->label('Activate selected')
-                        ->icon('heroicon-o-check-circle')
-                        ->color('success')
-                        ->action(function (Collection $records) {
-                            $records->each(fn(Model $record) => $record->update(['estado' => 'activo']));
-                            Notification::make()->title('Users activated')->success()->send();
-                        })
-                        ->requiresConfirmation(),
+
                     BulkAction::make('deactivate')
                         ->label('Deactivate selected')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->action(function (Collection $records) {
                             $records->each(function (Model $record) {
-                                if (!in_array($record->roles->pluck('name')->first(), ['ADMIN', 'LABORATORISTA'])) {
-                                    $record->update(['estado' => 'inactivo']);
-                                }
+                                // Eliminar la condición para no desactivar ciertos roles si deseas permitir la desactivación
+                                // Aquí solo se actualiza el estado de los usuarios seleccionados
+                                $record->update(['status' => 'inactive']);
                             });
                             Notification::make()->title('Users deactivated')->success()->send();
                         })
                         ->requiresConfirmation(),
+
                     Tables\Actions\DeleteBulkAction::make()
                         ->label('Delete selected')
                         ->icon('heroicon-o-trash'),
@@ -250,4 +235,3 @@ class UserResource extends Resource
         ];
     }
 }
-

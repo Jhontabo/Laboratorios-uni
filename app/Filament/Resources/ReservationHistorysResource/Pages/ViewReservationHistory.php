@@ -8,5 +8,5 @@ class ViewReservationHistory extends ViewRecord
 {
     protected static string $resource = \App\Filament\Resources\ReservationHistorysResource::class;
 
-    protected static string $view = 'filament.resources.historial-reservas.pages.view';
+    protected static string $view = 'filament.pages.view-reservation-history';
 }

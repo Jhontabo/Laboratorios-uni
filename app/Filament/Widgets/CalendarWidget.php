@@ -14,7 +14,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use Saade\FilamentFullCalendar\Actions\CreateAction;
@@ -31,9 +30,9 @@ class CalendarWidget extends FullCalendarWidget
     {
         $routesToHideWidget = [
             'filament.admin.pages.dashboard',
-            'filament.student.pages.dashboard',
-            'filament.teacher.pages.dashboard',
-            'filament.laboratorian.pages.dashboard',
+            'filament.estudiante.pages.dashboard',
+            'filament.docente.pages.dashboard',
+            'filament.laboratorista.pages.dashboard'
         ];
 
         return !in_array(request()->route()->getName(), $routesToHideWidget);

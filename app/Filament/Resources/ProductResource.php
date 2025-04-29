@@ -40,7 +40,6 @@ class ProductResource extends Resource
     protected static ?string $pluralModelLabel = 'Products';
     protected static ?string $navigationGroup = 'Inventory and Laboratory';
     protected static ?int $navigationSort = 1;
-    protected static ?string $recordTitleAttribute = 'name'; // Still depends on your database
 
     public static function getNavigationBadge(): ?string
     {
@@ -137,7 +136,7 @@ class ProductResource extends Resource
                         ->schema([
                             Select::make('category_id')
                                 ->label('Category')
-                                ->options(Category::all()->pluck('category_name', 'id'))
+                                ->options(Category::all()->pluck('name', 'id'))
                                 ->searchable()
                                 ->preload()
                                 ->required(),
@@ -205,7 +204,7 @@ class ProductResource extends Resource
                 ->searchable()
                 ->sortable(),
 
-            TextColumn::make('category.category_name')
+            TextColumn::make('category.name')
                 ->label('Category')
                 ->sortable()
                 ->searchable()

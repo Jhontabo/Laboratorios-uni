@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources\BookingResource\Pages;
 
-use App\Filament\Resources\ReservationResource;
-use App\Filament\Widgets\CalendarWidget;
+use App\Filament\Resources\BookingResource;
+use App\Filament\Widgets\BookingCalendar;
+use App\Models\Booking;
 use App\Models\Reservation;
 use App\Models\Laboratory;
 use Filament\Resources\Pages\Page;
 
-class BookingCalendar extends Page
+class BookingResourceCalendar extends Page
 {
-    protected static string $resource = ReservationResource::class;
+    protected static string $resource = BookingResource::class;
 
     protected static string $view = 'filament.pages.reservation';
 
@@ -32,10 +33,10 @@ class BookingCalendar extends Page
 
     public function getFilteredReservations()
     {
-        $query = Reservation::query();
+        $query = Booking::query();
 
         if ($this->laboratoryId) {
-            $query->where('id_laboratory', $this->laboratoryId);
+            $query->where('laboratory_id', $this->laboratoryId);
         }
 
         return $query->get();
@@ -50,7 +51,7 @@ class BookingCalendar extends Page
 
     public function getDropdownOptions(): array
     {
-        $laboratories = Laboratory::all()->pluck('name', 'id_laboratory')->toArray();
+        $laboratories = Laboratory::all()->pluck('name', 'id')->toArray();
 
         $options = [
             'All' => 'All',

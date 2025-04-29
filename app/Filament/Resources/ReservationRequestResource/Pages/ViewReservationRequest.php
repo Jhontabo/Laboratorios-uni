@@ -8,5 +8,5 @@ class ViewReservationRequest extends ViewRecord
 {
     protected static string $resource = \App\Filament\Resources\ReservationRequestResource::class;
 
-    protected static string $view = 'filament.resources.solicitudes-reservas.pages.view';
+    protected static string $view = 'filament.pages.view-reservation-request';
 }

@@ -6,7 +6,7 @@ use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ReservationPolicy
+class BookingPolicy
 {
     use HandlesAuthorization;
 

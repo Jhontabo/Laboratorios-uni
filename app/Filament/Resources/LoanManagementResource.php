@@ -36,10 +36,10 @@ class LoanManagementResource extends Resource
                 'product_id',
                 'user_id',
                 'status',
-                'request_date',
-                'approval_date',
-                'estimated_return_date',
-                'real_return_date',
+                'requested_at', // Changed from 'request_date' to 'requested_at'
+                'approved_at',  // Changed from 'approval_date' to 'approved_at'
+                'estimated_return_at',
+                'actual_return_at', // Changed from 'real_return_date' to 'actual_return_at'
             ])
             ->whereIn('status', ['pending', 'approved', 'returned'])
             ->whereNotNull('user_id');
@@ -95,31 +95,32 @@ class LoanManagementResource extends Resource
                     })
                     ->formatStateUsing(fn(string $state): string => ucfirst($state)),
 
-                TextColumn::make('request_date')
+                TextColumn::make('requested_at') // Changed from 'request_date' to 'requested_at'
                     ->label('Request')
                     ->dateTime('d M Y')
                     ->sortable(),
 
-                TextColumn::make('approval_date')
+                TextColumn::make('approved_at') // Changed from 'approval_date' to 'approved_at'
                     ->label('Approval')
                     ->dateTime('d M Y')
                     ->sortable()
                     ->placeholder('Not approved')
                     ->toggleable(isToggledHiddenByDefault: false),
 
-                TextColumn::make('estimated_return_date')
+                TextColumn::make('estimated_return_at')
                     ->label('Estimated Return')
                     ->dateTime('d M Y')
-                    ->color(fn($record) =>
-                        $record->status === 'approved' && $record->estimated_return_date < now()
-                            ? 'danger'
-                            : 'success'
+                    ->color(
+                        fn($record) =>
+                        $record->status === 'approved' && $record->estimated_return_at < now()
+                        ? 'danger'
+                        : 'success'
                     )
                     ->sortable()
                     ->placeholder('Not assigned')
                     ->toggleable(isToggledHiddenByDefault: false),
 
-                TextColumn::make('real_return_date')
+                TextColumn::make('actual_return_at') // Changed from 'real_return_date' to 'actual_return_at'
                     ->label('Returned')
                     ->dateTime('d M Y')
                     ->sortable()
@@ -131,26 +132,30 @@ class LoanManagementResource extends Resource
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->form([
-                        Forms\Components\DatePicker::make('estimated_return_date')
+                        Forms\Components\DatePicker::make('estimated_return_at')
                             ->label('Estimated Return Date')
                             ->required()
-                            ->minDate(now()->addDay())
-                            ->default(now()->addWeek())
+                            ->minDate(now()->addDay())  // Set min date to the next day
+                            ->default(now()->addWeek())  // Set default to one week from now
                             ->displayFormat('d M Y')
+                            ->disabled()  // Prevent modifying the approval date
                     ])
                     ->action(function (Loan $record, array $data) {
                         DB::transaction(function () use ($record, $data) {
                             $product = $record->product;
-                            $estimatedReturnDate = \Carbon\Carbon::parse($data['estimated_return_date']);
 
+                            // If you want to set 'estimated_return_at' directly and not use $data from the form
+                            $estimatedReturnDate = \Carbon\Carbon::parse(now()->addWeek());  // Automatically use the default date (one week from now)
+            
                             if ($product->available_quantity <= 0) {
                                 throw new \Exception('No available units');
                             }
 
+                            // Set the current date for 'approved_at' and lock it
                             $record->update([
                                 'status' => 'approved',
-                                'approval_date' => now(),
-                                'estimated_return_date' => $estimatedReturnDate,
+                                'approved_at' => now(),  // Ensure 'approved_at' is the current date and time
+                                'estimated_return_at' => $estimatedReturnDate, // Set estimated return date to one week from now
                             ]);
 
                             $product->decrement('available_quantity');
@@ -181,7 +186,7 @@ class LoanManagementResource extends Resource
                     ->action(function (Loan $record) {
                         $record->update([
                             'status' => 'rejected',
-                            'estimated_return_date' => null,
+                            'estimated_return_at' => null,
                         ]);
 
                         Notification::make()
@@ -197,20 +202,22 @@ class LoanManagementResource extends Resource
                     ->color('info')
                     ->requiresConfirmation()
                     ->form([
-                        Forms\Components\DatePicker::make('real_return_date')
+                        Forms\Components\DatePicker::make('actual_return_at') // Changed from 'real_return_date' to 'actual_return_at'
                             ->label('Actual Return Date')
-                            ->default(now())
-                            ->maxDate(now())
+                            ->default(now())  // Set default to current date
+                            ->maxDate(now()) // Limit the date to today (cannot be in the future)
                             ->displayFormat('d M Y')
+                            ->disabled() // Disable editing of the actual return date
                     ])
                     ->action(function (Loan $record, array $data) {
-                        DB::transaction(function () use ($record, $data) {
-                            $realReturnDate = \Carbon\Carbon::parse($data['real_return_date']);
+                        DB::transaction(function () use ($record) {
+                            // Set the actual return date to the current date
+                            $actualReturnDate = now();  // Use the current date as the actual return date
                             $product = $record->product;
 
                             $record->update([
                                 'status' => 'returned',
-                                'real_return_date' => $realReturnDate,
+                                'actual_return_at' => $actualReturnDate, // Record the actual return date
                             ]);
 
                             $product->increment('available_quantity');
@@ -221,31 +228,34 @@ class LoanManagementResource extends Resource
                             Notification::make()
                                 ->success()
                                 ->title('Equipment returned')
-                                ->body("Return date: {$realReturnDate->format('d/m/Y')}")
+                                ->body("Return date: {$actualReturnDate->format('d/m/Y')}")
                                 ->send();
                         });
                     })
                     ->visible(fn(Loan $record) => $record->status === 'approved'),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('approve')
                     ->label('Approve selected')
                     ->icon('heroicon-o-check')
                     ->form([
-                        Forms\Components\DatePicker::make('estimated_return_date')
+                        Forms\Components\DatePicker::make('estimated_return_at')
                             ->label('Estimated Return Date')
                             ->required()
                             ->minDate(now()->addDay())
                             ->default(now()->addWeek())
+                            ->disabled()  // Disable editing for the bulk approve action as well
                     ])
                     ->action(function ($records, array $data) {
-                        $estimatedReturnDate = \Carbon\Carbon::parse($data['estimated_return_date']);
+                        $estimatedReturnDate = \Carbon\Carbon::parse($data['estimated_return_at']);
 
                         $records->each->update([
                             'status' => 'approved',
-                            'approval_date' => now(),
-                            'estimated_return_date' => $estimatedReturnDate,
+                            'approved_at' => now(),  // Set approved_at to the current date
+                            'estimated_return_at' => $estimatedReturnDate,
                         ]);
+
 
                         Notification::make()
                             ->success()
@@ -264,4 +274,3 @@ class LoanManagementResource extends Resource
         ];
     }
 }
-

@@ -23,10 +23,6 @@ class Booking extends Model
         'status',
     ];
 
-    const STATUS_PENDING = 'pending';
-    const STATUS_ACCEPTED = 'accepted';
-    const STATUS_REJECTED = 'rejected';
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -42,19 +38,7 @@ class Booking extends Model
         return $this->belongsTo(Schedule::class, 'schedule_id');
     }
 
-    public function labTechnician()
-    {
-        return $this->belongsTo(User::class, 'lab_technician_id');
-    }
 
-    public function getReadableStatusAttribute(): string
-    {
-        return match ($this->status) {
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_ACCEPTED => 'Accepted',
-            self::STATUS_REJECTED => 'Rejected',
-            default => 'Unknown',
-        };
-    }
+
 }
 

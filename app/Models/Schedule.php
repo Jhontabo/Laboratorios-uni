@@ -32,35 +32,6 @@ class Schedule extends Model
         'end_at' => 'datetime',
     ];
 
-    public static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($schedule) {
-            $exists = self::where('id_laboratory', $schedule->id_laboratory)
-                ->where(function ($query) use ($schedule) {
-                    $query->whereBetween('start_at', [$schedule->start_at, $schedule->end_at])
-                        ->orWhereBetween('end_at', [$schedule->start_at, $schedule->end_at])
-                        ->orWhere(function ($query) use ($schedule) {
-                            $query->where('start_at', '<=', $schedule->start_at)
-                                ->where('end_at', '>=', $schedule->end_at);
-                        });
-                })
-                ->exists();
-
-            if ($exists) {
-                Notification::make()
-                    ->title('Error')
-                    ->body('A schedule already exists in this time range for this laboratory.')
-                    ->danger()
-                    ->send();
-
-                throw ValidationException::withMessages([
-                    'error' => 'A schedule already exists in this time range for this laboratory.'
-                ]);
-            }
-        });
-    }
 
     public function user()
     {

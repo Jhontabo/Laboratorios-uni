@@ -44,10 +44,10 @@ class CalendarWidget extends FullCalendarWidget
             'firstDay' => 1,
             'slotMinTime' => '06:00:00',
             'slotMaxTime' => '22:00:00',
-            'locale' => 'en',
+            'locale' => 'es',
             'initialView' => 'timeGridWeek',
             'headerToolbar' => [
-                'left' => 'prev,next',
+                'left' => 'prev,next today',
                 'center' => 'title',
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
@@ -120,53 +120,53 @@ class CalendarWidget extends FullCalendarWidget
     public function getFormSchema(): array
     {
         return [
-            Section::make('General Information')
+            Section::make('Informacion general')
                 ->schema([
                     TextInput::make('title')
                         ->required()
-                        ->label('Event Name')
-                        ->placeholder('Enter event name'),
+                        ->label('Nombre del evento')
+                        ->placeholder('Ingrese el nombre del evento'),
 
                     Textarea::make('description')
-                        ->label('Description')
+                        ->label('Descripcion')
                         ->maxLength(500)
-                        ->placeholder('e.g., Advanced programming class')
-                        ->helperText('Maximum 500 characters allowed.'),
+                        ->placeholder('e.g., Espacio disponible para practicas')
+                        ->helperText('Maximo 500 caracteres.'),
                 ])
                 ->columns(2),
 
-            Section::make('Availability and Color')
+            Section::make('Disponibilidad y Color ')
                 ->schema([
                     Toggle::make('is_available')
-                        ->label('Available for Reservation')
+                        ->label('Disponible para reserva')
                         ->onColor('success')
                         ->offColor('danger')
-                        ->helperText('Toggle if this space is available for reservation.')
+                        ->helperText('Activar o desactivar esta opción si este espacio está disponible para reserva.')
                         ->default(false),
 
                     ColorPicker::make('color')
                         ->label('Event Color')
-                        ->helperText('Select a color for the event.'),
+                        ->helperText('Selecionar un color.'),
 
                     Select::make('laboratory_id')
-                        ->label('Laboratory')
+                        ->label('Laboratorio')
                         ->options(Laboratory::pluck('name', 'id')->toArray())
                         ->required(),
                 ])
                 ->columns(3),
 
-            Section::make('Schedule')
+            Section::make('Horario')
                 ->schema([
                     Grid::make(2)
                         ->schema([
                             DateTimePicker::make('start_at')
                                 ->required()
-                                ->label('Start Date and Time')
-                                ->placeholder('Select start date and time')
+                                ->label('Fecha de inicio')
+                                ->placeholder('Selecione fecha y hora de inicio')
                                 ->displayFormat('d/m/Y H:i')
                                 ->native(false)
                                 ->minDate(Carbon::now())
-                                ->helperText('Cannot select a past date.')
+                                ->helperText('No se puede selecionar una fecha pasada.')
                                 ->afterStateUpdated(function ($state, callable $set) {
                                     if ($state && Carbon::parse($state)->isPast()) {
                                         $set('start_at', null);
@@ -175,12 +175,12 @@ class CalendarWidget extends FullCalendarWidget
 
                             DateTimePicker::make('end_at')
                                 ->required()
-                                ->label('End Date and Time')
-                                ->placeholder('Select end date and time')
+                                ->label('Fecha y hora de finalizacion')
+                                ->placeholder('Selecione fecha de finalizacion')
                                 ->displayFormat('d/m/Y H:i')
                                 ->native(false)
                                 ->minDate(Carbon::now())
-                                ->helperText('Must be after the start date.')
+                                ->helperText('Debe ser posterior a la fecha de inicio.')
                                 ->afterStateUpdated(function ($state, callable $set, $get) {
                                     if ($state && Carbon::parse($state)->lessThan(Carbon::parse($get('start_at')))) {
                                         $set('end_at', null);

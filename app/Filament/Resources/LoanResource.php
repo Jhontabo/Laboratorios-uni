@@ -19,8 +19,8 @@ class LoanResource extends Resource
     protected static ?string $model = Loan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $navigationLabel = 'My Loans';
-    protected static ?string $navigationGroup = 'Loans';
+    protected static ?string $navigationLabel = 'Mis prestamos';
+    protected static ?string $navigationGroup = 'Prestamos';
 
     public static function getEloquentQuery(): Builder
     {
@@ -36,16 +36,16 @@ class LoanResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('product.image')
-                    ->label('Image')
+                    ->label('Imagen')
                     ->size(50),
 
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label('Producto')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label('Estado')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'pending' => 'warning',
@@ -57,25 +57,25 @@ class LoanResource extends Resource
                     ->formatStateUsing(fn(string $state): string => ucfirst($state)),
 
                 TextColumn::make('requested_at')
-                    ->label('Request Date')
+                    ->label('Fecha peticion')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
 
                 TextColumn::make('approved_at')
-                    ->label('Approval Date')
+                    ->label('Fecha aprobado')
                     ->dateTime('d M Y H:i')
-                    ->placeholder('Not approved')
+                    ->placeholder('No aprobado')
                     ->sortable(),
 
                 TextColumn::make('estimated_return_at')
-                    ->label('Estimated Return')
+                    ->label('Fecha devolucion')
                     ->dateTime('d M Y')
-                    ->placeholder('Not assigned'),
+                    ->placeholder('No Asigando'),
 
                 TextColumn::make('actual_return_at')
-                    ->label('Returned')
+                    ->label('Devuelto')
                     ->dateTime('d M Y H:i')
-                    ->placeholder('Not returned'),
+                    ->placeholder('No Devuelto'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -85,11 +85,9 @@ class LoanResource extends Resource
                         'rejected' => 'Rejected',
                         'returned' => 'Returned',
                     ])
-                    ->label('Loan Status'),
+                    ->label('Estado del prestamo'),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-            ])
+
             ->bulkActions([]) // No bulk actions needed
             ->emptyStateHeading('You have no loans yet');
     }
@@ -111,4 +109,3 @@ class LoanResource extends Resource
         return Auth::check();
     }
 }
-

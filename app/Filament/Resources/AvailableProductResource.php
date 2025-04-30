@@ -17,8 +17,8 @@ class AvailableProductResource extends Resource
 {
     protected static ?string $model = AvailableProduct::class;
     protected static ?string $navigationIcon = 'heroicon-m-shopping-cart';
-    protected static ?string $navigationGroup = 'Loans';
-    protected static ?string $title = 'Available Products';
+    protected static ?string $navigationGroup = 'Prestamos';
+    protected static ?string $navigationLabel = 'Productos para prestamos';
 
     public static function getEloquentQuery(): Builder
     {
@@ -31,13 +31,13 @@ class AvailableProductResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('image')
-                    ->label('Image')
+                    ->label('Imagen')
                     ->size(50)
                     ->circular()
                     ->toggleable(),
 
                 TextColumn::make('name')
-                    ->label('Product')
+                    ->label('Producto')
                     ->searchable()
                     ->sortable()
                     ->description(fn($record) => substr($record->description, 0, 50) . '...')
@@ -45,14 +45,14 @@ class AvailableProductResource extends Resource
                     ->color('primary'),
 
                 TextColumn::make('available_quantity')
-                    ->label('Stock')
+                    ->label('Cantidad disponible')
                     ->sortable()
                     ->alignCenter()
                     ->color(fn($record) => $record->available_quantity > 10 ? 'success' : ($record->available_quantity > 0 ? 'warning' : 'danger'))
                     ->icon(fn($record) => $record->available_quantity > 10 ? 'heroicon-o-check-circle' : ($record->available_quantity > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
 
                 TextColumn::make('product_condition')
-                    ->label('Condition')
+                    ->label('Condicion')
                     ->badge()
                     ->color(fn($state) => match ($state) {
                         'new' => 'success',
@@ -66,7 +66,7 @@ class AvailableProductResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('product_type')
-                    ->label('Type')
+                    ->label('Tipo')
                     ->badge()
                     ->color(fn($state) => match ($state) {
                         'equipment' => 'info',
@@ -76,15 +76,15 @@ class AvailableProductResource extends Resource
                     ->formatStateUsing(fn($state) => ucfirst($state))
                     ->sortable(),
 
-                TextColumn::make('laboratory.location')
-                    ->label('Location')
+                TextColumn::make('laboratory.name')
+                    ->label('Laboratorio')
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('')
+                    ->label('Ver')
                     ->icon('heroicon-o-eye'),
             ])
             ->headerActions([

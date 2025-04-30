@@ -17,9 +17,7 @@ class ReservationHistorysResource extends Resource
 {
     protected static ?string $model = Booking::class;
     protected static ?string $navigationIcon = 'heroicon-o-clock';
-    protected static ?string $navigationLabel = 'My Reservations';
-    protected static ?string $modelLabel = 'Reservation';
-    protected static ?string $pluralModelLabel = 'Reservations';
+    protected static ?string $navigationLabel = 'Mis Reservas';
     protected static ?string $navigationGroup = 'Academic Management';
 
     public static function getNavigationBadge(): ?string
@@ -140,4 +138,3 @@ class ReservationHistorysResource extends Resource
         ];
     }
 }
-

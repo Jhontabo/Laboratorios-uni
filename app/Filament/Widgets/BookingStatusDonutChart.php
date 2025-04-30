@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class BookingStatusDonutChart extends ChartWidget
 {
-    protected static ?string $heading = 'Bookings by Status';
+    protected static ?string $heading = 'Reservas por estado';
     protected static ?string $maxHeight = '300px';
     protected static ?int $sort = 2;
 
@@ -68,7 +68,6 @@ class BookingStatusDonutChart extends ChartWidget
 
     public function getDescription(): ?string
     {
-        return 'Percentage distribution of bookings by status';
+        return 'Percentaje distribucion de reservas por estado';
     }
 }
-

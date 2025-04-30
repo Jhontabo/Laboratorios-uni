@@ -8,7 +8,7 @@ use Filament\Widgets\ChartWidget;
 
 class BookingByLaboratoryChart extends ChartWidget
 {
-    protected static ?string $heading = 'Bookings by Laboratory';
+    protected static ?string $heading = 'Reservas por laboratorio';
     protected static ?string $maxHeight = '300px';
     protected static ?int $sort = 3;
 
@@ -40,7 +40,7 @@ class BookingByLaboratoryChart extends ChartWidget
             'labels' => $data->pluck('name')->toArray(),
             'datasets' => [
                 [
-                    'label' => 'Total Bookings',
+                    'label' => 'Total reservas',
                     'data' => $data->pluck('total_bookings')->toArray(),
                     'backgroundColor' => $this->generateColors($data->count()),
                     'borderColor' => '#ffffff',
@@ -78,7 +78,6 @@ class BookingByLaboratoryChart extends ChartWidget
 
     public function getDescription(): ?string
     {
-        return 'Distribution of bookings by laboratory';
+        return 'Distribucion de reservas por laboratory';
     }
 }
-

@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LoanManagementResource\Pages;
 use App\Models\Loan;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -13,16 +12,22 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use labelObj;
 
 class LoanManagementResource extends Resource
 {
     protected static ?string $model = Loan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-    protected static ?string $navigationLabel = 'Loan Management';
-    protected static ?string $modelLabel = 'Loan Management';
-    protected static ?string $navigationGroup = 'Loans';
+    protected static ?string $navigationLabel = 'Administrar Prestamos';
+    protected static ?string $navigationGroup = 'Prestamos';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('user_id', Auth::id())->count();
+    }
 
     public static function getEloquentQuery(): Builder
     {
@@ -51,25 +56,26 @@ class LoanManagementResource extends Resource
             ->actionsPosition(Tables\Enums\ActionsPosition::BeforeColumns)
             ->columns([
                 ImageColumn::make('product.image')
-                    ->label('Image')
+                    ->label('Imagen')
                     ->size(50)
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('product.name')
-                    ->label('Equipment')
+                    ->label('Equipo')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('product.available_quantity')
-                    ->label('Stock')
+                    ->label('Cantidad dsiponible')
                     ->sortable()
                     ->color('success')
                     ->icon('heroicon-o-check-circle'),
 
                 Tables\Columns\ColumnGroup::make('User')
+                    ->label('Usuario')
                     ->columns([
                         TextColumn::make('user.name')
-                            ->label('Name')
+                            ->label('Nombre')
                             ->formatStateUsing(fn($state, $record) => "{$record->user->name} {$record->user->last_name}")
                             ->searchable(query: function (Builder $query, string $search): Builder {
                                 return $query->whereHas('user', function ($q) use ($search) {
@@ -79,12 +85,12 @@ class LoanManagementResource extends Resource
                             }),
 
                         TextColumn::make('user.email')
-                            ->label('Email')
+                            ->label('Corre electronico')
                             ->searchable(),
                     ]),
 
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label('Estado')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'pending' => 'warning',
@@ -96,44 +102,44 @@ class LoanManagementResource extends Resource
                     ->formatStateUsing(fn(string $state): string => ucfirst($state)),
 
                 TextColumn::make('requested_at') // Changed from 'request_date' to 'requested_at'
-                    ->label('Request')
+                    ->label('fecha de peticion')
                     ->dateTime('d M Y')
                     ->sortable(),
 
                 TextColumn::make('approved_at') // Changed from 'approval_date' to 'approved_at'
-                    ->label('Approval')
+                    ->label('Aprobado')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->placeholder('Not approved')
+                    ->placeholder('No aprobado')
                     ->toggleable(isToggledHiddenByDefault: false),
 
                 TextColumn::make('estimated_return_at')
-                    ->label('Estimated Return')
+                    ->label('Fecha devolucion')
                     ->dateTime('d M Y')
                     ->color(
                         fn($record) =>
                         $record->status === 'approved' && $record->estimated_return_at < now()
-                        ? 'danger'
-                        : 'success'
+                            ? 'danger'
+                            : 'success'
                     )
                     ->sortable()
-                    ->placeholder('Not assigned')
+                    ->placeholder('No Asignado')
                     ->toggleable(isToggledHiddenByDefault: false),
 
                 TextColumn::make('actual_return_at') // Changed from 'real_return_date' to 'actual_return_at'
-                    ->label('Returned')
+                    ->label('Devuelto')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->placeholder('Not returned'),
+                    ->placeholder('Sin devolver'),
             ])
             ->actions([
                 Tables\Actions\Action::make('approve')
-                    ->label('Approve')
+                    ->label('Aprovado')
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->form([
                         Forms\Components\DatePicker::make('estimated_return_at')
-                            ->label('Estimated Return Date')
+                            ->label('Fecha estimada devolucion')
                             ->required()
                             ->minDate(now()->addDay())  // Set min date to the next day
                             ->default(now()->addWeek())  // Set default to one week from now
@@ -146,9 +152,9 @@ class LoanManagementResource extends Resource
 
                             // If you want to set 'estimated_return_at' directly and not use $data from the form
                             $estimatedReturnDate = \Carbon\Carbon::parse(now()->addWeek());  // Automatically use the default date (one week from now)
-            
+
                             if ($product->available_quantity <= 0) {
-                                throw new \Exception('No available units');
+                                throw new \Exception('Sin unidades disponibles');
                             }
 
                             // Set the current date for 'approved_at' and lock it
@@ -169,7 +175,7 @@ class LoanManagementResource extends Resource
 
                             Notification::make()
                                 ->success()
-                                ->title('Loan approved')
+                                ->title('Prestamo aprovado')
                                 ->body($message)
                                 ->send();
                         });
@@ -177,12 +183,12 @@ class LoanManagementResource extends Resource
                     ->visible(fn(Loan $record) => $record->status === 'pending'),
 
                 Tables\Actions\Action::make('reject')
-                    ->label('Reject')
+                    ->label('Rechazar')
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Reject Loan')
-                    ->modalDescription('Are you sure you want to reject this loan?')
+                    ->modalDescription('Estas seguro de rechazar el prestamos?')
                     ->action(function (Loan $record) {
                         $record->update([
                             'status' => 'rejected',
@@ -191,19 +197,19 @@ class LoanManagementResource extends Resource
 
                         Notification::make()
                             ->danger()
-                            ->title('Loan rejected')
+                            ->title('Prestamos Rechazado')
                             ->send();
                     })
                     ->visible(fn(Loan $record) => $record->status === 'pending'),
 
                 Tables\Actions\Action::make('return')
-                    ->label('Mark as Returned')
+                    ->label('Marcar como devuelto')
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('info')
                     ->requiresConfirmation()
                     ->form([
                         Forms\Components\DatePicker::make('actual_return_at') // Changed from 'real_return_date' to 'actual_return_at'
-                            ->label('Actual Return Date')
+                            ->label('fecha de devolucion')
                             ->default(now())  // Set default to current date
                             ->maxDate(now()) // Limit the date to today (cannot be in the future)
                             ->displayFormat('d M Y')
@@ -227,7 +233,7 @@ class LoanManagementResource extends Resource
 
                             Notification::make()
                                 ->success()
-                                ->title('Equipment returned')
+                                ->title('Equipo devuelto')
                                 ->body("Return date: {$actualReturnDate->format('d/m/Y')}")
                                 ->send();
                         });
@@ -235,36 +241,7 @@ class LoanManagementResource extends Resource
                     ->visible(fn(Loan $record) => $record->status === 'approved'),
 
             ])
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('approve')
-                    ->label('Approve selected')
-                    ->icon('heroicon-o-check')
-                    ->form([
-                        Forms\Components\DatePicker::make('estimated_return_at')
-                            ->label('Estimated Return Date')
-                            ->required()
-                            ->minDate(now()->addDay())
-                            ->default(now()->addWeek())
-                            ->disabled()  // Disable editing for the bulk approve action as well
-                    ])
-                    ->action(function ($records, array $data) {
-                        $estimatedReturnDate = \Carbon\Carbon::parse($data['estimated_return_at']);
-
-                        $records->each->update([
-                            'status' => 'approved',
-                            'approved_at' => now(),  // Set approved_at to the current date
-                            'estimated_return_at' => $estimatedReturnDate,
-                        ]);
-
-
-                        Notification::make()
-                            ->success()
-                            ->title('Loans approved')
-                            ->body("Deadline: {$estimatedReturnDate->format('d/m/Y')}")
-                            ->send();
-                    })
-                    ->deselectRecordsAfterCompletion(),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getPages(): array

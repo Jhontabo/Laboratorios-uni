@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class BookingTrendsAreaChart extends ChartWidget
 {
-    protected static ?string $heading = 'Monthly Booking Trends';
+    protected static ?string $heading = 'Tendecias de reservas Mensuales';
     protected static ?string $maxHeight = '350px';
     protected static ?int $sort = 4;
 
@@ -32,7 +32,7 @@ class BookingTrendsAreaChart extends ChartWidget
             'labels' => $data->pluck('date')->map(fn($date) => $this->formatDate($date))->toArray(),
             'datasets' => [
                 [
-                    'label' => 'Bookings',
+                    'label' => 'Reservas',
                     'data' => $data->pluck('total')->toArray(),
                     'backgroundColor' => 'rgba(59, 130, 246, 0.2)',
                     'borderColor' => '#3b82f6',
@@ -56,7 +56,6 @@ class BookingTrendsAreaChart extends ChartWidget
 
     public function getDescription(): ?string
     {
-        return 'Daily booking trend for the current month';
+        return 'Tendencia de reservas diarias para el mes actual';
     }
 }
-

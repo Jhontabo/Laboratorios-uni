@@ -46,8 +46,7 @@ class ScheduleCalendar extends Page
         $laboratories = Laboratory::all()->pluck('name', 'id')->toArray();
 
         return [
-            'All' => 'All',
+            'All' => 'Todos',
         ] + $laboratories;
     }
 }
-

@@ -11,32 +11,32 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverview extends BaseWidget
 {
-    protected ?string $heading = 'Statistics Overview';
-    protected ?string $description = 'Key system metrics';
+    protected ?string $heading = 'Resumen de estadisticas';
+    protected ?string $description = 'Metricas clave del sistema';
     protected static ?int $sort = 1;
 
     protected function getStats(): array
     {
         return [
-            Stat::make('Registered Products', Product::count())
-                ->description('Products in inventory')
+            Stat::make('Productos Registrados', Product::count())
+                ->description('Productos en el inventario')
                 ->descriptionIcon('heroicon-o-cube')
                 ->color('primary'),
 
 
 
-            Stat::make('Laboratories', Laboratory::count())
-                ->description('Available spaces')
+            Stat::make('Laboratorios', Laboratory::count())
+                ->description('Espacios disponibles')
                 ->descriptionIcon('heroicon-o-building-office')
                 ->color('warning'),
 
-            Stat::make('Active Users', User::where('status', true)->count())
+            Stat::make('Usuarios disponibles', User::where('status', true)->count())
                 ->description('Total: ' . User::count())
                 ->descriptionIcon('heroicon-o-users')
                 ->color('success'),
 
-            Stat::make('Total Bookings', Booking::count())
-                ->description('Total bookings in the system')
+            Stat::make('Total Reservas', Booking::count())
+                ->description('Total reservas en el sistema')
                 ->descriptionIcon('heroicon-o-clipboard-document-check')
                 ->color('primary'),
         ];

@@ -51,7 +51,7 @@ class BookingCalendar extends FullCalendarWidget
             'slotMinTime' => '06:00:00',
             'slotMaxTime' => '22:00:00',
             'slotDuration' => '00:30:00',
-            'locale' => 'en',
+            'locale' => 'es',
             'initialView' => 'timeGridWeek',
             'headerToolbar' => [
                 'left' => 'prev,next today',

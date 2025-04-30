@@ -11,10 +11,8 @@ class BookingResource extends Resource
     protected static ?string $model = Booking::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationLabel = 'Reservation Management';
-    protected static ?string $modelLabel = 'Booking';
-    protected static ?string $pluralModelLabel = 'Booking Management';
-    protected static ?string $navigationGroup = 'Academic Management';
+    protected static ?string $navigationLabel = 'Reservar Espacio';
+    protected static ?string $navigationGroup = 'Gestion de Reservas';
 
 
     public static function getNavigationBadgeColor(): string

@@ -8,13 +8,11 @@ use Filament\Resources\Resource;
 
 class ScheduleResource extends Resource
 {
-    protected static ?string $model = Horario::class;
+    protected static ?string $model = Schedule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationGroup = 'Academic Management';
-    protected static ?string $navigationLabel = 'Manage Schedules';
-    protected static ?string $modelLabel = 'Schedule';
-    protected static ?string $pluralModelLabel = 'Schedules';
+    protected static ?string $navigationLabel = 'Administrar Horarios';
 
     public static function getPages(): array
     {
@@ -23,4 +21,3 @@ class ScheduleResource extends Resource
         ];
     }
 }
-

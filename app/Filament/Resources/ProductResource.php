@@ -6,9 +6,7 @@ use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
 use App\Models\Laboratory;
 use Filament\Resources\Resource;
-use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -49,97 +47,91 @@ class ProductResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Section::make('Basic Information')
+            Section::make('Informacion Basica')
                 ->icon('heroicon-o-information-circle')
                 ->schema([
                     Grid::make(2)
                         ->schema([
                             TextInput::make('name')
-                                ->label('Product Name')
+                                ->label('Nombre')
                                 ->required()
                                 ->maxLength(255)
-                                ->placeholder('e.g., Microscope')
-                                ->helperText('Maximum 255 characters.'),
+                                ->placeholder('e.g., Microscopio')
+                                ->helperText('Maximo 255 caracteres.'),
                             Textarea::make('description')
-                                ->label('Product Description')
+                                ->label('Descripcion del producto')
                                 ->maxLength(500)
                                 ->rows(4)
-                                ->placeholder('Product features or details...')
+                                ->placeholder('Caracteristicas del producto o detalles...')
                                 ->required(),
                         ]),
                 ]),
 
-            Section::make('Technical Specifications')
+            Section::make('Especificaiones Tecnicas')
                 ->icon('heroicon-o-clipboard-document-list')
                 ->schema([
                     Grid::make(3)
                         ->schema([
                             TextInput::make('serial_number')
-                                ->label('Serial Number')
+                                ->label('Numero de Serie')
                                 ->required()
                                 ->maxLength(255),
                             Select::make('product_type')
-                                ->label('Product Type')
+                                ->label('Tipo de producto')
                                 ->options([
-                                    'supply' => 'Supply',
-                                    'equipment' => 'Equipment',
+                                    'supply' => 'Suministro',
+                                    'equipment' => 'Equipo',
                                 ])
                                 ->required()
                                 ->native(false),
                             Select::make('product_condition')
-                                ->label('Product Condition')
+                                ->label('Condicion del Producto')
                                 ->options([
-                                    'new' => 'New',
-                                    'used' => 'Used',
-                                    'damaged' => 'Damaged',
-                                    'decommissioned' => 'Decommissioned',
-                                    'lost' => 'Lost',
+                                    'new' => 'Nuevo',
+                                    'used' => 'Usado',
+                                    'damaged' => 'Dañado',
+                                    'decommissioned' => 'Fuera de Servicio',
+                                    'lost' => 'Perdido',
                                 ])
                                 ->required()
                                 ->native(false),
                             Toggle::make('available_for_loan')
-                                ->label('Available for Loan')
+                                ->label('Disponible para Prestamo')
                                 ->default(false),
                         ]),
                 ]),
 
-            Section::make('Inventory and Costs')
+            Section::make('Inventario y costos')
                 ->icon('heroicon-o-currency-dollar')
                 ->schema([
                     Grid::make(3)
                         ->schema([
                             TextInput::make('available_quantity')
-                                ->label('Stock Quantity')
+                                ->label('Cantidad disponible')
                                 ->numeric()
                                 ->required(),
                             TextInput::make('unit_cost')
-                                ->label('Unit Cost (COP)')
+                                ->label('Costo unitario (COP)')
                                 ->numeric()
                                 ->prefix('$')
                                 ->required(),
                             DatePicker::make('acquisition_date')
-                                ->label('Acquisition Date')
+                                ->label('Fecha de adquisición')
                                 ->required()
                                 ->displayFormat('d/m/Y'),
-                        ]),
-                ]),
-
-            Section::make('Location and Classification')
-                ->icon('heroicon-o-map-pin')
-                ->schema([
-                    Grid::make(2)
-                        ->schema([
-
                             Select::make('laboratory_id')
-                                ->label('Laboratory Location')
-                                ->options(Laboratory::all()->pluck('location', 'id'))
+                                ->label('Laboratorio')
+                                ->options(Laboratory::all()->pluck('name', 'id'))
                                 ->searchable()
                                 ->preload()
                                 ->required(),
+
                         ]),
                 ]),
 
-            Section::make('Product Image')
+
+
+            Section::make('Imagen del producto')
                 ->icon('heroicon-o-photo')
                 ->schema([
                     FileUpload::make('image')
@@ -148,7 +140,7 @@ class ProductResource extends Resource
                         ->directory('products')
                         ->disk('public')
                         ->visibility('public')
-                        ->helperText('Upload a representative image'),
+                        ->helperText('Cargar una imagen representativa'),
                 ]),
         ]);
     }
@@ -157,40 +149,39 @@ class ProductResource extends Resource
     {
         return $table->columns([
             ImageColumn::make('image')
-                ->label('Image')
+                ->label('Imagen')
                 ->size(50)
                 ->circular()
                 ->toggleable(),
 
             TextColumn::make('name')
-                ->label('Product')
+                ->label('Producto')
                 ->searchable()
                 ->sortable(),
 
             TextColumn::make('available_quantity')
-                ->label('Stock')
-                ->sortable(),
+                ->label('Stock'),
 
             TextColumn::make('product_condition')
-                ->label('Condition')
+                ->label('Condicion')
                 ->badge(),
 
             TextColumn::make('product_type')
-                ->label('Type')
+                ->label('Tipo')
                 ->badge(),
 
             TextColumn::make('unit_cost')
-                ->label('Price')
+                ->label('Precio')
                 ->money('COP')
                 ->sortable(),
 
             TextColumn::make('acquisition_date')
-                ->label('Acquisition')
+                ->label('Adquisición')
                 ->date('d/m/Y')
                 ->sortable(),
 
-            TextColumn::make('laboratory.location')
-                ->label('Location')
+            TextColumn::make('laboratory.name')
+                ->label('laboratorio')
                 ->searchable()
                 ->sortable(),
 
@@ -200,12 +191,12 @@ class ProductResource extends Resource
 
             ->filters([
                 Filter::make('product_type')
-                    ->label('Product Type')
                     ->form([
-                        Select::make('product_type')  // Aquí cambiamos 'status' por 'type'
+                        Select::make('product_type')
+                            ->label('Tipo de prodcuto')
                             ->options([
-                                'Supply' => 'Supply',
-                                'Equipment' => 'Equipment',
+                                'Supply' => 'Suministro',
+                                'Equipment' => 'Equipo',
                             ])
                             ->native(false),  // Usamos 'native(false)' para personalizar el diseño
                     ])
@@ -216,20 +207,20 @@ class ProductResource extends Resource
             ])
 
             ->actions([  // Actions for individual rows
-                EditAction::make()->tooltip('Edit product'),
+                EditAction::make()->tooltip('Editar producto'),
             ])
             ->bulkActions([  // Bulk actions for selected rows
                 BulkAction::make('markAsLost')
-                    ->label('Mark as Lost')
+                    ->label('Marcar como perdido')
                     ->action(fn(Collection $records) => $records->each->update(['product_condition' => 'lost']))
                     ->requiresConfirmation()
-                    ->modalHeading('Mark selected as lost'),
+                    ->modalHeading('Marcar seleccion como perdido'),
 
                 BulkAction::make('decommissionSelected')
-                    ->label('Decommission')
+                    ->label('Desactivacion')
                     ->action(fn(Collection $records) => $records->each->update(['product_condition' => 'decommissioned']))
                     ->requiresConfirmation()
-                    ->modalHeading('Decommission selected products'),
+                    ->modalHeading('Productos selecionados para desactivacion'),
 
                 DeleteBulkAction::make(),  // Bulk delete action
             ])

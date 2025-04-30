@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Laboratory;
-use App\Models\Category;
 use App\Models\Product;
 use Carbon\Carbon;
 
@@ -24,19 +23,8 @@ class ProductsSeeder extends Seeder
             ]
         );
 
-        // Create categories
-        $categories = [
-            ['id' => 1, 'name' => 'Electronics'],
-            ['id' => 2, 'name' => 'Optics'],
-            ['id' => 3, 'name' => 'Computing'],
-        ];
 
-        foreach ($categories as $category) {
-            Category::firstOrCreate(
-                ['id' => $category['id']],
-                $category
-            );
-        }
+
 
         // Products data
         $products = [
@@ -45,7 +33,6 @@ class ProductsSeeder extends Seeder
                 'description' => 'Microscope with integrated camera 1000x',
                 'available_quantity' => 5,
                 'laboratory_id' => $laboratory->id,
-                'category_id' => 2, // Optics
                 'serial_number' => 'MIC-001',
                 'acquisition_date' => Carbon::now()->subYear(),
                 'available_for_loan' => true,
@@ -60,7 +47,6 @@ class ProductsSeeder extends Seeder
                 'description' => 'Business laptop i7, 16GB RAM, 512GB SSD',
                 'available_quantity' => 8,
                 'laboratory_id' => $laboratory->id,
-                'category_id' => 3, // Computing
                 'serial_number' => 'LT-HP-001',
                 'acquisition_date' => Carbon::now()->subMonths(3),
                 'available_for_loan' => true,
@@ -80,4 +66,3 @@ class ProductsSeeder extends Seeder
         $this->command->info('10 different products created successfully!');
     }
 }
-

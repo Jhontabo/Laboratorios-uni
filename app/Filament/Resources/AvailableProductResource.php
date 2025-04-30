@@ -81,12 +81,6 @@ class AvailableProductResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
-
-                TextColumn::make('category.name')
-                    ->label('Category')
-                    ->sortable()
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -131,7 +125,6 @@ class AvailableProductResource extends Resource
                                 'status' => 'pending',
                                 'requested_at' => now(), // Change this from 'request_date' to 'requested_at'
                             ]);
-
                         }
 
                         Notification::make()
@@ -158,4 +151,3 @@ class AvailableProductResource extends Resource
         ];
     }
 }
-

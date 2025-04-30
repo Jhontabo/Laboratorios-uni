@@ -16,7 +16,6 @@ class Product extends Model
         'description',
         'available_quantity',
         'laboratory_id',
-        'category_id',
         'serial_number',
         'acquisition_date',
         'unit_cost',
@@ -49,10 +48,7 @@ class Product extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function category()
-    {
-        return $this->belongsTo(Category::class, 'category_id');
-    }
+
 
     // Accesor para ubicación
     public function getLocationAttribute(): string
@@ -60,4 +56,3 @@ class Product extends Model
         return $this->laboratory ? $this->laboratory->location : 'No location assigned';
     }
 }
-

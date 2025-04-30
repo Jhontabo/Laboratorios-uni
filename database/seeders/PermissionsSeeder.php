@@ -19,8 +19,6 @@ class PermissionsSeeder extends Seeder
         // List of permissions (in English now)
         $permissions = [
             // Panels
-            'view category panel',
-            'view any category',
             'view product panel',
             'view reservation history panel',
             'view schedule panel',
@@ -43,14 +41,12 @@ class PermissionsSeeder extends Seeder
             'view reservation request',
             'view schedule',
             'view laboratory',
-            'view category',
             'view product',
             'view reservation panel',
 
             // Update
             'update schedule',
             'update laboratory',
-            'update category',
             'update role',
             'update product',
             'update reservation',
@@ -60,7 +56,6 @@ class PermissionsSeeder extends Seeder
             'create permission',
             'create role',
             'create user',
-            'create category',
             'create schedule',
             'create reservation',
             'create product',
@@ -71,7 +66,6 @@ class PermissionsSeeder extends Seeder
             'delete role',
             'delete reservation',
             'delete schedule',
-            'delete category',
             'delete user',
             'delete permission',
             'delete reservation request',
@@ -89,8 +83,6 @@ class PermissionsSeeder extends Seeder
 
         // Assign specific permissions to LABORATORISTA
         $laboratoryTechnician->syncPermissions([
-            'view category panel',
-            'view any category',
             'view product panel',
             'view reservation history panel',
             'view schedule panel',
@@ -113,13 +105,11 @@ class PermissionsSeeder extends Seeder
             'view reservation request',
             'view schedule',
             'view laboratory',
-            'view category',
             'view product',
             'view reservation panel',
 
             'update schedule',
             'update laboratory',
-            'update category',
             'update role',
             'update product',
             'update reservation',
@@ -128,7 +118,6 @@ class PermissionsSeeder extends Seeder
             'create permission',
             'create role',
             'create user',
-            'create category',
             'create schedule',
             'create reservation',
             'create product',
@@ -138,7 +127,6 @@ class PermissionsSeeder extends Seeder
             'delete role',
             'delete reservation',
             'delete schedule',
-            'delete category',
             'delete user',
             'delete permission',
             'delete reservation request',
@@ -165,4 +153,3 @@ class PermissionsSeeder extends Seeder
         ]);
     }
 }
-

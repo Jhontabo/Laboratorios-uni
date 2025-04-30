@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
-use App\Models\Category;
 use App\Models\Laboratory;
 use Filament\Resources\Resource;
 use Filament\Forms;
@@ -24,21 +23,17 @@ use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Notifications\Notification;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cube';
-    protected static ?string $navigationLabel = 'Product Management';
-    protected static ?string $modelLabel = 'Product';
-    protected static ?string $pluralModelLabel = 'Products';
-    protected static ?string $navigationGroup = 'Inventory and Laboratory';
+    protected static ?string $navigationLabel = 'Inventario';
+    protected static ?string $navigationGroup = 'Inventario';
     protected static ?int $navigationSort = 1;
 
     public static function getNavigationBadge(): ?string
@@ -134,12 +129,7 @@ class ProductResource extends Resource
                 ->schema([
                     Grid::make(2)
                         ->schema([
-                            Select::make('category_id')
-                                ->label('Category')
-                                ->options(Category::all()->pluck('name', 'id'))
-                                ->searchable()
-                                ->preload()
-                                ->required(),
+
                             Select::make('laboratory_id')
                                 ->label('Laboratory Location')
                                 ->options(Laboratory::all()->pluck('location', 'id'))
@@ -204,28 +194,27 @@ class ProductResource extends Resource
                 ->searchable()
                 ->sortable(),
 
-            TextColumn::make('category.name')
-                ->label('Category')
-                ->sortable()
-                ->searchable()
-                ->toggleable(isToggledHiddenByDefault: true),
-        ])
-            ->filters([
-                Filter::make('low_stock')
-                    ->label('Low Stock (<=10)')
-                    ->query(fn(Builder $query) => $query->where('available_quantity', '<=', 10))
-                    ->toggle(),
 
-                Filter::make('by_laboratory')
-                    ->label('By Laboratory')
+        ])
+
+
+            ->filters([
+                Filter::make('product_type')
+                    ->label('Product Type')
                     ->form([
-                        Select::make('laboratory_id')
-                            ->options(Laboratory::all()->pluck('location', 'id'))
-                            ->searchable()
-                            ->preload(),
+                        Select::make('product_type')  // Aquí cambiamos 'status' por 'type'
+                            ->options([
+                                'Supply' => 'Supply',
+                                'Equipment' => 'Equipment',
+                            ])
+                            ->native(false),  // Usamos 'native(false)' para personalizar el diseño
                     ])
-                    ->query(fn(Builder $query, array $data) => $query->when($data['laboratory_id'], fn($q) => $q->where('laboratory_id', $data['laboratory_id']))),
+                    ->query(
+                        fn(Builder $query, array $data): Builder =>
+                        $query->when($data['product_type'], fn($q) => $q->where('product_type', $data['product_type']))
+                    ),
             ])
+
             ->actions([  // Actions for individual rows
                 EditAction::make()->tooltip('Edit product'),
             ])

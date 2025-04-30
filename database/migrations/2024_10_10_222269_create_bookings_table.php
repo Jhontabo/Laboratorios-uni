@@ -38,8 +38,8 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             // Booking status
-            $table->string('status', 20)->default('pending')->comment('Booking status');
 
+            $table->enum('status', ['pending', 'approved', 'reserved', 'rejected'])->default('pending');
             // Timestamps
             $table->timestamps();
         });
@@ -50,4 +50,3 @@ return new class extends Migration
         Schema::dropIfExists('bookings');
     }
 };
-

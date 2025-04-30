@@ -20,9 +20,7 @@ return new class extends Migration {
                 ->constrained('laboratories')
                 ->cascadeOnDelete();
 
-            $table->foreignId('category_id')
-                ->constrained('categories')
-                ->cascadeOnDelete();
+
 
             // Technical details
             $table->string('serial_number')->nullable()->unique();
@@ -60,4 +58,3 @@ return new class extends Migration {
         Schema::dropIfExists('products');
     }
 };
-

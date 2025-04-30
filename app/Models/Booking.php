@@ -23,8 +23,32 @@ class Booking extends Model
         'status',
     ];
 
-    const STATUS_REJECTED = 'rejected';
     const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_RESERVED = 'reserved';
+    const STATUS_REJECTED = 'rejected';
+
+
+    protected $casts = [
+        'status' => 'string', // Asegurar que siempre sea tratado como string
+    ];
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    // Método para verificar si está aprobado
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_APPROVED;
+    }
+
+    // Método para verificar si está rechazado
+    public function isRejected(): bool
+    {
+        return $this->status === self::STATUS_REJECTED;
+    }
 
     public function user()
     {

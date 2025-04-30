@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Category;
 use App\Models\Laboratory;
 use App\Models\Product;
 use App\Models\Booking;
@@ -24,10 +23,7 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-o-cube')
                 ->color('primary'),
 
-            Stat::make('Active Categories', Category::count())
-                ->description('Product organization')
-                ->descriptionIcon('heroicon-o-tag')
-                ->color('danger'),
+
 
             Stat::make('Laboratories', Laboratory::count())
                 ->description('Available spaces')
@@ -46,4 +42,3 @@ class StatsOverview extends BaseWidget
         ];
     }
 }
-

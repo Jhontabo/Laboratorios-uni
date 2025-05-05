@@ -14,7 +14,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use labelObj;
 
 class LoanManagementResource extends Resource
 {
@@ -23,6 +22,8 @@ class LoanManagementResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationLabel = 'Administrar Prestamos';
     protected static ?string $navigationGroup = 'Prestamos';
+    protected static ?string $modelLabel = 'Prestamo';
+    protected static ?string $pluralModelLabel = 'Prestamos';
 
     public static function getNavigationBadge(): ?string
     {

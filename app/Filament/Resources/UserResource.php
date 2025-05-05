@@ -20,19 +20,16 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'User Management';
-    protected static ?string $modelLabel = 'User';
-    protected static ?string $pluralModelLabel = 'Users';
-    protected static ?string $navigationGroup = 'Administration';
-    protected static ?int $navigationSort = 1;
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $navigationLabel = 'Usuarios';
+    protected static ?string $navigationGroup = 'Administracion';
+    protected static ?string $modelLabel = 'Usuario';
+    protected static ?string $pluralModelLabel = 'Usuarios';
 
     public static function getNavigationBadge(): ?string
     {
@@ -47,18 +44,18 @@ class UserResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Section::make('Personal Information')
+            Section::make('Informacion Personal')
                 ->icon('heroicon-o-user-circle')
                 ->schema([
                     Forms\Components\Grid::make(2)
                         ->schema([
                             TextInput::make('name')
-                                ->label('First Name')
+                                ->label('Nombre')
                                 ->required()
                                 ->maxLength(255),
 
                             TextInput::make('last_name')
-                                ->label('Last Name')
+                                ->label('Apellido')
                                 ->required()
                                 ->maxLength(255),
                         ]),
@@ -72,17 +69,17 @@ class UserResource extends Resource
                                 ->unique(ignoreRecord: true),
 
                             TextInput::make('phone')
-                                ->label('Phone')
+                                ->label('Telefono')
                                 ->tel()
                                 ->required()
                                 ->maxLength(15),
                         ]),
                     TextInput::make('address')
-                        ->label('Address')
+                        ->label('Direccion')
                         ->required()
                         ->maxLength(255),
                 ]),
-            Section::make('Account Settings')
+            Section::make('Ajustes de cuenta')
                 ->icon('heroicon-o-cog')
                 ->schema([
                     Forms\Components\Grid::make(2)
@@ -95,7 +92,7 @@ class UserResource extends Resource
                                 ->required(),
 
                             Select::make('status')
-                                ->label('Account Status')
+                                ->label('Estado de cuenta')
                                 ->options([
                                     'Active' => 'Active',
                                     'Inactive' => 'Inactive',
@@ -112,12 +109,12 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('First Name')->searchable()->sortable(),
-                TextColumn::make('last_name')->label('Last Name')->searchable()->sortable(),
+                TextColumn::make('name')->label('Nombre')->searchable()->sortable(),
+                TextColumn::make('last_name')->label('Apellido')->searchable()->sortable(),
                 TextColumn::make('email')->label('Email')->searchable()->sortable(),
                 TextColumn::make('roles.name')->label('Roles')->badge()->color('primary')->sortable(),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label('Estado')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'active' => 'success',
@@ -133,7 +130,7 @@ class UserResource extends Resource
             ])
             ->filters([
                 Filter::make('status')
-                    ->label('Account Status')
+                    ->label('Estado de cuenta')
                     ->form([
                         Select::make('status')
                             ->options([
@@ -163,7 +160,7 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()->icon('heroicon-o-pencil')->color('primary'),
                 Action::make('togglestatus')
-                    ->label(fn(Model $record) => $record->status === 'active' ? 'Deactivate' : 'Activate')
+                    ->label(fn(Model $record) => $record->status === 'active' ? 'Desactivar' : 'Activar')
                     ->icon(fn(Model $record) => $record->status === 'active' ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
                     ->color(fn(Model $record) => $record->status === 'active' ? 'danger' : 'success')
                     ->action(function (Model $record) {
@@ -172,16 +169,16 @@ class UserResource extends Resource
                         $record->save();
 
                         Notification::make()
-                            ->title($record->status === 'active' ? 'User activated' : 'User deactivated')
+                            ->title($record->status === 'active' ? 'Usuario activado' : 'Usuario desactivado')
                             ->success()
                             ->send();
                     })
                     ->requiresConfirmation()
-                    ->modalHeading(fn(Model $record) => $record->status === 'active' ? 'Deactivate user' : 'Activate user')
+                    ->modalHeading(fn(Model $record) => $record->status === 'active' ? 'Desactivar usuario' : 'Activar usuario')
                     ->modalDescription(fn(Model $record) => $record->status === 'active'
-                        ? 'Are you sure you want to deactivate this user?'
-                        : 'Are you sure you want to activate this user?')
-                    ->modalSubmitActionLabel(fn(Model $record) => $record->status === 'active' ? 'Yes, deactivate' : 'Yes, activate'),
+                        ? 'Estas seguro que quieres desactivar este usuario?'
+                        : 'Estas seguro que quieres activar este usuario?')
+                    ->modalSubmitActionLabel(fn(Model $record) => $record->status === 'active' ? 'Si, desactivar' : 'Si, activar'),
             ])
 
             ->bulkActions([

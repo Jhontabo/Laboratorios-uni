@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    Reservation Details #{{ $record->id }}
+                    Detallles de Reserva #{{ $record->id }}
                 </h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                     Created on {{ $record->created_at->format('d/m/Y H:i') }}
@@ -31,20 +31,20 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         <x-heroicon-o-building-office class="w-5 h-5 inline mr-2" />
-                        Laboratory Information
+                        Informacion de laboratorio
                     </h3>
 
                     <div class="space-y-2">
                         <p>
-                            <span class="font-medium">Name:</span>
+                            <span class="font-medium">Nombre:</span>
                             {{ $record->laboratory->name ?? 'Not specified' }}
                         </p>
                         <p>
-                            <span class="font-medium">Location:</span>
+                            <span class="font-medium">Localizacion:</span>
                             {{ $record->laboratory->location ?? 'Not specified' }}
                         </p>
                         <p>
-                            <span class="font-medium">Capacity:</span>
+                            <span class="font-medium">Capacidad:</span>
                             {{ $record->laboratory->capacity ?? 'N/A' }}
                         </p>
                     </div>
@@ -54,21 +54,21 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         <x-heroicon-o-clock class="w-5 h-5 inline mr-2" />
-                        Reserved Schedule
+                        Horario Reservado
                     </h3>
 
                     <div class="space-y-2">
                         <p>
-                            <span class="font-medium">Date:</span>
+                            <span class="font-medium">Fecha:</span>
                             {{ $record->schedule->start_at->format('d/m/Y') ?? 'Not specified' }}
                         </p>
                         <p>
-                            <span class="font-medium">Time:</span>
+                            <span class="font-medium">Hora:</span>
                             {{ $record->schedule->start_at->format('H:i') ?? '00:00' }} -
                             {{ $record->schedule->end_at->format('H:i') ?? '00:00' }}
                         </p>
                         <p>
-                            <span class="font-medium">Duration:</span>
+                            <span class="font-medium">Duracion:</span>
                             {{ $record->schedule->start_at->diffInHours($record->schedule->end_at) }} hours
                         </p>
                     </div>
@@ -85,13 +85,13 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <p class="font-medium">First Name:</p>
+                    <p class="font-medium">Nombre:</p>
                     <!-- Corrected to access the 'user' relationship -->
                     <p>{{ $record->first_name ?? 'No first name provided' }}</p>
                 </div>
 
                 <div>
-                    <p class="font-medium">Last Name:</p>
+                    <p class="font-medium">Apellido:</p>
                     <!-- Corrected to access the 'user' relationship -->
                     <p>{{ $record->last_name ?? 'No last name provided' }}</p>
                 </div>
@@ -110,16 +110,16 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         <x-heroicon-o-document-text class="w-5 h-5 inline mr-2" />
-                        Additional Details
+                        Detalles Adicionales
                     </h3>
 
                     <div class="space-y-2">
                         <p>
-                            <span class="font-medium">Request Date:</span>
+                            <span class="font-medium">Fecha de peticion:</span>
                             {{ $record->created_at->format('d/m/Y H:i') }}
                         </p>
                         <p>
-                            <span class="font-medium">Last Updated:</span>
+                            <span class="font-medium">Ultima actualizacion:</span>
                             {{ $record->updated_at->format('d/m/Y H:i') }}
                         </p>
                     </div>

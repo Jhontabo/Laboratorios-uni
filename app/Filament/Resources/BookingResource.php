@@ -13,7 +13,8 @@ class BookingResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationLabel = 'Reservar Espacio';
     protected static ?string $navigationGroup = 'Gestion de Reservas';
-
+    protected static ?string $modelLabel = 'Horario';
+    protected static ?string $pluralLabel = 'Reservar espacio';
 
     public static function getNavigationBadgeColor(): string
     {

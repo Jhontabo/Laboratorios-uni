@@ -19,7 +19,8 @@ class AvailableProductResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-m-shopping-cart';
     protected static ?string $navigationGroup = 'Prestamos';
     protected static ?string $navigationLabel = 'Productos para prestamos';
-
+    protected static ?string $modelLabel = 'prestamo';
+    protected static ?string $pluralLabel = 'Productos para prestamos';
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -89,7 +90,7 @@ class AvailableProductResource extends Resource
             ])
             ->headerActions([
                 Tables\Actions\Action::make('infoSelection')
-                    ->label('How to request products?')
+                    ->label('como pedir un producto')
                     ->color('gray')
                     ->icon('heroicon-o-question-mark-circle')
                     ->modalContent(view('filament.pages.instructions-request'))

@@ -21,7 +21,8 @@ class LoanResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationLabel = 'Mis prestamos';
     protected static ?string $navigationGroup = 'Prestamos';
-
+    protected static ?string $modelLabel = 'Prestamo';
+    protected static ?string $pluralModelLabel = 'Mis prestamos';
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

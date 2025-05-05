@@ -17,11 +17,10 @@ class ReservationRequestResource extends Resource
     protected static ?string $model = Booking::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
-    protected static ?string $navigationLabel = 'Reservation Requests';
-    protected static ?string $modelLabel = 'Reservation Request';
-    protected static ?string $pluralModelLabel = 'Reservation Requests';
-    protected static ?string $navigationGroup = 'Academic Management';
-
+    protected static ?string $navigationLabel = 'Solicitud reserva';
+    protected static ?string $navigationGroup = 'Gestion de Reservas';
+    protected static ?string $modelLabel = 'Horario';
+    protected static ?string $pluralLabel = 'Solicitud de reservas';
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('status', 'pending')->count();
@@ -39,18 +38,18 @@ class ReservationRequestResource extends Resource
             ->columns([
 
                 TextColumn::make('schedule.laboratory.location') // Asegúrate de que 'schedule.laboratory.location' sea la ruta correcta
-                    ->label('Laboratory')
+                    ->label('Laboratorio')
                     ->description(fn($record) => $record->schedule?->laboratory?->location ?? 'No location') // Usa 'schedule.laboratory.location'
                     ->searchable()
                     ->icon('heroicon-o-building-office'),
                 TextColumn::make('user.name') // Usamos 'user.name' para acceder al nombre completo
-                    ->label('Applicant')
+                    ->label('Aplicante')
                     ->formatStateUsing(fn($record) => "{$record->user->name} {$record->user->last_name}")
                     ->description(fn($record) => $record->user->email ?? 'No email')
                     ->icon('heroicon-o-user'),
 
                 TextColumn::make('interval')
-                    ->label('Schedule')
+                    ->label('Estado')
                     ->getStateUsing(fn($record) => $record->schedule && $record->schedule->start_at && $record->schedule->end_at
                         ? $record->schedule->start_at->format('d M Y, H:i') . ' - ' . $record->schedule->end_at->format('H:i')
                         : 'Not assigned')
@@ -58,7 +57,7 @@ class ReservationRequestResource extends Resource
                     ->icon('heroicon-o-clock'),
 
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label('Estado')
                     ->formatStateUsing(fn($state) => match ($state) {
                         'pending' => 'Pending Review',
                         'approved' => 'Approved',
@@ -79,14 +78,14 @@ class ReservationRequestResource extends Resource
                     }),
 
                 TextColumn::make('created_at')
-                    ->label('Requested')
+                    ->label('Fecha peticion')
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->icon('heroicon-o-calendar'),
             ])
 
             ->actions([
-                Action::make('Approve')
+                Action::make('Aprobar')
                     ->action(function (Booking $record) { // Ensure you're using the correct model Booking
                         $record->status = 'approved';
                         $record->save();
@@ -104,7 +103,7 @@ class ReservationRequestResource extends Resource
                     ->modalDescription('Are you sure you want to approve this reservation request?')
                     ->requiresConfirmation(),
 
-                Action::make('Reject')
+                Action::make('Rechazar')
                     ->form([
                         Textarea::make('rejection_reason') // Changed 'razon_rechazo' to 'rejection_reason'
                             ->label('Reason for Rejection')
@@ -132,7 +131,7 @@ class ReservationRequestResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye')
                     ->color('info')
-                    ->label('View Details'),
+                    ->label('Ver detalles'),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()

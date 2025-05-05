@@ -5,7 +5,6 @@ namespace App\Filament\Resources\BookingResource\Pages;
 use App\Filament\Resources\BookingResource;
 use App\Filament\Widgets\BookingCalendar;
 use App\Models\Booking;
-use App\Models\Reservation;
 use App\Models\Laboratory;
 use Filament\Resources\Pages\Page;
 
@@ -14,6 +13,7 @@ class BookingResourceCalendar extends Page
     protected static string $resource = BookingResource::class;
 
     protected static string $view = 'filament.pages.reservation';
+    protected static ?string $pluralModelLabel = 'Reservar espacio';
 
     public ?int $laboratoryId = null;
 
@@ -64,5 +64,4 @@ class BookingResourceCalendar extends Page
     {
         return Laboratory::pluck('name', 'id')->toArray();
     }
-
 }

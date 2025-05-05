@@ -32,8 +32,8 @@ class ProductResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-cube';
     protected static ?string $navigationLabel = 'Inventario';
     protected static ?string $navigationGroup = 'Inventario';
-    protected static ?int $navigationSort = 1;
-
+    protected static ?string $modelLabel = 'Producto';
+    protected static ?string $pluralLabel = 'Productos';
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
@@ -160,7 +160,7 @@ class ProductResource extends Resource
                 ->sortable(),
 
             TextColumn::make('available_quantity')
-                ->label('Stock'),
+                ->label('Cantidad'),
 
             TextColumn::make('product_condition')
                 ->label('Condicion')

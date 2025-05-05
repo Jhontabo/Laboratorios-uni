@@ -18,7 +18,9 @@ class ReservationHistorysResource extends Resource
     protected static ?string $model = Booking::class;
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?string $navigationLabel = 'Mis Reservas';
-    protected static ?string $navigationGroup = 'Academic Management';
+    protected static ?string $navigationGroup = 'Gestion de Reservas';
+    protected static ?string $modelLabel = 'Horario';
+    protected static ?string $pluralLabel = 'Mis reservas';
 
     public static function getNavigationBadge(): ?string
     {
@@ -52,14 +54,14 @@ class ReservationHistorysResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('laboratory.name')
-                    ->label('Laboratory')
+                    ->label('Laboratorio')
                     ->description(fn($record) => $record->laboratory?->location ?? 'No location')
                     ->searchable()
                     ->sortable()
                     ->icon('heroicon-o-building-office'),
 
                 TextColumn::make('interval')
-                    ->label('Schedule')
+                    ->label('Horario')
                     ->getStateUsing(function ($record) {
                         if (!$record->schedule) {
                             return 'Not assigned';
@@ -73,7 +75,7 @@ class ReservationHistorysResource extends Resource
                     ->icon('heroicon-o-clock'),
 
                 BadgeColumn::make('status')
-                    ->label('Status')
+                    ->label('Estado')
                     ->formatStateUsing(fn($state) => match ($state) {
                         'pending' => 'Pending Approval',
                         'approved' => 'Approved',
@@ -94,13 +96,13 @@ class ReservationHistorysResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label('Requested')
+                    ->label('Rechazado')
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->icon('heroicon-o-calendar'),
 
                 TextColumn::make('updated_at')
-                    ->label('Last Updated')
+                    ->label('Ultima actualizacion')
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -112,17 +114,17 @@ class ReservationHistorysResource extends Resource
                         'approved' => 'Approved',
                         'rejected' => 'Rejected',
                     ])
-                    ->label('Reservation Status'),
+                    ->label('Estado de la reserva'),
 
                 SelectFilter::make('laboratory')
                     ->relationship('laboratory', 'name')
-                    ->label('Filter by Laboratory'),
+                    ->label('Filtrar por laboratorio'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-o-eye')
                     ->color('info')
-                    ->label('View Details'),
+                    ->label('Ver detalles'),
             ])
             ->bulkActions([])
             ->emptyStateHeading('No reservations yet')

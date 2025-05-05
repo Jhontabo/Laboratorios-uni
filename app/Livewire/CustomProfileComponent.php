@@ -32,8 +32,8 @@ class CustomProfileComponent extends Component implements HasForms
         $user = Auth::user();
 
         $this->form->fill([
-            'telefono' => $user->telefono,
-            'direccion' => $user->direccion,
+            'telefono' => $user->phone,
+            'direccion' => $user->address,
         ]);
     }
 

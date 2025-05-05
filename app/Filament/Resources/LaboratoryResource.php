@@ -17,13 +17,10 @@ class LaboratoryResource extends Resource
     protected static ?string $model = Laboratory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-beaker';
-    protected static ?string $navigationLabel = 'Laboratory Management';
-    protected static ?string $modelLabel = 'Laboratory';
-    protected static ?string $pluralModelLabel = 'Laboratories';
-    protected static ?string $navigationGroup = 'Inventory and Laboratory';
-    protected static ?int $navigationSort = 3;
-
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $navigationLabel = 'Laboratorios';
+    protected static ?string $navigationGroup = 'Inventario';
+    protected static ?string $pluralModelLabel = 'Laboratorios';
+    protected static ?string $modelLabel = 'Laboratorio';
 
     public static function getNavigationBadge(): ?string
     {
@@ -34,51 +31,49 @@ class LaboratoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Laboratory Information')
+                Forms\Components\Section::make('Informacion del laboratorio')
                     ->icon('heroicon-o-building-office')
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('Name')
+                                    ->label('Nombre')
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('Ex. Molecular Biology')
-                                    ->helperText('Short name for the laboratory'),
+                                    ->placeholder('Ejemplo. Quimica'),
 
                                 Forms\Components\TextInput::make('capacity')
-                                    ->label('Capacity')
+                                    ->label('Capacidad')
                                     ->numeric()
                                     ->required()
                                     ->minValue(1)
                                     ->maxValue(100)
                                     ->step(1)
-                                    ->placeholder('Ex. 20')
-                                    ->helperText('Maximum number of people'),
+                                    ->placeholder('Ejem. 20')
+                                    ->helperText('Numero maximo de personas'),
 
                                 Forms\Components\TextInput::make('location')
-                                    ->label('Location')
+                                    ->label('Localizacion')
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('Building, Floor, Room')
-                                    ->helperText('Exact location'),
+                                    ->placeholder('Edificio, Piso, Aula')
                             ])
                             ->columns(2),
                     ])
                     ->compact(),
 
-                Forms\Components\Section::make('Manager')
+                Forms\Components\Section::make('Encargado')
                     ->icon('heroicon-o-user')
                     ->schema([
                         Forms\Components\Select::make('user_id')
-                            ->label('Laboratory Manager')
+                            ->label('Laboratorios')
                             ->options(User::role('LABORATORISTA')->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->required()
                             ->native(false)
-                            ->placeholder('Select a manager')
-                            ->helperText('Assigned responsible person'),
+                            ->placeholder('Selecione un encargado')
+                            ->helperText('Asigne una persona encargada'),
                     ])
                     ->compact(),
             ]);
@@ -89,7 +84,7 @@ class LaboratoryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Laboratory')
+                    ->label('Laboratorio')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
@@ -97,7 +92,7 @@ class LaboratoryResource extends Resource
 
                 Tables\Columns\TextColumn::make('capacity')
                     ->badge()
-                    ->label('Capacity')
+                    ->label('Capacidad')
                     ->formatStateUsing(fn($state): string => "{$state} people")
                     ->color(fn($state): string => match (true) {
                         $state > 30 => 'success',
@@ -106,34 +101,19 @@ class LaboratoryResource extends Resource
                     })
                     ->sortable(),
 
+
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Manager')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('user.last_name')
-                    ->label('Last Name')
-                    ->getStateUsing(fn(Laboratory $record): string => trim($record->user->first_name . ' ' . $record->user->last_name))
+                    ->label('Encargado')
+                    ->getStateUsing(fn(Laboratory $record): string => trim($record->user->name . ' ' . $record->user->last_name))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
+                    ->label('Creado')
                     ->dateTime('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                Tables\Filters\Filter::make('high_capacity')
-                    ->label('High Capacity (>30)')
-                    ->query(fn(Builder $query): Builder => $query->where('capacity', '>', 30)),
 
-                Tables\Filters\Filter::make('medium_capacity')
-                    ->label('Medium Capacity (15-30)')
-                    ->query(fn(Builder $query): Builder => $query->whereBetween('capacity', [15, 30])),
-
-                Tables\Filters\Filter::make('low_capacity')
-                    ->label('Low Capacity (<15)')
-                    ->query(fn(Builder $query): Builder => $query->where('capacity', '<', 15)),
-            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil')
@@ -151,14 +131,7 @@ class LaboratoryResource extends Resource
                             ->body('The laboratory was successfully deleted.'),
                     ),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make()
-                    ->label('Delete selected')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->modalHeading('Delete selected laboratories')
-                    ->modalDescription('Are you sure you want to delete the selected laboratories? This action cannot be undone.'),
-            ])
+
             ->emptyStateHeading('No laboratories yet')
             ->emptyStateDescription('Create your first laboratory by clicking the button above')
             ->emptyStateIcon('heroicon-o-beaker')
@@ -183,4 +156,3 @@ class LaboratoryResource extends Resource
         ];
     }
 }
-

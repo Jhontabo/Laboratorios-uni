@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\RoleResource\Pages;
 use App\Models\Role;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -14,18 +13,17 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Support\Enums\FontWeight;
-use Illuminate\Database\Eloquent\Builder;
 
 class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
-    protected static ?string $navigationGroup = 'Administration';
-    protected static ?string $navigationLabel = 'Role Management';
-    protected static ?string $modelLabel = 'Role';
+    protected static ?string $navigationGroup = 'Administracion';
+    protected static ?string $navigationLabel = 'Roles';
+    protected static ?string $modelLabel = 'Rol';
     protected static ?string $pluralModelLabel = 'Roles';
-    protected static ?int $navigationSort = 2;
+
 
     public static function getNavigationBadge(): ?string
     {
@@ -35,36 +33,35 @@ class RoleResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Section::make('Role Information')
-                ->description('Define the basic details of the role')
+            Section::make('Informacion del Rol')
+                ->description('Define los detalles basicos del rol')
                 ->icon('heroicon-o-identification')
                 ->schema([
                     TextInput::make('name')
-                        ->label('Role Name')
+                        ->label('Nombre del rol')
                         ->placeholder('Example: ADMIN, USER, GUEST')
                         ->autocapitalize('words')
                         ->required()
                         ->unique(ignoreRecord: true)
                         ->maxLength(255)
                         ->afterStateUpdated(fn($state, $set) => $set('name', strtoupper($state)))
-                        ->helperText('Use only uppercase letters and underscores (e.g., ADMIN_USERS)')
                         ->columnSpanFull(),
                 ]),
 
-            Section::make('Assign Permissions')
-                ->description('Select associated permissions')
+            Section::make('Asignacion de permisos')
+                ->description('Selecione los permisos')
                 ->icon('heroicon-o-lock-closed')
                 ->schema([
                     Select::make('permissions')
-                        ->label('Permissions')
+                        ->label('Permisos')
                         ->relationship('permissions', 'name')
                         ->multiple()
                         ->searchable()
                         ->preload()
                         ->maxItems(50)
-                        ->helperText('Search and select multiple permissions.')
-                        ->loadingMessage('Loading permissions...')
-                        ->noSearchResultsMessage('No permissions found.')
+                        ->helperText('Busque y selecione los permisos.')
+                        ->loadingMessage('Cargando permisos...')
+                        ->noSearchResultsMessage('No se encontro permisos.')
                         ->columnSpanFull(),
                 ]),
         ]);
@@ -75,15 +72,15 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Role Name')
+                    ->label('Nombre del rol')
                     ->sortable()
                     ->searchable()
                     ->weight(FontWeight::Bold)
                     ->formatStateUsing(fn($state) => strtoupper($state))
-                    ->description(fn(Role $record) => $record->permissions->count() . ' permissions assigned'),
+                    ->description(fn(Role $record) => $record->permissions->count() . ' permisos asignados'),
 
                 TextColumn::make('permissions_count')
-                    ->label('Permissions')
+                    ->label('Permisos')
                     ->counts('permissions')
                     ->badge()
                     ->color(fn(int $state): string => match (true) {
@@ -94,12 +91,12 @@ class RoleResource extends Resource
                     }),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label('creacion')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label('actualizacion')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -115,12 +112,12 @@ class RoleResource extends Resource
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
             ])
-            ->emptyStateHeading('No roles found')
-            ->emptyStateDescription('Create your first role by clicking the button above.')
+            ->emptyStateHeading('No se encontro permisos')
+            ->emptyStateDescription('Crea tu primer rol haciendo clic en el botón de arriba..')
             ->emptyStateIcon('heroicon-o-shield-exclamation')
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Create Role')
+                    ->label('Crear rol')
                     ->icon('heroicon-o-plus'),
             ])
             ->deferLoading()
@@ -137,4 +134,3 @@ class RoleResource extends Resource
         ];
     }
 }
-

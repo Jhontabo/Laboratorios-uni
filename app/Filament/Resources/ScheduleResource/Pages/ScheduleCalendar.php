@@ -12,6 +12,8 @@ class ScheduleCalendar extends Page
     protected static string $resource = ScheduleResource::class;
 
     protected static string $view = 'filament.pages.calendar';
+    protected static ?string $modelLabel = 'Horario';
+    protected static ?string $pluralLabel = 'Horarios';
 
     public ?int $laboratoryId = null;
 

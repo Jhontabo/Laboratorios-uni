@@ -22,7 +22,7 @@ use Saade\FilamentFullCalendar\Actions\EditAction;
 
 class CalendarWidget extends FullCalendarWidget
 {
-    protected static ?string $heading = 'Schedule Calendar';
+    protected static ?string $heading = 'Calendar';
 
     public Model|string|null $model = Schedule::class;
 

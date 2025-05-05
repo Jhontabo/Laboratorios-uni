@@ -16,6 +16,10 @@ class ScheduleResource extends Resource
     protected static ?string $modelLabel = 'Horario';
     protected static ?string $pluralLabel = 'Horarios';
 
+
+
+
+
     public static function getPages(): array
     {
         return [

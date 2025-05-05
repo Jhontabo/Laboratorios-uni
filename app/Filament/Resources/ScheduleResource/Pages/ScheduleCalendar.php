@@ -15,6 +15,7 @@ class ScheduleCalendar extends Page
     protected static ?string $modelLabel = 'Horario';
     protected static ?string $pluralLabel = 'Horarios';
 
+
     public ?int $laboratoryId = null;
 
     public function mount()
@@ -25,6 +26,7 @@ class ScheduleCalendar extends Page
         logger()->info('ScheduleCalendar mount', ['laboratory_id' => $this->laboratoryId]);
         session()->put('lab', $this->laboratoryId);
     }
+
 
     public function getFooterWidgets(): array
     {

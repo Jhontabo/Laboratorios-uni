@@ -4,14 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PermissionResource\Pages;
 use App\Models\Permission;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
 
 class PermissionResource extends Resource
 {
@@ -86,4 +84,3 @@ class PermissionResource extends Resource
         ];
     }
 }
-

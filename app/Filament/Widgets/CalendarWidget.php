@@ -42,8 +42,8 @@ class CalendarWidget extends FullCalendarWidget
     {
         return [
             'firstDay' => 1,
-            'slotMinTime' => '06:00:00',
-            'slotMaxTime' => '22:00:00',
+            'slotMinTime' => '07:00:00',
+            'slotMaxTime' => '16:00:00',
             'locale' => 'es',
             'initialView' => 'timeGridWeek',
             'headerToolbar' => [
@@ -51,6 +51,7 @@ class CalendarWidget extends FullCalendarWidget
                 'center' => 'title',
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
+            'height' => 600,
         ];
     }
 

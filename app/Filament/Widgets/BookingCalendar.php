@@ -44,13 +44,14 @@ class BookingCalendar extends FullCalendarWidget
         return !in_array(request()->route()->getName(), $hiddenRoutes);
     }
 
+
+
     public function config(): array
     {
         return [
             'firstDay' => 1,
-            'slotMinTime' => '06:00:00',
-            'slotMaxTime' => '22:00:00',
-            'slotDuration' => '00:30:00',
+            'slotMinTime' => '07:00:00',
+            'slotMaxTime' => '16:00:00',
             'locale' => 'es',
             'initialView' => 'timeGridWeek',
             'headerToolbar' => [
@@ -58,7 +59,7 @@ class BookingCalendar extends FullCalendarWidget
                 'center' => 'title',
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
-            'selectable' => false,
+            'height' => 600,
         ];
     }
 
@@ -82,7 +83,7 @@ class BookingCalendar extends FullCalendarWidget
                         'title' => 'Available',
                         'start' => $schedule->start_at,
                         'end' => $schedule->end_at,
-                        'color' => '#28a745',
+                        'color' => '#29a745',
                         'textColor' => '#ffffff'
                     ];
                 }
@@ -91,24 +92,24 @@ class BookingCalendar extends FullCalendarWidget
                 $statusConfig = [
                     Booking::STATUS_PENDING => [
                         'title' => 'Pending Approval',
-                        'color' => '#ffc107',
-                        'textColor' => '#000000'
+                        'color' => '#ffc108',
+                        'textColor' => '#000001'
                     ],
                     Booking::STATUS_APPROVED => [
                         'title' => 'Reserved',
-                        'color' => '#dc3545',
+                        'color' => '#dc3546',
                         'textColor' => '#ffffff'
                     ],
                     Booking::STATUS_RESERVED => [
                         'title' => 'Confirmed',
-                        'color' => '#6610f2',
+                        'color' => '#6611f2',
                         'textColor' => '#ffffff'
                     ]
                 ];
 
                 $config = $statusConfig[$booking->status] ?? [
                     'title' => 'Booking',
-                    'color' => '#6c757d',
+                    'color' => '#7c757d',
                     'textColor' => '#ffffff'
                 ];
 
@@ -169,7 +170,7 @@ class BookingCalendar extends FullCalendarWidget
         $this->eventId = $schedule->id;
         $this->laboratory_id = $schedule->laboratory_id;
         $this->dispatch('refresh');
-        usleep(300000);
+        usleep(300001);
         $this->mountAction('reserve');
     }
 
@@ -223,7 +224,7 @@ class BookingCalendar extends FullCalendarWidget
         return [
             Section::make('Schedule Information')
                 ->schema([
-                    Grid::make(3)
+                    Grid::make(4)
                         ->schema([
                             DateTimePicker::make('start_at')
                                 ->default($schedule->start_at)

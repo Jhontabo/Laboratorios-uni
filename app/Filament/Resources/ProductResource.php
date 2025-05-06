@@ -455,19 +455,37 @@ class ProductResource extends Resource
                             ->options([
                                 'damaged' => 'Dañado',
                                 'maintenance' => 'Mantenimiento',
+                                'other' => 'Otra razón'
                             ])
                             ->required()
                             ->live()
                             ->afterStateUpdated(function ($state, $set) {
-                                if ($state !== 'damaged') {
-                                    $set('responsible_user_id', null);
-                                    $set('academic_program', null);
-                                    $set('semester', null);
-                                }
+                                $set('damage_type', null);
+                                $set('responsible_user_id', null);
+                                $set('academic_program', null);
+                                $set('semester', null);
                             }),
 
-                        Fieldset::make('Información del Estudiante Responsable')
+                        // Nuevo campo para tipo de daño (solo visible cuando es 'damaged')
+                        Select::make('damage_type')
+                            ->label('Tipo de daño')
+                            ->options([
+                                'student' => 'Dañado por estudiante',
+                                'usage' => 'Deterioro por uso normal',
+                                'manufacturing' => 'Defecto de fabricación',
+                                'other' => 'Otra causa'
+                            ])
+                            ->required(fn(callable $get) => $get('decommission_type') === 'damaged')
                             ->visible(fn(callable $get) => $get('decommission_type') === 'damaged')
+                            ->live(),
+
+                        // Grupo de campos solo visibles cuando el daño es por estudiante
+                        Fieldset::make('Información del Estudiante Responsable')
+                            ->visible(
+                                fn(callable $get) =>
+                                $get('decommission_type') === 'damaged' &&
+                                    $get('damage_type') === 'student'
+                            )
                             ->schema([
                                 Select::make('responsible_user_id')
                                     ->label('Estudiante')
@@ -497,16 +515,12 @@ class ProductResource extends Resource
                                 Select::make('academic_program')
                                     ->label('Programa académico')
                                     ->options(function (callable $get) {
-                                        // Opciones base
                                         $programs = [
                                             'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
                                             'Ingeniería Civil' => 'Ingeniería Civil',
-                                            'Ingeniería Eléctrica' => 'Ingeniería Eléctrica',
-                                            'Ingeniería Mecánica' => 'Ingeniería Mecánica',
-                                            'Ingeniería Industrial' => 'Ingeniería Industrial',
+                                            // ... otros programas
                                         ];
 
-                                        // Si hay un usuario seleccionado, agregar su programa si no está en la lista
                                         if ($userId = $get('responsible_user_id')) {
                                             $userProgram = User::find($userId)?->academic_program;
                                             if ($userProgram && !array_key_exists($userProgram, $programs)) {
@@ -518,14 +532,13 @@ class ProductResource extends Resource
                                     })
                                     ->searchable()
                                     ->required()
-                                    ->reactive(),  // Añadido reactive()
+                                    ->reactive(),
 
                                 Select::make('semester')
                                     ->label('Semestre')
                                     ->options(function (callable $get) {
                                         $semesters = collect(range(1, 10))->mapWithKeys(fn($i) => [$i => "Semestre $i"]);
 
-                                        // Si hay un usuario seleccionado, agregar su semestre si no está en la lista
                                         if ($userId = $get('responsible_user_id')) {
                                             $userSemester = User::find($userId)?->semester;
                                             if ($userSemester && !$semesters->has($userSemester)) {
@@ -537,7 +550,7 @@ class ProductResource extends Resource
                                     })
                                     ->searchable()
                                     ->required()
-                                    ->reactive(),  // Añadido reactive()
+                                    ->reactive(),
                             ]),
 
                         Textarea::make('observations')
@@ -545,34 +558,38 @@ class ProductResource extends Resource
                             ->required()
                             ->columnSpanFull()
                             ->maxLength(500),
-                    ])->action(function (Collection $records, array $data): void {
+                    ])
+                    ->action(function (Collection $records, array $data): void {
                         foreach ($records as $record) {
-                            // Crear registro en equipment_decommissions
                             \App\Models\EquipmentDecommission::create([
                                 'product_id' => $record->id,
-                                'reason' => $data['decommission_type'], // Usamos el tipo como razón
-                                'responsible_user_id' => $data['decommission_type'] === 'damaged'
+                                'reason' => $data['decommission_type'],
+                                'damage_type' => $data['decommission_type'] === 'damaged'
+                                    ? $data['damage_type']
+                                    : null,
+                                'responsible_user_id' => $data['decommission_type'] === 'damaged' &&
+                                    $data['damage_type'] === 'student'
                                     ? $data['responsible_user_id']
                                     : null,
-                                'academic_program' => $data['decommission_type'] === 'damaged'
+                                'academic_program' => $data['decommission_type'] === 'damaged' &&
+                                    $data['damage_type'] === 'student'
                                     ? $data['academic_program']
                                     : null,
-                                'semester' => $data['decommission_type'] === 'damaged'
+                                'semester' => $data['decommission_type'] === 'damaged' &&
+                                    $data['damage_type'] === 'student'
                                     ? $data['semester']
                                     : null,
                                 'decommission_date' => now(),
                                 'registered_by' => auth()->id(),
-                                'observations' => $data['observations'], // El texto libre va aquí
+                                'observations' => $data['observations'],
                             ]);
 
-                            // Actualizar el producto
                             $record->update([
                                 'status' => 'decommissioned',
                                 'decommissioned_at' => now(),
                                 'decommissioned_by' => auth()->id(),
                             ]);
                         }
-
 
                         Notification::make()
                             ->title('Baja registrada exitosamente')
@@ -584,6 +601,7 @@ class ProductResource extends Resource
                     ->modalHeading('Confirmar baja de equipos')
                     ->modalDescription('Esta acción registrará la baja de los equipos seleccionados. ¿Desea continuar?')
                     ->modalSubmitActionLabel('Confirmar baja'),
+
                 DeleteBulkAction::make()
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation(),

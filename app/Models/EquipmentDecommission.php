@@ -19,13 +19,15 @@ class EquipmentDecommission extends Model
         'registered_by',
         'reversed_by',
         'reversed_at',
-        'observations'
+        'observations',
+        'damage_type'
     ];
 
     protected $casts = [
         'decommission_date' => 'date',
         'expected_return_date' => 'date',
-        'reversed_at' => 'datetime'
+        'reversed_at' => 'datetime',
+        'damage_type' => 'string'
     ];
 
     /**

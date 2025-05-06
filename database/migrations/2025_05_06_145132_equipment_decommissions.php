@@ -30,6 +30,14 @@ return new class extends Migration
                 'other'         // Otros motivos
             ])->comment('Tipo principal de baja');
 
+            $table->enum('damage_type', [
+                'student',
+                'usage',
+                'manufacturing',
+                'other'
+
+            ])->nullable();
+
             $table->text('details')
                 ->nullable()
                 ->comment('Detalles adicionales del motivo');

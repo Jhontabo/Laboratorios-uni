@@ -445,12 +445,55 @@ class ProductResource extends Resource
                     ->label('Dar de Baja')
                     ->icon('heroicon-o-no-symbol')
                     ->color('primary')
-                    ->action(fn(Collection $records) => $records->each->update(['product_condition' => 'decommissioned']))
+                    ->form([
+                        Select::make('reason')
+                            ->label('Motivo de baja')
+                            ->options([
+                                'maintenance' => 'Mantenimiento',
+                                'damaged' => 'Dañado',
+                            ])
+                            ->required()
+                            ->live(),
+
+                        Select::make('responsible_student_id')
+                            ->label('Estudiante responsable')
+                            ->options(function (callable $get) {
+                                // Solo se muestra si el motivo es "Dañado"
+                                if ($get('reason') !== 'damaged') {
+                                    return [];
+                                }
+
+
+                                return \App\Models\User::query()
+                                    ->whereHas('roles', function ($query) {
+                                        $query->where('name', 'ESTUDIANTE'); // Ajusta 'estudiante' al nombre exacto de tu rol
+                                    })
+                                    ->selectRaw("id, CONCAT(name, ' ', last_name) as full_name")
+                                    ->pluck('full_name', 'id');
+                            })
+                            ->searchable()
+                            ->hidden(fn(callable $get) => $get('reason') !== 'damaged'),
+
+                        Textarea::make('notes')
+                            ->label('Observaciones')
+                            ->columnSpanFull(),
+                    ])
+                    ->action(function (Collection $records, array $data): void {
+                        foreach ($records as $record) {
+                            $record->update([
+                                'product_condition' => 'decommissioned',
+                                'decommission_reason' => $data['reason'],
+                                'responsible_student_id' => $data['reason'] === 'damaged'
+                                    ? $data['responsible_student_id']
+                                    : null,
+                                'decommission_notes' => $data['notes'],
+                            ]);
+                        }
+                    })
                     ->requiresConfirmation()
                     ->modalHeading('Dar de baja productos seleccionados')
-                    ->modalDescription('Los productos dados de baja ya no estarán disponibles para préstamos o uso.')
-                    ->modalSubmitActionLabel('Sí, dar de baja'),
-
+                    ->modalDescription('¿Está seguro de dar de baja los productos seleccionados?')
+                    ->modalSubmitActionLabel('Confirmar baja'),
                 DeleteBulkAction::make()
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation(),

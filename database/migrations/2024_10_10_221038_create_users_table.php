@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('email')->unique(); // Correo único
             $table->string('phone')->nullable(); // Teléfono opcional
             $table->string('address'); // Dirección
+            $table->string('document_number')->nullable(); // Dirección
             $table->enum('status', ['active', 'inactive'])->default('active');
 
             $table->rememberToken(); // Token para recordar sesión

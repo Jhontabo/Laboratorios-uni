@@ -32,6 +32,8 @@ class UsersSeeder extends Seeder
                 'phone' => '123456789',
                 'address' => 'Calle Falsa 123',
                 'role' => 'ADMIN',
+                'document_number' => '123456789',
+
             ],
             [
                 'email' => 'jonathanc.burbano221@umariana.edu.co',
@@ -40,6 +42,9 @@ class UsersSeeder extends Seeder
                 'phone' => '987654321',
                 'address' => 'Calle Real 456',
                 'role' => 'ADMIN',
+                'document_number' => '123456789',
+
+
             ],
             [
                 'email' => 'laboratorista@ejemplo.com',
@@ -48,6 +53,9 @@ class UsersSeeder extends Seeder
                 'phone' => '321654987',
                 'address' => 'Calle Laboratorio 789',
                 'role' => 'LABORATORISTA',
+                'document_number' => '123456789',
+
+
             ],
             [
                 'email' => 'estudiante@ejemplo.com',
@@ -56,6 +64,9 @@ class UsersSeeder extends Seeder
                 'phone' => '654987321',
                 'address' => 'Avenida Universidad 456',
                 'role' => 'ESTUDIANTE',
+                'document_number' => '123456789',
+
+
             ],
             [
                 'email' => 'danielf.zapata221@umariana.edu.co',
@@ -64,6 +75,9 @@ class UsersSeeder extends Seeder
                 'phone' => '741258963',
                 'address' => 'Avenida Docente 123',
                 'role' => 'DOCENTE',
+                'document_number' => '123456789',
+
+
             ],
             [
                 'email' => 'ivanda.martinez@umariana.edu.co',
@@ -72,6 +86,9 @@ class UsersSeeder extends Seeder
                 'phone' => '852963741',
                 'address' => 'Calle Campus 789',
                 'role' => 'ESTUDIANTE',
+                'document_number' => '123456789',
+
+
             ],
         ];
 
@@ -84,6 +101,7 @@ class UsersSeeder extends Seeder
                     'phone' => $data['phone'],
                     'address' => $data['address'],
                     'status' => 'active',
+                    'document_number' => '110005671'
                 ]
             );
 

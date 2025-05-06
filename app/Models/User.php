@@ -29,6 +29,8 @@ class User extends Authenticatable implements HasAvatar, FilamentUser
         'status',
         'custom_fields',
         'avatar_url',
+        'document_number',
+
     ];
 
     // Atributos ocultos
@@ -58,5 +60,3 @@ class User extends Authenticatable implements HasAvatar, FilamentUser
         return $this->avatar_url ? Storage::url($this->avatar_url) : null;
     }
 }
-
-

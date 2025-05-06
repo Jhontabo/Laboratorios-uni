@@ -31,6 +31,7 @@ class EstudiantePanelProvider extends PanelProvider
             ->path('estudiante') // Ruta base para el panel
             ->login()
             ->profile(false)
+            ->sidebarFullyCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Amber, // Misma configuración de color
             ])

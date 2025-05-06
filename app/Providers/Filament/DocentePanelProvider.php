@@ -32,6 +32,7 @@ class DocentePanelProvider extends PanelProvider
             ->path('docente') // Cambia la ruta base del panel
             ->login()
             ->profile(false)
+            ->sidebarFullyCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -87,24 +87,15 @@ class LoanResource extends Resource
                     ->label('Estado del prestamo'),
             ])
 
-            ->bulkActions([]) // No bulk actions needed
             ->emptyStateHeading('You have no loans yet');
     }
 
-    public static function getRelations(): array
-    {
-        return [];
-    }
+
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListLoans::route('/'),
         ];
-    }
-
-    public static function canViewAny(): bool
-    {
-        return Auth::check();
     }
 }

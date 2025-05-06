@@ -39,7 +39,7 @@ class ProductsSeeder extends Seeder
                 'unit_cost' => 1200.50,
                 'location' => 'Shelf A1',
                 'product_type' => 'equipment',
-                'product_condition' => 'new',
+                'status' => 'new',
                 'image' => 'https://ejemplo.com/microscopio.jpg'
             ],
             [
@@ -53,7 +53,7 @@ class ProductsSeeder extends Seeder
                 'unit_cost' => 1500.00,
                 'location' => 'Shelf B2',
                 'product_type' => 'equipment',
-                'product_condition' => 'used',
+                'status' => 'used',
                 'image' => 'https://ejemplo.com/laptop.jpg'
             ],
             // (Aquí continúas igual con los demás productos, ya traducidos)

@@ -19,7 +19,7 @@ class AvailableProduct extends Model
         'serial_number',
         'acquisition_date',
         'unit_cost',
-        'product_condition',
+        'status',
         'loan_status',
         'product_type',
         'available_for_loan',

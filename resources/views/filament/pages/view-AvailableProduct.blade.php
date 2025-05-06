@@ -50,10 +50,10 @@
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Condition</p>
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                @if ($record->product_condition == 'new') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                @elseif($record->product_condition == 'used') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                @if ($record->status == 'new') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                @elseif($record->status == 'used') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                                 @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 @endif">
-                                {{ ucfirst($record->product_condition) }}
+                                {{ ucfirst($record->status) }}
                             </span>
                         </div>
 

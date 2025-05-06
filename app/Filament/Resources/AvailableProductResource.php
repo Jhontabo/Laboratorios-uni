@@ -52,7 +52,7 @@ class AvailableProductResource extends Resource
                     ->color(fn($record) => $record->available_quantity > 10 ? 'success' : ($record->available_quantity > 0 ? 'warning' : 'danger'))
                     ->icon(fn($record) => $record->available_quantity > 10 ? 'heroicon-o-check-circle' : ($record->available_quantity > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
 
-                TextColumn::make('product_condition')
+                TextColumn::make('status')
                     ->label('Condicion')
                     ->badge()
                     ->color(fn($state) => match ($state) {

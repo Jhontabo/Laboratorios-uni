@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
 use App\Models\Laboratory;
+use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -49,6 +50,7 @@ use Filament\Forms\Components\View;
 use Filament\Forms\Components\ViewField;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\CreateAction;
@@ -170,15 +172,16 @@ class ProductResource extends Resource
                                         ->native(false)
                                         ->live(),
 
-                                    Select::make('product_condition')
+                                    Select::make('status')
                                         ->label('Condición Actual')
                                         ->options([
                                             'new' => 'Nuevo',
                                             'used' => 'Usado - Buen Estado',
-                                            'used_worn' => 'Usado - Desgaste Normal',
                                             'damaged' => 'Dañado - Reparación Necesaria',
                                             'decommissioned' => 'Fuera de Servicio',
                                             'lost' => 'Perdido/Robo',
+                                            'miantenace' => 'Mantenimiento',
+
                                         ])
                                         ->required()
                                         ->native(false),
@@ -330,7 +333,7 @@ class ProductResource extends Resource
                     })
                     ->sortable(),
 
-                TextColumn::make('product_condition')
+                TextColumn::make('status')
                     ->label('Condición')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -386,7 +389,7 @@ class ProductResource extends Resource
                     ->multiple()
                     ->searchable(),
 
-                SelectFilter::make('product_condition')
+                SelectFilter::make('status')
                     ->label('Condición')
                     ->options([
                         'new' => 'Nuevo',
@@ -435,64 +438,151 @@ class ProductResource extends Resource
                     ->label('Marcar como Perdido')
                     ->icon('heroicon-o-shield-exclamation')
                     ->color('warning')
-                    ->action(fn(Collection $records) => $records->each->update(['product_condition' => 'lost']))
+                    ->action(fn(Collection $records) => $records->each->update(['status' => 'lost']))
                     ->requiresConfirmation()
                     ->modalHeading('Marcar productos seleccionados como perdidos')
                     ->modalDescription('¿Está seguro de marcar estos productos como perdidos?')
                     ->modalSubmitActionLabel('Sí, marcar como perdidos'),
 
+
                 BulkAction::make('decommissionSelected')
                     ->label('Dar de Baja')
                     ->icon('heroicon-o-no-symbol')
-                    ->color('primary')
+                    ->color('danger')
                     ->form([
-                        Select::make('reason')
-                            ->label('Motivo de baja')
+                        Select::make('decommission_type')
+                            ->label('Tipo de baja')
                             ->options([
-                                'maintenance' => 'Mantenimiento',
                                 'damaged' => 'Dañado',
+                                'maintenance' => 'Mantenimiento',
                             ])
                             ->required()
-                            ->live(),
-
-                        Select::make('responsible_student_id')
-                            ->label('Estudiante responsable')
-                            ->options(function (callable $get) {
-                                // Solo se muestra si el motivo es "Dañado"
-                                if ($get('reason') !== 'damaged') {
-                                    return [];
+                            ->live()
+                            ->afterStateUpdated(function ($state, $set) {
+                                if ($state !== 'damaged') {
+                                    $set('responsible_user_id', null);
+                                    $set('academic_program', null);
+                                    $set('semester', null);
                                 }
+                            }),
 
-
-                                return \App\Models\User::query()
-                                    ->whereHas('roles', function ($query) {
-                                        $query->where('name', 'ESTUDIANTE'); // Ajusta 'estudiante' al nombre exacto de tu rol
+                        Fieldset::make('Información del Estudiante Responsable')
+                            ->visible(fn(callable $get) => $get('decommission_type') === 'damaged')
+                            ->schema([
+                                Select::make('responsible_user_id')
+                                    ->label('Estudiante')
+                                    ->options(function () {
+                                        return User::whereHas('roles', fn($q) => $q->where('name', 'estudiante'))
+                                            ->get()
+                                            ->mapWithKeys(fn($user) => [
+                                                $user->id => sprintf(
+                                                    "%s %s - %s",
+                                                    $user->name ?? 'Sin nombre',
+                                                    $user->last_name ?? '',
+                                                    $user->document_number ?? 'Sin documento'
+                                                )
+                                            ]);
                                     })
-                                    ->selectRaw("id, CONCAT(name, ' ', last_name) as full_name")
-                                    ->pluck('full_name', 'id');
-                            })
-                            ->searchable()
-                            ->hidden(fn(callable $get) => $get('reason') !== 'damaged'),
+                                    ->searchable()
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, $set) {
+                                        if ($state) {
+                                            $user = User::find($state);
+                                            $set('academic_program', $user->academic_program ?? null);
+                                            $set('semester', $user->semester ?? null);
+                                        }
+                                    }),
 
-                        Textarea::make('notes')
-                            ->label('Observaciones')
-                            ->columnSpanFull(),
-                    ])
-                    ->action(function (Collection $records, array $data): void {
+                                Select::make('academic_program')
+                                    ->label('Programa académico')
+                                    ->options(function (callable $get) {
+                                        // Opciones base
+                                        $programs = [
+                                            'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
+                                            'Ingeniería Civil' => 'Ingeniería Civil',
+                                            'Ingeniería Eléctrica' => 'Ingeniería Eléctrica',
+                                            'Ingeniería Mecánica' => 'Ingeniería Mecánica',
+                                            'Ingeniería Industrial' => 'Ingeniería Industrial',
+                                        ];
+
+                                        // Si hay un usuario seleccionado, agregar su programa si no está en la lista
+                                        if ($userId = $get('responsible_user_id')) {
+                                            $userProgram = User::find($userId)?->academic_program;
+                                            if ($userProgram && !array_key_exists($userProgram, $programs)) {
+                                                $programs[$userProgram] = $userProgram;
+                                            }
+                                        }
+
+                                        return $programs;
+                                    })
+                                    ->searchable()
+                                    ->required()
+                                    ->reactive(),  // Añadido reactive()
+
+                                Select::make('semester')
+                                    ->label('Semestre')
+                                    ->options(function (callable $get) {
+                                        $semesters = collect(range(1, 10))->mapWithKeys(fn($i) => [$i => "Semestre $i"]);
+
+                                        // Si hay un usuario seleccionado, agregar su semestre si no está en la lista
+                                        if ($userId = $get('responsible_user_id')) {
+                                            $userSemester = User::find($userId)?->semester;
+                                            if ($userSemester && !$semesters->has($userSemester)) {
+                                                $semesters->put($userSemester, "Semestre $userSemester");
+                                            }
+                                        }
+
+                                        return $semesters;
+                                    })
+                                    ->searchable()
+                                    ->required()
+                                    ->reactive(),  // Añadido reactive()
+                            ]),
+
+                        Textarea::make('observations')
+                            ->label('Descripción detallada')
+                            ->required()
+                            ->columnSpanFull()
+                            ->maxLength(500),
+                    ])->action(function (Collection $records, array $data): void {
                         foreach ($records as $record) {
-                            $record->update([
-                                'product_condition' => 'decommissioned',
-                                'decommission_reason' => $data['reason'],
-                                'responsible_student_id' => $data['reason'] === 'damaged'
-                                    ? $data['responsible_student_id']
+                            // Crear registro en equipment_decommissions
+                            \App\Models\EquipmentDecommission::create([
+                                'product_id' => $record->id,
+                                'reason' => $data['decommission_type'], // Usamos el tipo como razón
+                                'responsible_user_id' => $data['decommission_type'] === 'damaged'
+                                    ? $data['responsible_user_id']
                                     : null,
-                                'decommission_notes' => $data['notes'],
+                                'academic_program' => $data['decommission_type'] === 'damaged'
+                                    ? $data['academic_program']
+                                    : null,
+                                'semester' => $data['decommission_type'] === 'damaged'
+                                    ? $data['semester']
+                                    : null,
+                                'decommission_date' => now(),
+                                'registered_by' => auth()->id(),
+                                'observations' => $data['observations'], // El texto libre va aquí
+                            ]);
+
+                            // Actualizar el producto
+                            $record->update([
+                                'status' => 'decommissioned',
+                                'decommissioned_at' => now(),
+                                'decommissioned_by' => auth()->id(),
                             ]);
                         }
+
+
+                        Notification::make()
+                            ->title('Baja registrada exitosamente')
+                            ->body("Se dieron de baja {$records->count()} equipos.")
+                            ->success()
+                            ->send();
                     })
                     ->requiresConfirmation()
-                    ->modalHeading('Dar de baja productos seleccionados')
-                    ->modalDescription('¿Está seguro de dar de baja los productos seleccionados?')
+                    ->modalHeading('Confirmar baja de equipos')
+                    ->modalDescription('Esta acción registrará la baja de los equipos seleccionados. ¿Desea continuar?')
                     ->modalSubmitActionLabel('Confirmar baja'),
                 DeleteBulkAction::make()
                     ->icon('heroicon-o-trash')
@@ -511,7 +601,7 @@ class ProductResource extends Resource
             ->groups([
                 'laboratory.name',
                 'product_type',
-                'product_condition',
+                'status',
             ])
             ->groupingSettingsInDropdownOnDesktop()
             ->groupRecordsTriggerAction(

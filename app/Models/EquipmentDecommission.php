@@ -46,7 +46,11 @@ class EquipmentDecommission extends Model
         return $this->belongsTo(User::class, 'responsible_user_id')
             ->whereHas('roles', fn($q) => $q->where('name', 'estudiante'));
     }
-
+    // En app/Models/EquipmentDecommission.php
+    public function responsibleUser()
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
     /**
      * Usuario que registró la baja
      */

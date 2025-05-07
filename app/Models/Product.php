@@ -48,7 +48,10 @@ class Product extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-
+    public function equipmentDecommissions()
+    {
+        return $this->hasMany(EquipmentDecommission::class);
+    }
 
     // Accesor para ubicación
     public function getLocationAttribute(): string

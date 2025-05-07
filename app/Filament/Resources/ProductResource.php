@@ -428,6 +428,25 @@ class ProductResource extends Resource
                     DeleteAction::make()
                         ->icon('heroicon-o-trash')
                         ->color('danger'),
+
+                    Action::make('history')
+                        ->label('Historial')
+                        ->icon('heroicon-o-clock')
+                        ->modalHeading(fn(Product $record) => "Historial del equipo: {$record->name}")
+                        ->modalContent(fn(Product $record) => view(
+                            'filament.pages.history-modal-product-resource',
+                            [
+                                'history' => $record->equipmentDecommissions()
+                                    ->with(['registeredBy', 'reversedBy'])
+                                    ->orderBy('created_at', 'desc')
+                                    ->get()
+                            ]
+                        ))
+                        ->modalWidth('8xl')
+                        ->modalSubmitAction(false)
+                        ->hidden(fn(Product $record) => $record->product_type !== 'equipment')
+
+
                 ])
                     ->tooltip('Acciones')
                     ->icon('heroicon-s-cog-6-tooth')
@@ -537,7 +556,7 @@ class ProductResource extends Resource
                                 Select::make('semester')
                                     ->label('Semestre')
                                     ->options(function (callable $get) {
-                                        $semesters = collect(range(1, 10))->mapWithKeys(fn($i) => [$i => "Semestre $i"]);
+                                        $semesters = collect(range(2, 10))->mapWithKeys(fn($i) => [$i => "Semestre $i"]);
 
                                         if ($userId = $get('responsible_user_id')) {
                                             $userSemester = User::find($userId)?->semester;
@@ -557,7 +576,7 @@ class ProductResource extends Resource
                             ->label('Descripción detallada')
                             ->required()
                             ->columnSpanFull()
-                            ->maxLength(500),
+                            ->maxLength(501),
                     ])
                     ->action(function (Collection $records, array $data): void {
                         foreach ($records as $record) {

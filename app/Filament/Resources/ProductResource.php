@@ -165,8 +165,6 @@ class ProductResource extends Resource
                                         ->options([
                                             'supply' => 'Suministro',
                                             'equipment' => 'Equipo',
-                                            'chemical' => 'Reactivo Químico',
-                                            'glassware' => 'Material de Vidrio',
                                         ])
                                         ->required()
                                         ->native(false)

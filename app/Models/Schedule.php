@@ -30,6 +30,11 @@ class Schedule extends Model
         'end_at' => 'datetime',
     ];
 
+    // En tu modelo Schedule o donde tengas la relación
+    public function equipments()
+    {
+        return $this->belongsToMany(Equipment::class, 'schedule_equipment')->withPivot('quantity');;
+    }
 
     public function user()
     {

@@ -59,4 +59,11 @@ class User extends Authenticatable implements HasAvatar, FilamentUser
     {
         return $this->avatar_url ? Storage::url($this->avatar_url) : null;
     }
+
+    public function scopeProfessors($query)
+    {
+        return $query->whereHas('roles', function ($q) {
+            $q->where('name', 'docente'); // Ajusta al nombre de tu rol
+        });
+    }
 }

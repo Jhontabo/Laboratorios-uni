@@ -32,9 +32,6 @@ class CalendarWidget extends FullCalendarWidget
     {
         $routesToHideWidget = [
             'filament.admin.pages.dashboard',
-            'filament.estudiante.pages.dashboard',
-            'filament.docente.pages.dashboard',
-            'filament.laboratorista.pages.dashboard'
         ];
 
         return !in_array(request()->route()->getName(), $routesToHideWidget);
@@ -149,12 +146,17 @@ class CalendarWidget extends FullCalendarWidget
                         ->preload()
                         ->required(),
 
+                    Select::make('laboratory_id')
+                        ->label('Espacio academico')
+                        ->options(Laboratory::pluck('name', 'id')->toArray())
+                        ->required()
+                        ->reactive(),
+
                     Select::make('semester')
                         ->label('Semestre')
                         ->options(array_combine(range(1, 10), range(1, 10)))
                         ->required()
                         ->native(false),
-
 
                     Select::make('user_id')
                         ->label('Profesor Responsable')
@@ -168,6 +170,11 @@ class CalendarWidget extends FullCalendarWidget
                         ->preload()
                         ->required(),
 
+                    TextInput::make('title')
+                        ->label('Nombre de la practica academica')
+                        ->required()
+                        ->maxLength(255),
+
                     TextInput::make('student_count')
                         ->label('Número de Estudiantes')
                         ->numeric()
@@ -179,7 +186,7 @@ class CalendarWidget extends FullCalendarWidget
                         ->label('Número de Grupos')
                         ->numeric()
                         ->minValue(1)
-                        ->maxValue(10)
+                        ->maxValue(20)
                         ->required(),
                 ])
                 ->columns(2),
@@ -201,36 +208,29 @@ class CalendarWidget extends FullCalendarWidget
                         ->native(false)
                         ->after('start_at'),
 
-                    Select::make('laboratory_id')
-                        ->label('Laboratorio')
-                        ->options(Laboratory::pluck('name', 'id')->toArray())
-                        ->required()
-                        ->reactive(),
 
-                    Select::make('products') // Cambiado de product_ids a products
-                        ->label('Productos')
-                        ->multiple()
-                        ->relationship(
-                            name: 'products',
-                            titleAttribute: 'name',
-                            modifyQueryUsing: fn(Builder $query, Get $get) =>
-                            $query->where('laboratory_id', $get('laboratory_id'))
-                        )
-                        ->getOptionLabelFromRecordUsing(
-                            fn(Product $product) => "{$product->name} - {$product->serial_number}"
-                        )
-                        ->searchable()
-                        ->preload()
-                        ->required()
+
+                    /* Select::make('products') // Cambiado de product_ids a products */
+                    /*     ->label('Productos') */
+                    /*     ->multiple() */
+                    /*     ->relationship( */
+                    /*         name: 'products', */
+                    /*         titleAttribute: 'name', */
+                    /*         modifyQueryUsing: fn(Builder $query, Get $get) => */
+                    /*         $query->where('laboratory_id', $get('laboratory_id')) */
+                    /*     ) */
+                    /*     ->getOptionLabelFromRecordUsing( */
+                    /*         fn(Product $product) => "{$product->name} - {$product->serial_number}" */
+                    /*     ) */
+                    /*     ->searchable() */
+                    /*     ->preload() */
+                    /*     ->required() */
                 ])
                 ->columns(2),
 
             Section::make('Configuración Adicional')
                 ->schema([
-                    TextInput::make('title')
-                        ->label('Título del Evento')
-                        ->required()
-                        ->maxLength(255),
+
 
                     Textarea::make('description')
                         ->label('Descripción Adicional')

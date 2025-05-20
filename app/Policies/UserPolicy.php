@@ -10,34 +10,35 @@ class UserPolicy
     use HandlesAuthorization;
 
     /**
-     * Determina si el usuario puede ver cualquier usuario.
+     * Determine whether the user can view any users.
      */
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('ver panel usuarios');
+        return $user->hasPermissionTo('view user panel');
     }
 
     /**
-     * Determina si el usuario puede crear un usuario.laravel-app
+     * Determine whether the user can create a user.
      */
-    public function create(User $user)
-    {
-        return $user->hasRole('ADMIN'); // Asegurar que coincida con el nombre en la base de datos
-    }
-
-    /**
-     * Determina si el usuario puede actualizar un usuario.
-     */
-    public function update(User $user, User $targetUser)
+    public function create(User $user): bool
     {
         return $user->hasRole('ADMIN');
     }
 
     /**
-     * Determina si el usuario puede eliminar un usuario.
+     * Determine whether the user can update a user.
      */
-    public function delete(User $user, User $targetUser)
+    public function update(User $user, User $targetUser): bool
+    {
+        return $user->hasRole('ADMIN');
+    }
+
+    /**
+     * Determine whether the user can delete a user.
+     */
+    public function delete(User $user, User $targetUser): bool
     {
         return $user->hasRole('ADMIN');
     }
 }
+

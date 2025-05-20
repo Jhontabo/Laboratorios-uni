@@ -10,143 +10,146 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use Illuminate\Support\Collection;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Forms\Components\Wizard;
+use Illuminate\Support\Facades\Hash; // Necesario para hashear contraseñas
+use Filament\Forms\Get; // Necesario para lógica condicional en formularios
+use Filament\Forms\Components\Section; // Para agrupar campos visualmente
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Gestión de Usuarios';
     protected static ?string $modelLabel = 'Usuario';
     protected static ?string $pluralModelLabel = 'Usuarios';
-    protected static ?string $navigationGroup = 'Administración';
-    protected static ?int $navigationSort = 1;
-
-    protected static ?string $recordTitleAttribute = 'name';
-
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'Administracion';
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }
 
-    public static function getNavigationBadgeColor(): ?string
+    public static function getNavigationBadgeColor(): string|array|null
     {
-        return 'primary';
+        return static::getModel()::count() > 0 ? 'primary' : 'gray';
     }
 
     public static function form(Form $form): Form
     {
+
         return $form
             ->schema([
-                Section::make('Información Personal')
-                    ->icon('heroicon-o-user-circle')
-                    ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                TextInput::make('name')
-                                    ->label('Nombres')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->placeholder('Ej. Juan Carlos')
-                                    ->validationMessages([
-                                        'required' => 'El nombre es obligatorio',
-                                        'max' => 'Máximo 255 caracteres',
-                                    ]),
+                Wizard::make([
+                    Wizard\Step::make('Identificación')
+                        ->icon('heroicon-o-user-circle')
+                        ->description('Información básica y foto del usuario.')
+                        ->schema([
+                            Section::make() // Quitamos el título de la sección si el título del paso es suficiente
+                                ->columns(12) // Usamos un grid de 12 columnas para mayor flexibilidad
+                                ->schema([
+                                    // Columna para la Foto de Perfil (aprox. 1/3 del ancho)
+                                    Forms\Components\FileUpload::make('avatar_url')
+                                        ->label('Foto de Perfil')
+                                        ->image()
+                                        ->avatar()
+                                        ->imageEditor()
+                                        ->directory('avatars')
+                                        ->preserveFilenames()
+                                        ->helperText('Opcional.')
+                                        ->columnSpan([ // Ocupa 4 de 12 columnas
+                                            'default' => 12, // En pantallas pequeñas, ocupa todo el ancho
+                                            'md' => 4,      // En medianas y grandes, ocupa 4 columnas
+                                        ]),
 
-                                TextInput::make('apellido')
-                                    ->label('Apellidos')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->placeholder('Ej. Pérez García')
-                                    ->validationMessages([
-                                        'required' => 'El apellido es obligatorio',
-                                        'max' => 'Máximo 255 caracteres',
-                                    ]),
-                            ]),
-
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                TextInput::make('email')
-                                    ->label('Correo Electrónico')
-                                    ->email()
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->unique(ignoreRecord: true)
-                                    ->placeholder('ejemplo@dominio.com')
-                                    ->validationMessages([
-                                        'required' => 'El correo es obligatorio',
-                                        'email' => 'Debe ser un correo válido',
-                                        'unique' => 'Este correo ya está registrado',
-                                    ]),
-
-                                TextInput::make('telefono')
-                                    ->label('Teléfono')
-                                    ->tel()
-                                    ->required()
-                                    ->maxLength(15)
-                                    ->placeholder('Ej. 3001234567')
-                                    ->validationMessages([
-                                        'required' => 'El teléfono es obligatorio',
-                                        'max' => 'Máximo 15 caracteres',
-                                    ]),
-                            ]),
-
-                        TextInput::make('direccion')
-                            ->label('Dirección')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpanFull()
-                            ->placeholder('Ej. Calle 123 #45-67')
-                            ->validationMessages([
-                                'required' => 'La dirección es obligatoria',
-                                'max' => 'Máximo 255 caracteres',
-                            ]),
-                    ]),
-
-                Section::make('Configuración de Cuenta')
-                    ->icon('heroicon-o-cog')
-
-                    ->schema([
-                        Grid::make(2)
-                            ->schema([
-
-                                Select::make('roles')
-                                    ->label('Roles')
-                                    ->multiple()
-                                    ->relationship('roles', 'name')
-                                    ->preload()
-                                    ->required()
-                                    ->validationMessages([
-                                        'required' => 'Debe asignar al menos un rol',
-                                    ]),
-
-                                Select::make('estado')
-                                    ->label('Estado de la Cuenta')
-                                    ->options([
-                                        'activo' => 'Activo',
-                                        'inactivo' => 'Inactivo',
-                                    ])
-                                    ->default('activo')
-                                    ->required()
-                                    ->native(false)
-                                    ->validationMessages([
-                                        'required' => 'El estado es obligatorio',
-                                    ]),
-                            ])
-                    ]),
+                                    // Columna para Nombre y Apellido (aprox. 2/3 del ancho)
+                                    Grid::make(1) // Grid anidado para nombre y apellido uno debajo del otro
+                                        ->columnSpan([ // Ocupa 8 de 12 columnas
+                                            'default' => 12,
+                                            'md' => 8,
+                                        ])
+                                        ->schema([
+                                            Forms\Components\TextInput::make('name')
+                                                ->label('Nombre')
+                                                ->required()
+                                                ->maxLength(255)
+                                                ->placeholder('Ej: Carlos Alberto')
+                                                ->live(onBlur: true),
+                                            Forms\Components\TextInput::make('last_name')
+                                                ->label('Apellido')
+                                                ->required()
+                                                ->maxLength(255)
+                                                ->placeholder('Ej: Pérez Rodríguez')
+                                                ->live(onBlur: true),
+                                        ]),
+                                ]),
+                        ]),
+                    Wizard\Step::make('Información de Contacto')
+                        ->icon('heroicon-o-identification')
+                        ->description('Correo, teléfono y dirección.')
+                        ->schema([
+                            Section::make()
+                                ->columns(2) // Dos columnas para email y teléfono
+                                ->schema([
+                                    Forms\Components\TextInput::make('email')
+                                        ->label('Correo Electrónico')
+                                        ->email()
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->unique(ignoreRecord: true)
+                                        ->placeholder('usuario@ejemplo.com')
+                                        ->live(onBlur: true)
+                                        ->columnSpan(1),
+                                    Forms\Components\TextInput::make('phone')
+                                        ->label('Teléfono')
+                                        ->tel()
+                                        ->maxLength(20)
+                                        ->placeholder('Ej: +57 310 123 4567')
+                                        ->helperText('Opcional.')
+                                        ->columnSpan(1),
+                                ]),
+                            Section::make() // Sección separada para la dirección o dentro de la misma
+                                ->columns(1)
+                                ->schema([
+                                    Forms\Components\Textarea::make('address')
+                                        ->label('Dirección')
+                                        ->maxLength(500)
+                                        ->rows(3)
+                                        ->placeholder('Ej: Calle 10 # 20-30, Apto 101, Barrio, Ciudad')
+                                        ->helperText('Opcional.')
+                                        ->columnSpanFull(), // Ocupa todo el ancho de su sección/grid padre
+                                ]),
+                        ]),
+                    Wizard\Step::make('Configuración de Cuenta')
+                        ->icon('heroicon-o-cog-6-tooth')
+                        ->description('Roles y estado de la cuenta.')
+                        ->schema([
+                            Section::make()
+                                ->columns(2) // Dos columnas para roles y status
+                                ->schema([
+                                    Forms\Components\Select::make('roles')
+                                        ->label('Roles')
+                                        ->multiple()
+                                        ->relationship(name: 'roles', titleAttribute: 'name')
+                                        ->preload()
+                                        ->searchable()
+                                        ->required()
+                                        ->helperText('Asigna uno o más roles.'),
+                                    Forms\Components\Toggle::make('status')
+                                        ->label('Usuario Activo')
+                                        ->default(true)
+                                        ->onColor('success')
+                                        ->offColor('danger')
+                                        ->helperText('Permite o deniega el acceso.'),
+                                ]),
+                        ]),
+                ])
+                    ->columnSpanFull() // Asegura que el Wizard ocupe todo el ancho
+                    ->persistStepInQueryString() // Mantiene el paso actual en la URL
+                // ->skippable() // Considera si realmente quieres permitir saltar pasos. Para usuarios, usualmente no.
             ]);
     }
 
@@ -154,172 +157,137 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->label('Nombres')
-                    ->sortable()
+                Tables\Columns\ImageColumn::make('avatar_url')
+                    ->label('Avatar')
+                    ->circular() // Muestra la imagen como círculo
+                    ->defaultImageUrl(url('/images/default-avatar.png')), // Imagen por defecto si no hay avatar
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Nombre')
                     ->searchable()
-                    ->weight('medium'),
-
-                TextColumn::make('apellido')
-                    ->label('Apellidos')
-                    ->sortable()
-                    ->searchable(),
-
-                TextColumn::make('email')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('last_name')
+                    ->label('Apellido')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('email')
                     ->label('Correo')
-                    ->sortable()
                     ->searchable()
-                    ->icon('heroicon-o-envelope'),
-
-                TextColumn::make('roles.name')
+                    ->icon('heroicon-s-envelope') // Añade un icono
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('roles.name')
                     ->label('Roles')
-                    ->badge()
-                    ->color('primary')
+                    ->badge() // Muestra los roles como badges
+                    ->formatStateUsing(fn($state) => ucwords($state)) // Capitaliza el nombre del rol
+                    ->color(fn(string $state): string => match (strtolower($state)) { // Colores dinámicos para roles (ejemplo)
+                        'admin' => 'danger',
+                        'editor' => 'warning',
+                        'user' => 'success',
+                        default => 'primary',
+                    })
                     ->sortable(),
+                // Importante devolver el estado
+                Tables\Columns\ToggleColumn::make('status')
+                    ->label('Activo')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->updateStateUsing(function (Model $record, $state) {
+                        $record->status = $state ? 'active' : 'inactive';
+                        $record->save();
 
-                TextColumn::make('estado')
-                    ->label('Estado')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'activo' => 'success',
-                        'inactivo' => 'danger',
-                        default => 'gray',
+                        // Forzar la actualización del estado en el frontend
+                        $record->refresh();
+
+                        Notification::make()
+                            ->title('Estado actualizado')
+                            ->body("El usuario ahora está " . ($state ? 'activo' : 'inactivo'))
+                            ->success()
+                            ->send();
+
+                        return $state;
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'activo' => 'Activo',
-                        'inactivo' => 'Inactivo',
-                        default => $state,
-                    })
-                    ->sortable(),
+                    ->getStateUsing(fn($record): bool => $record->status === 'active'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Creado')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true), // Oculto por defecto, pero se puede mostrar
+                Tables\Columns\TextColumn::make('updated_at') // Columna añadida
+                    ->label('Actualizado')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filter::make('estado')
-                    ->label('Estado de la Cuenta')
-                    ->form([
-                        Select::make('estado')
-                            ->options([
-                                'activo' => 'Activo',
-                                'inactivo' => 'Inactivo',
-                            ])
-                            ->native(false),
-                    ])
-                    ->query(
-                        fn(Builder $query, array $data): Builder =>
-                        $query->when($data['estado'], fn($q) => $q->where('estado', $data['estado']))
-                    ),
-
-                Filter::make('roles')
+                Tables\Filters\SelectFilter::make('roles')
                     ->label('Roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->native(false), // Usar el estilo de Filament
+                Tables\Filters\TernaryFilter::make('status')
+                    ->label('Estado')
+                    ->trueLabel('Activos')
+                    ->falseLabel('Inactivos')
+                    ->native(false),
+                Tables\Filters\Filter::make('created_at') // Filtro de fecha
                     ->form([
-                        Select::make('roles')
-                            ->relationship('roles', 'name')
-                            ->multiple()
-                            ->preload()
-                            ->native(false),
+                        Forms\Components\DatePicker::make('created_from')->label('Creado desde'),
+                        Forms\Components\DatePicker::make('created_until')->label('Creado hasta'),
                     ])
-                    ->query(
-                        fn(Builder $query, array $data): Builder =>
-                        $query->when($data['roles'], fn($q) => $q->whereHas('roles', fn($q) => $q->whereIn('id', $data['roles'])))
-                    ),
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->icon('heroicon-o-pencil')
-                    ->color('primary')
-                    ->tooltip('Editar usuario'),
-
-                Action::make('toggleEstado')
-                    ->label(fn(Model $record): string => $record->estado === 'activo' ? 'Desactivar' : 'Activar')
-                    ->icon(fn(Model $record): string => $record->estado === 'activo' ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                    ->color(fn(Model $record): string => $record->estado === 'activo' ? 'danger' : 'success')
-                    ->action(function (Model $record): void {
-                        $record->estado = $record->estado === 'activo' ? 'inactivo' : 'activo';
-                        $record->save();
-
-                        Notification::make()
-                            ->title($record->estado === 'activo' ? 'Usuario activado' : 'Usuario desactivado')
-                            ->success()
-                            ->send();
-                    })
-                    ->requiresConfirmation()
-                    ->modalHeading(fn(Model $record): string => $record->estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario')
-                    ->modalDescription(fn(Model $record): string => $record->estado === 'activo'
-                        ? '¿Está seguro de desactivar este usuario?'
-                        : '¿Está seguro de activar este usuario?')
-                    ->modalSubmitActionLabel(fn(Model $record): string => $record->estado === 'activo' ? 'Sí, desactivar' : 'Sí, activar')
-                    ->tooltip(fn(Model $record): string => $record->estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario'),
+                    ->icon('heroicon-o-pencil-square') // Icono actualizado
+                    ->color('primary'),
+                Tables\Actions\DeleteAction::make(), // Acción de eliminar individual (si es necesaria además de la masiva)
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    ExportBulkAction::make()
-                        ->label('Exportar seleccionados')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->exports([
-                            ExcelExport::make('usuarios')
-                                ->fromTable()
-                                ->withFilename('Usuarios_' . date('d-m-Y'))
-                                ->askForWriterType(),
-                        ]),
-
-                    BulkAction::make('activar')
+                    BulkAction::make('activate')
                         ->label('Activar seleccionados')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->action(function (Collection $records): void {
-                            $records->each(function (Model $record): void {
-                                $record->estado = 'activo';
-                                $record->save();
-                            });
-
-                            Notification::make()
-                                ->title('Usuarios activados')
-                                ->body("Se han activado {$records->count()} usuarios")
-                                ->success()
-                                ->send();
+                            $records->each->update(['status' => true]);
+                            Notification::make()->title(count($records) . ' Usuarios Activados')->success()->send();
                         })
                         ->requiresConfirmation()
-                        ->modalHeading('Activar usuarios seleccionados')
-                        ->modalDescription('¿Está seguro de activar los usuarios seleccionados?')
-                        ->modalSubmitActionLabel('Sí, activar'),
-
-                    BulkAction::make('desactivar')
+                        ->deselectRecordsAfterCompletion(),
+                    BulkAction::make('deactivate')
                         ->label('Desactivar seleccionados')
-                        ->icon('heroicon-o-x-circle')
+                        ->icon('heroicon-o-no-symbol')
                         ->color('danger')
                         ->action(function (Collection $records): void {
-                            $records->each(function (Model $record): void {
-                                if (!in_array($record->roles->pluck('name')->first(), ['ADMIN', 'LABORATORISTA'])) {
-                                    $record->estado = 'inactivo';
-                                    $record->save();
-                                }
-                            });
-
-                            Notification::make()
-                                ->title('Usuarios desactivados')
-                                ->body("Se han desactivado {$records->count()} usuarios")
-                                ->success()
-                                ->send();
+                            $records->each->update(['status' => false]);
+                            Notification::make()->title(count($records) . ' Usuarios Desactivados')->success()->send();
                         })
                         ->requiresConfirmation()
-                        ->modalHeading('Desactivar usuarios seleccionados')
-                        ->modalDescription('¿Está seguro de desactivar los usuarios seleccionados? Los administradores no pueden ser desactivados.')
-                        ->modalSubmitActionLabel('Sí, desactivar'),
-
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make()
                         ->label('Eliminar seleccionados')
-                        ->icon('heroicon-o-trash')
-                        ->requiresConfirmation(),
+                        ->icon('heroicon-o-trash'),
                 ]),
             ])
             ->emptyStateHeading('No hay usuarios registrados')
-            ->emptyStateDescription('Crea tu primer usuario haciendo clic en el botón de arriba')
-            ->emptyStateIcon('heroicon-o-users')
+            ->emptyStateDescription('Puedes crear tu primer usuario ahora mismo.')
+            ->emptyStateIcon('heroicon-o-user-plus') // Icono más sugestivo
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Crear usuario')
-                    ->icon('heroicon-o-plus'),
+                    ->label('Crear Nuevo Usuario')
+                    ->icon('heroicon-o-plus-circle'), // Icono actualizado
             ])
-            ->defaultSort('name', 'asc')
+            ->defaultSort('created_at', 'desc') // Ordenar por defecto por los más recientes
             ->deferLoading()
             ->persistFiltersInSession()
             ->persistSearchInSession()
@@ -329,7 +297,8 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // Relaciones si las necesitas
+            // Aquí puedes agregar Relaciones si es necesario, por ejemplo:
+            // RelationManagers\PostsRelationManager::class,
         ];
     }
 
@@ -339,20 +308,6 @@ class UserResource extends Resource
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
-        ];
-    }
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name', 'apellido', 'email'];
-    }
-
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            'Correo' => $record->email,
-            'Estado' => $record->estado === 'activo' ? 'Activo' : 'Inactivo',
-            'Roles' => $record->roles->pluck('name')->join(', '),
         ];
     }
 }

@@ -2,80 +2,126 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Inicio de Sesión</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
     <style>
-        .login-container {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B3D91;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #0B3D91;
         }
 
         .login-card {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            padding: 40px 30px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             text-align: center;
+        }
+
+        .login-card img {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
+        .login-card h2 {
+            color: #0B3D91;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        .success {
+            color: #27ae60;
         }
 
         .google-btn {
             display: flex;
-            justify-content: center;
             align-items: center;
-            background-color: #fff;
+            justify-content: center;
+            background: #ffffff;
             color: #333;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px 25px;
-            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            width: 100%;
-            max-width: 320px;
-            margin: 20px auto;
-            transition: background-color 0.3s;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .google-btn img {
+            margin-right: 10px;
+            width: 22px;
+            height: 22px;
         }
 
         .google-btn:hover {
-            background-color: #f2f2f2;
+            background-color: #f0f0f0;
+        }
+
+        .aviso {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
         }
     </style>
 </head>
 
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <img src="{{ asset('img/logo.png') }}" alt="Logo UMariana">
-            <h2 class="text-blue-900 text-2xl font-bold mb-4">Bienvenido a LABORATORIOS U MARIANA</h2>
+    <div class="login-card">
+        <img src="{{ asset('img/logo.png') }}" alt="Logo UMariana">
+        <h2>Bienvenido a LABORATORIOS U MARIANA</h2>
 
-            <!-- Mostrar mensajes flash -->
-            @if (session('error'))
-                <div class="mb-4 text-red-500 font-semibold">
-                    {{ session('error') }}
-                </div>
-            @endif
-            @if (session('success'))
-                <div class="mb-4 text-green-500 font-semibold">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <!-- Mensajes flash -->
+        @if (session('error'))
+            <div class="message error">
+                {{ session('error') }}
+            </div>
+        @endif
 
-            <!-- Botón de Google -->
-            <a href="{{ url('/auth/google') }}" class="google-btn">
-                <img width="25" height="25" src="https://img.icons8.com/fluency/48/google-logo.png"
-                    alt="google-logo" />
-                Iniciar sesión con Google
-            </a>
+        @if (session('success'))
+            <div class="message success">
+                {{ session('success') }}
+            </div>
+        @endif
 
-            <p class="aviso mt-4 text-gray-500 text-sm">Aviso de cookies</p>
-        </div>
+        <!-- Botón de Google -->
+        <a href="{{ url('/auth/google') }}" class="google-btn">
+            <img src="https://img.icons8.com/fluency/48/google-logo.png" alt="Google logo">
+            Iniciar sesión con Google
+        </a>
+
+        <p class="aviso">Este sitio utiliza cookies. Al continuar aceptas su uso.</p>
     </div>
 </body>
 
 </html>
+

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use App\Models\Categoria;
 use App\Models\Reserva;
 use App\Models\Horario;
 use App\Models\Laboratorio;
@@ -11,14 +10,12 @@ use App\Models\Permiso;
 use App\Models\Producto;
 use App\Models\Rol;
 use App\Models\User;
-use App\Policies\CategoriaPolicy;
 use App\Policies\ReservaPolicy;
 use App\Policies\HorarioPolicy;
 use App\Policies\LaboratorioPolicy;
 use App\Policies\PermisoPolicy;
 use App\Policies\ProductoPolicy;
 use App\Policies\RolPolicy;
-use App\Policies\SolicitudesReservasPolicy;
 use App\Policies\UserPolicy;
 
 class AuthServiceProvider extends ServiceProvider
@@ -29,7 +26,6 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        Categoria::class => CategoriaPolicy::class,
         Reserva::class => ReservaPolicy::class,
         Horario::class => HorarioPolicy::class,
         Laboratorio::class => LaboratorioPolicy::class,

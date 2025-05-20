@@ -1,54 +1,35 @@
 <?php
 
-// app/Models/Usuario.php
-
 namespace App\Models;
 
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Panel;
-use Filament\Models\Contracts\HasAvatar;
-use Illuminate\Support\Facades\Storage;
 
-// usa esto para production 'class User extends Authenticatable implements FilamentUser'
 class User extends Authenticatable implements HasAvatar, FilamentUser
 {
     use Notifiable, HasRoles;
 
-
-    // contrato para que solo personas autorizadas puedan acceder al sistema
-    public function canAccessPanel(Panel $panel): bool
-    {
-        // Permitir acceso solo si el usuario está activo
-        return $this->estado === 'activo';
-    }
-
-    public function getFilamentAvatarUrl(): ?string
-    {
-        return $this->avatar_url ? Storage::url($this->avatar_url) : null;
-    }
-
-
-    // Nombre de la tabla en la base de datos
+    // Nombre de la tabla
     protected $table = 'users';
 
-    // Clave primaria de la tabla
-    protected $primaryKey = 'user_id';
-    public $incrementing = true;
+    // ✅ NO redefinimos primaryKey: Laravel asume 'id' automáticamente
 
     // Atributos asignables en masa
     protected $fillable = [
-        'user_id',
         'name',
-        'apellido',
+        'last_name',
         'email',
-        'telefono',
-        'direccion',
-        'estado',
+        'phone',
+        'address',
+        'status',
         'custom_fields',
         'avatar_url',
+        'document_number',
 
     ];
 
@@ -57,15 +38,32 @@ class User extends Authenticatable implements HasAvatar, FilamentUser
         'remember_token',
     ];
 
-    public $timestamps = true;
-
-
+    // Casts
     protected function casts(): array
     {
         return [
-            #'email_verified_at' => 'datetime',
-            #'password' => 'hashed',
-            'custom_fields' => 'array'
+            'custom_fields' => 'array',
         ];
+    }
+
+    public $timestamps = true;
+
+    // Método para Filament: control de acceso al panel
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->status === 'active'; // ✅ Usar 'status', no 'estado'
+    }
+
+    // Método para obtener avatar en Filament
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar_url ? Storage::url($this->avatar_url) : null;
+    }
+
+    public function scopeProfessors($query)
+    {
+        return $query->whereHas('roles', function ($q) {
+            $q->where('name', 'docente'); // Ajusta al nombre de tu rol
+        });
     }
 }

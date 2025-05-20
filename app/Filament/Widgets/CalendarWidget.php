@@ -2,14 +2,12 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Equipment;
+use App\Models\AcademicProgram;
 use App\Models\Schedule;
 use App\Models\Laboratory;
+use App\Models\Product;
 use App\Models\User;
-use Carbon\Carbon;
 use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -17,6 +15,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
@@ -55,6 +54,9 @@ class CalendarWidget extends FullCalendarWidget
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
             'height' => 600,
+            'editable' => true, // Habilitar edición
+            'droppable' => true, // Habilitar arrastrar y soltar
+            'eventDurationEditable' => true,
         ];
     }
 
@@ -80,6 +82,7 @@ class CalendarWidget extends FullCalendarWidget
         })->toArray();
     }
 
+
     protected function modalActions(): array
     {
         return [
@@ -92,21 +95,30 @@ class CalendarWidget extends FullCalendarWidget
                         'color' => $record->color,
                         'is_available' => $record->is_available,
                         'laboratory_id' => $record->laboratory_id,
+                        'academic_program_id' => $record->academic_program_id,
+                        'semester' => $record->semester,
+                        'user_id' => $record->user_id,
+                        'student_count' => $record->student_count,
+                        'group_count' => $record->group_count,
+                        'products' => $record->products->pluck('id')->toArray(), // Añadir productos seleccionados
                     ]);
                 })
                 ->action(function (Schedule $record, array $data) {
-                    $record->update([
-                        'title' => $data['title'],
-                        'start_at' => $data['start_at'],
-                        'end_at' => $data['end_at'],
-                        'color' => $data['color'],
-                        'is_available' => $data['is_available'],
-                        'laboratory_id' => $data['laboratory_id'],
-                    ]);
+                    // Extraer productos antes de actualizar
+                    $products = $data['products'] ?? [];
+                    unset($data['products']);
+
+                    // Actualizar el registro principal
+                    $record->update($data);
+
+                    // Sincronizar los productos
+                    $record->products()->sync($products);
                 }),
             DeleteAction::make(),
         ];
     }
+
+
     protected function headerActions(): array
     {
         return [
@@ -131,14 +143,11 @@ class CalendarWidget extends FullCalendarWidget
                 ->schema([
                     Select::make('academic_program_id')
                         ->label('Programa Académico')
-                        ->options([
-                            'ingenieria_sistemas' => 'Ingeniería de Sistemas',
-                            'ingenieria_electronica' => 'Ingeniería Electrónica',
-                            'licenciatura_matematicas' => 'Licenciatura en Matemáticas',
-                            // Agrega más programas según necesites
-                        ])
-                        ->required()
-                        ->native(false),
+                        ->relationship('academicProgram', 'name')
+                        ->getOptionLabelFromRecordUsing(fn(AcademicProgram $record) => $record->full_name)
+                        ->searchable(['name', 'code'])
+                        ->preload()
+                        ->required(),
 
                     Select::make('semester')
                         ->label('Semestre')
@@ -198,34 +207,21 @@ class CalendarWidget extends FullCalendarWidget
                         ->required()
                         ->reactive(),
 
-                    Select::make('equipment_ids')
-                        ->label('Equipos')
+                    Select::make('products') // Cambiado de product_ids a products
+                        ->label('Productos')
                         ->multiple()
                         ->relationship(
-                            name: 'equipments', // Nombre de la relación en el modelo Schedule
+                            name: 'products',
                             titleAttribute: 'name',
-                            modifyQueryUsing: fn(Builder $query, callable $get) => $query->when(
-                                $labId = $get('laboratory_id'),
-                                fn($q) => $q->where('laboratory_id', $labId)
-                            )
+                            modifyQueryUsing: fn(Builder $query, Get $get) =>
+                            $query->where('laboratory_id', $get('laboratory_id'))
                         )
-                        ->getOptionLabelFromRecordUsing(fn(Equipment $equipment) => $equipment->name)
-                        ->searchable(['name', 'model']) // Campos por los que se puede buscar
+                        ->getOptionLabelFromRecordUsing(
+                            fn(Product $product) => "{$product->name} - {$product->serial_number}"
+                        )
+                        ->searchable()
                         ->preload()
-                        ->required(),
-
-                    // Select::make('material_ids')
-                    //     ->label('Insumos, Materiales y Herramientas')
-                    //     ->multiple()
-                    //     ->options(function (callable $get) {
-                    //         $labId = $get('laboratory_id');
-                    //         if (!$labId) {
-                    //             return [];
-                    //         }
-                    //         return Laboratory::find($labId)->materials()->pluck('name', 'id');
-                    //     })
-                    //     ->searchable()
-                    //     ->preload(),
+                        ->required()
                 ])
                 ->columns(2),
 

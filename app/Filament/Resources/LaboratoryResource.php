@@ -6,10 +6,14 @@ use App\Filament\Resources\LaboratoryResource\Pages;
 use App\Models\Laboratory;
 use App\Models\User;
 use Filament\Forms;
+use App\Models\Product;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class LaboratoryResource extends Resource
 {
@@ -55,7 +59,19 @@ class LaboratoryResource extends Resource
                                     ->label('Localizacion')
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('Edificio, Piso, Aula')
+                                    ->placeholder('Edificio, Piso, Aula'),
+
+                                Select::make('product_ids')
+                                    ->label('Productos asociados')
+                                    ->multiple()
+                                    ->relationship(
+                                        name: 'products',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn(Builder $query, ?Model $record) => $query->where('laboratory_id', $record?->id)
+                                    )
+                                    ->searchable()
+                                    ->preload()
+
                             ])
                             ->columns(2),
                     ])

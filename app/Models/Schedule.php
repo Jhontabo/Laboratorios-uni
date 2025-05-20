@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schedule extends Model
 {
@@ -30,10 +31,25 @@ class Schedule extends Model
         'end_at' => 'datetime',
     ];
 
-    // En tu modelo Schedule o donde tengas la relación
-    public function equipments()
+    public function academicProgram()
     {
-        return $this->belongsToMany(Equipment::class, 'schedule_equipment')->withPivot('quantity');;
+        return $this->belongsTo(AcademicProgram::class);
+    }
+    // app/Models/Schedule.php
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_schedule')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+
+    // En tu modelo Schedule o donde tengas la relación
+    public function equipments(): BelongsToMany
+    {
+        return $this->belongsToMany(Equipment::class, 'schedule_equipment')
+            ->using(ScheduleEquipment::class)
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
 
     public function user()

@@ -5,7 +5,7 @@ use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use App\Filament\Widgets\CalendarWidget;
 
 return [
-       
+
 
     'widgets' => [
         CalendarWidget::class,
@@ -107,9 +107,6 @@ return [
 
     'panels' => [
         'admin' => App\Providers\Filament\AdminPanelProvider::class,
-        'docente' => App\Providers\Filament\DocentePanelProvider::class,
-        'estudiante' => App\Providers\Filament\EstudiantePanelProvider::class,
-        'laboratorista' => App\Providers\Filament\LaboratoristaPanelProvider::class,
     ],
 
 

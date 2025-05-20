@@ -10,19 +10,10 @@ use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
-
-    // Dominios de correo permitidos
+    // Allowed email domains
     protected $allowedDomains = ['umariana.edu.co'];
 
-    // Roles permitidos en el sistema
-    protected $allowedRoles = [
-        'ADMIN',
-        'LABORATORISTA',
-        'DOCENTE',
-        'ESTUDIANTE'
-    ];
-
-    // Redirigir a Google
+    // Redirect to Google
     public function redirectToGoogle()
     {
         return Socialite::driver('google')
@@ -30,7 +21,7 @@ class LoginController extends Controller
             ->redirect();
     }
 
-    // Manejar el callback de Google
+    // Handle the Google callback
     public function handleGoogleCallback()
     {
         try {
@@ -62,10 +53,9 @@ class LoginController extends Controller
         }
     }
 
-
     /**
-     * Obtiene los datos del usuario desde Google
-     * 
+     * Get user data from Google
+     *
      * @return \Laravel\Socialite\Contracts\User
      */
     protected function getGoogleUser()
@@ -74,8 +64,8 @@ class LoginController extends Controller
     }
 
     /**
-     * Registra el intento de autenticación
-     * 
+     * Log authentication attempt
+     *
      * @param \Laravel\Socialite\Contracts\User $googleUser
      */
     protected function logAuthenticationAttempt($googleUser)
@@ -88,8 +78,8 @@ class LoginController extends Controller
     }
 
     /**
-     * Valida el dominio del correo electrónico
-     * 
+     * Validate email domain
+     *
      * @param string $email
      * @return bool
      */
@@ -100,8 +90,8 @@ class LoginController extends Controller
     }
 
     /**
-     * Busca o crea un usuario basado en los datos de Google
-     * 
+     * Find or create a user based on Google data
+     *
      * @param \Laravel\Socialite\Contracts\User $googleUser
      * @return \App\Models\User
      */
@@ -113,38 +103,28 @@ class LoginController extends Controller
     }
 
     /**
-     * Verifica si el usuario tiene un rol válido
-     * 
+     * Check if the user has at least one role
+     *
      * @param \App\Models\User $user
      * @return bool
      */
     protected function userHasValidRole(User $user): bool
     {
-        return $user->roles()->whereIn('name', $this->allowedRoles)->exists();
+        // Allow if the user has at least one role, regardless of its name
+        return $user->roles()->exists();
     }
 
     /**
-     * Redirige al dashboard según el rol del usuario
-     * 
+     * Redirect all users to the admin dashboard, regardless of their role
+     *
      * @param \App\Models\User $user
      * @return \Illuminate\Http\RedirectResponse
      */
-
-
     protected function redirectToDashboard(User $user)
     {
-        $route = match (true) {
-            $user->hasRole('ADMIN') => 'admin.dashboard',
-            $user->hasRole('LABORATORISTA') => 'laboratorista.dashboard',
-            $user->hasRole('DOCENTE') => 'docente.dashboard',
-            $user->hasRole('ESTUDIANTE') => 'estudiante.dashboard',
-            default => 'home'
-        };
-
-        return redirect()->route($route);
+        // All users go to admin.dashboard
+        return redirect()->route('/admin');
     }
-
-
 
     protected function redirectWithError(string $message)
     {

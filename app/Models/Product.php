@@ -32,6 +32,12 @@ class Product extends Model
     ];
 
     // Relaciones
+    //
+    public function schedules()
+    {
+        return $this->belongsToMany(Schedule::class, 'product_schedule')
+            ->withPivot('quantity');
+    }
 
     public function laboratory()
     {

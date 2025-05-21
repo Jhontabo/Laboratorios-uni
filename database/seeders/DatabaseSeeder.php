@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\AcademicProgram;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,7 +13,6 @@ class DatabaseSeeder extends Seeder
             LaboratoriesSeeder::class,
             PermissionsSeeder::class,
             ProductsSeeder::class,
-            AcademicProgramSeeder::class,
 
         ]);
     }

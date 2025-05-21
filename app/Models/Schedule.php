@@ -10,8 +10,12 @@ class Schedule extends Model
 {
     use HasFactory;
 
-    protected $table = 'schedules'; // Table name
-    protected $primaryKey = 'id'; // Primary key
+    protected $table = 'schedules';
+    protected $primaryKey = 'id';
+
+    protected $attributes = [
+        'color' => '#3b82f6',
+    ];
 
     protected $fillable = [
         'title',
@@ -23,19 +27,26 @@ class Schedule extends Model
         'reservation_status',
         'laboratory_id',
         'user_id',
+        'type',
     ];
 
-    // Ensure that date fields are cast to Carbon objects
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
     ];
-
-    public function academicProgram()
+    public function unstructured()
     {
-        return $this->belongsTo(AcademicProgram::class);
+        return $this->hasOne(ScheduleUnstructured::class);
     }
-    // app/Models/Schedule.php
+
+    public function structured()
+    {
+        return $this->hasOne(ScheduleStructured::class); // ✅ Esto está bien
+    }
+
+
+
+
     public function products()
     {
         return $this->belongsToMany(Product::class, 'product_schedule')
@@ -43,7 +54,6 @@ class Schedule extends Model
             ->withTimestamps();
     }
 
-    // En tu modelo Schedule o donde tengas la relación
     public function equipments(): BelongsToMany
     {
         return $this->belongsToMany(Equipment::class, 'schedule_equipment')
@@ -54,22 +64,19 @@ class Schedule extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id'); // 'user_id' is the key that connects to the user
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relationship with laboratory
     public function laboratory()
     {
         return $this->belongsTo(Laboratory::class, 'laboratory_id');
     }
-
 
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'schedule_id');
     }
 
-    // Accessor for the time range (optional)
     public function getTimeRangeAttribute(): string
     {
         return $this->start_at . ' - ' . $this->end_at;

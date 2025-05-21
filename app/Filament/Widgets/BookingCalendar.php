@@ -36,9 +36,6 @@ class BookingCalendar extends FullCalendarWidget
     {
         $hiddenRoutes = [
             'filament.admin.pages.dashboard',
-            'filament.estudiante.pages.dashboard',
-            'filament.docente.pages.dashboard',
-            'filament.laboratorista.pages.dashboard'
         ];
 
         return !in_array(request()->route()->getName(), $hiddenRoutes);

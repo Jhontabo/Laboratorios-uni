@@ -10,10 +10,8 @@ use App\Models\User;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,16 +23,13 @@ use Saade\FilamentFullCalendar\Actions\EditAction;
 
 class CalendarWidget extends FullCalendarWidget
 {
-
     public Model|string|null $model = Schedule::class;
 
     public static function canView(): bool
     {
-        $routesToHideWidget = [
+        return !in_array(request()->route()->getName(), [
             'filament.admin.pages.dashboard',
-        ];
-
-        return !in_array(request()->route()->getName(), $routesToHideWidget);
+        ]);
     }
 
     public function config(): array
@@ -51,20 +46,18 @@ class CalendarWidget extends FullCalendarWidget
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
             'height' => 600,
-            'editable' => true, // Habilitar edición
-            'droppable' => true, // Habilitar arrastrar y soltar
+            'editable' => true,
             'eventDurationEditable' => true,
         ];
     }
 
     public function fetchEvents(array $fetchInfo): array
     {
-        $labId = session()->get('lab');
-        $query = Schedule::query();
+        $query = Schedule::query()
+            ->where('type', 'structured')
+            ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
 
-        $query->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
-
-        if (!is_null($labId)) {
+        if ($labId = session()->get('lab')) {
             $query->where('laboratory_id', $labId);
         }
 
@@ -79,90 +72,74 @@ class CalendarWidget extends FullCalendarWidget
         })->toArray();
     }
 
-
-    protected function modalActions(): array
-    {
-        return [
-            EditAction::make()
-                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
-                    $form->fill([
-                        'title' => $record->title,
-                        'start_at' => $arguments['event']['start'] ?? $record->start_at,
-                        'end_at' => $arguments['event']['end'] ?? $record->end_at,
-                        'color' => $record->color,
-                        'is_available' => $record->is_available,
-                        'laboratory_id' => $record->laboratory_id,
-                        'academic_program_id' => $record->academic_program_id,
-                        'semester' => $record->semester,
-                        'user_id' => $record->user_id,
-                        'student_count' => $record->student_count,
-                        'group_count' => $record->group_count,
-                        'products' => $record->products->pluck('id')->toArray(), // Añadir productos seleccionados
-                    ]);
-                })
-                ->action(function (Schedule $record, array $data) {
-                    // Extraer productos antes de actualizar
-                    $products = $data['products'] ?? [];
-                    unset($data['products']);
-
-                    // Actualizar el registro principal
-                    $record->update($data);
-
-                    // Sincronizar los productos
-                    $record->products()->sync($products);
-                }),
-            DeleteAction::make(),
-        ];
-    }
-
-
     protected function headerActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Crear Horario')  // Cambiar el texto del botón
-                ->icon('heroicon-o-plus') // Agregar icono
-                ->color('primary')        // Cambiar color
+                ->label('Crear Horario')
+                ->icon('heroicon-o-plus')
+                ->color('primary')
                 ->mountUsing(function (Form $form, array $arguments) {
                     $form->fill([
                         'start_at' => $arguments['start'] ?? null,
                         'end_at' => $arguments['end'] ?? null,
+                        'type' => 'structured',
                     ]);
                 })
-                ->form($this->getFormSchema()) // Asegurar que use el schema correcto
+                ->form($this->getFormSchema())
+                ->using(function (array $data, string $model): Model {
+                    \DB::beginTransaction();
+                    try {
+                        $schedule = $model::create([
+                            'type' => 'structured',
+                            'title' => $data['title'],
+                            'start_at' => $data['start_at'],
+                            'end_at' => $data['end_at'],
+                            'color' => $data['color'] ?? '#3b82f6',
+                            'laboratory_id' => $data['laboratory_id'],
+                            'user_id' => $data['user_id'],
+                        ]);
+
+                        $schedule->structured()->create([
+                            'academic_program_name' => $data['academic_program_name'], // Cambiado de academic_program_id a academic_program_name
+                            'semester' => $data['semester'],
+                            'student_count' => $data['student_count'],
+                            'group_count' => $data['group_count'],
+                        ]);
+
+                        if (!empty($data['products'])) {
+                            $schedule->products()->sync($data['products']);
+                        }
+
+                        \DB::commit();
+                        return $schedule;
+                    } catch (\Exception $e) {
+                        \DB::rollBack();
+                        throw $e;
+                    }
+                })
         ];
     }
 
     public function getFormSchema(): array
     {
         return [
-            Section::make('Información Académica')
+            Section::make('Información Básica')
                 ->schema([
-                    Select::make('academic_program_id')
-                        ->label('Programa Académico')
-                        ->relationship('academicProgram', 'name')
-                        ->getOptionLabelFromRecordUsing(fn(AcademicProgram $record) => $record->full_name)
-                        ->searchable(['name', 'code'])
-                        ->preload()
-                        ->required(),
-
                     Select::make('laboratory_id')
-                        ->label('Espacio academico')
-                        ->options(Laboratory::pluck('name', 'id')->toArray())
+                        ->label('Laboratorio')
+                        ->options(Laboratory::pluck('name', 'id'))
                         ->required()
-                        ->reactive(),
-
-                    Select::make('semester')
-                        ->label('Semestre')
-                        ->options(array_combine(range(1, 10), range(1, 10)))
-                        ->required()
-                        ->native(false),
+                        ->searchable()
+                        ->preload()
+                        ->live()
+                        ->afterStateUpdated(fn($state, $set) => $set('products', [])),
 
                     Select::make('user_id')
                         ->label('Profesor Responsable')
                         ->relationship(
                             name: 'user',
-                            titleAttribute: 'name', // Esto es requerido pero lo sobreescribiremos
+                            titleAttribute: 'name',
                             modifyQueryUsing: fn(Builder $query) => $query->role('docente')
                         )
                         ->getOptionLabelFromRecordUsing(fn(User $user) => "{$user->name} {$user->last_name}")
@@ -171,83 +148,129 @@ class CalendarWidget extends FullCalendarWidget
                         ->required(),
 
                     TextInput::make('title')
-                        ->label('Nombre de la practica academica')
+                        ->label('Nombre de la actividad')
                         ->required()
-                        ->maxLength(255),
+                        ->maxLength(257),
+                ])
+                ->columns(4),
+
+            Section::make('Detalles Académicos')
+                ->schema([
+                    Select::make('academic_program_name')
+                        ->label('Programa Académico')
+                        ->options([
+                            'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
+                            'Ingeniería Industrial' => 'Ingeniería Industrial',
+                            'Contaduría Pública' => 'Contaduría Pública',
+                            'Administración de Empresas' => 'Administración de Empresas',
+                            // ... agrega más según tu necesidad
+                        ])
+                        ->searchable()
+                        ->preload()
+                        ->required(),
+
+                    Select::make('semester')
+                        ->label('Semestre')
+                        ->options(collect(range(1, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
+                        ->required()
+                        ->native(false),
 
                     TextInput::make('student_count')
                         ->label('Número de Estudiantes')
                         ->numeric()
-                        ->minValue(1)
-                        ->maxValue(100)
+                        ->minValue(3)
+                        ->maxValue(102)
                         ->required(),
 
                     TextInput::make('group_count')
                         ->label('Número de Grupos')
                         ->numeric()
-                        ->minValue(1)
-                        ->maxValue(20)
+                        ->minValue(3)
+                        ->maxValue(22)
                         ->required(),
                 ])
-                ->columns(2),
+                ->columns(4),
 
-            Section::make('Detalles del Horario')
+            Section::make('Configuración del Horario')
                 ->schema([
                     TimePicker::make('start_at')
                         ->label('Hora de Inicio')
                         ->required()
-                        ->seconds(false)
-                        ->displayFormat('H:i')
-                        ->native(false),
+                        ->seconds(false),
 
                     TimePicker::make('end_at')
                         ->label('Hora de Finalización')
                         ->required()
                         ->seconds(false)
-                        ->displayFormat('H:i')
-                        ->native(false)
                         ->after('start_at'),
-
-
-
-                    /* Select::make('products') // Cambiado de product_ids a products */
-                    /*     ->label('Productos') */
-                    /*     ->multiple() */
-                    /*     ->relationship( */
-                    /*         name: 'products', */
-                    /*         titleAttribute: 'name', */
-                    /*         modifyQueryUsing: fn(Builder $query, Get $get) => */
-                    /*         $query->where('laboratory_id', $get('laboratory_id')) */
-                    /*     ) */
-                    /*     ->getOptionLabelFromRecordUsing( */
-                    /*         fn(Product $product) => "{$product->name} - {$product->serial_number}" */
-                    /*     ) */
-                    /*     ->searchable() */
-                    /*     ->preload() */
-                    /*     ->required() */
-                ])
-                ->columns(2),
-
-            Section::make('Configuración Adicional')
-                ->schema([
-
-
-                    Textarea::make('description')
-                        ->label('Descripción Adicional')
-                        ->maxLength(500)
-                        ->columnSpanFull(),
-
-                    Toggle::make('is_available')
-                        ->label('Disponible para Reserva')
-                        ->onColor('success')
-                        ->offColor('danger')
-                        ->default(true),
 
                     ColorPicker::make('color')
                         ->label('Color del Evento')
-                        ->default('#3b82f6'),
+                        ->default('#5b82f6'),
                 ])
-                ->columns(2),
+                ->columns(4),
+
+
+        ];
+    }
+
+    protected function modalActions(): array
+    {
+        return [
+            EditAction::make()
+                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
+                    if (!$record->structured) {
+                        throw new \Exception('Registro de práctica estructurada no encontrado');
+                    }
+
+                    $form->fill([
+                        'title' => $record->title,
+                        'start_at' => $arguments['event']['start'] ?? $record->start_at,
+                        'end_at' => $arguments['event']['end'] ?? $record->end_at,
+                        'color' => $record->color,
+                        'laboratory_id' => $record->laboratory_id,
+                        'user_id' => $record->user_id,
+                        'academic_program_name' => $record->structured->academic_program_name, // Cambiado de academic_program_id a academic_program_name
+                        'semester' => $record->structured->semester,
+                        'student_count' => $record->structured->student_count,
+                        'group_count' => $record->structured->group_count,
+                        'products' => $record->products->pluck('id')->toArray(),
+                    ]);
+                })
+                ->action(function (Schedule $record, array $data) {
+                    \DB::beginTransaction();
+                    try {
+                        $record->update([
+                            'title' => $data['title'],
+                            'start_at' => $data['start_at'],
+                            'end_at' => $data['end_at'],
+                            'color' => $data['color'] ?? $record->color,
+                            'laboratory_id' => $data['laboratory_id'],
+                            'user_id' => $data['user_id'],
+                        ]);
+
+                        $record->structured()->update([
+                            'academic_program_name' => $data['academic_program_name'], // Usar academic_program_name en lugar de academic_program_id
+                            'semester' => $data['semester'],
+                            'student_count' => $data['student_count'],
+                            'group_count' => $data['group_count'],
+                        ]);
+
+
+                        $record->products()->sync($data['products'] ?? []);
+
+                        \DB::commit();
+                    } catch (\Exception $e) {
+                        \DB::rollBack();
+                        throw $e;
+                    }
+                }),
+
+            DeleteAction::make()
+                ->before(function (Schedule $record) {
+                    $record->structured()->delete();
+                    $record->products()->detach();
+                }),
         ];
     }
 }

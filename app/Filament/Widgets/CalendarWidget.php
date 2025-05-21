@@ -5,19 +5,25 @@ namespace App\Filament\Widgets;
 use App\Models\Schedule;
 use App\Models\Laboratory;
 use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use Saade\FilamentFullCalendar\Actions\CreateAction;
 use Saade\FilamentFullCalendar\Actions\DeleteAction;
 use Saade\FilamentFullCalendar\Actions\EditAction;
+use Illuminate\Validation\ValidationException;
 
 class CalendarWidget extends FullCalendarWidget
 {
@@ -31,7 +37,7 @@ class CalendarWidget extends FullCalendarWidget
     public function config(): array
     {
         return [
-            'firstDay' => 1,
+            'firstDay' => 0,
             'slotMinTime' => '07:00:00',
             'slotMaxTime' => '16:00:00',
             'locale' => 'es',
@@ -42,23 +48,83 @@ class CalendarWidget extends FullCalendarWidget
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
             'height' => 600,
+
         ];
     }
 
     public function fetchEvents(array $fetchInfo): array
     {
-        return Schedule::whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
+        $start = $fetchInfo['start'];
+        $end = $fetchInfo['end'];
+
+        return Schedule::where(function ($query) use ($start, $end) {
+            $query->whereBetween('start_at', [$start, $end])
+                ->orWhere(function ($q) use ($start, $end) {
+                    $q->whereNotNull('recurrence_until')
+                        ->where('recurrence_until', '>=', $start)
+                        ->where('start_at', '<=', $end);
+                });
+        })
             ->get()
-            ->map(function (Schedule $schedule) {
-                return [
-                    'id' => $schedule->id,
-                    'title' => $schedule->title,
-                    'start' => $schedule->start_at,
-                    'end' => $schedule->end_at,
-                    'color' => $schedule->color,
-                ];
+            ->flatMap(function (Schedule $schedule) use ($start, $end) {
+                if (!$schedule->recurrence_days) {
+                    return [$this->formatEvent($schedule)];
+                }
+
+                return $this->generateRecurringEvents($schedule, $start, $end);
             })
             ->toArray();
+    }
+
+    protected function formatEvent(Schedule $schedule): array
+    {
+        return [
+            'id' => $schedule->id,
+            'title' => $schedule->title,
+            'start' => $schedule->start_at,
+            'end' => $schedule->end_at,
+            'color' => $schedule->color,
+        ];
+    }
+
+    protected function generateRecurringEvents(Schedule $schedule, string $start, string $end): array
+    {
+        $events = [];
+        $startDate = Carbon::parse($schedule->start_at);
+        $endDate = Carbon::parse($schedule->end_at);
+        $duration = $startDate->diffInMinutes($endDate);
+        $recurrenceUntil = Carbon::parse($schedule->recurrence_until);
+        $daysOfWeek = explode(',', $schedule->recurrence_days);
+
+        $period = CarbonPeriod::create($startDate, $recurrenceUntil);
+
+        foreach ($period as $date) {
+            if (!in_array($date->dayOfWeek, $daysOfWeek)) {
+                continue;
+            }
+
+            $eventStart = $date->setTime($startDate->hour, $startDate->minute);
+            $eventEnd = (clone $eventStart)->addMinutes($duration);
+
+            // Solo incluir eventos dentro del rango solicitado
+            if ($eventEnd < $start || $eventStart > $end) {
+                continue;
+            }
+
+            $events[] = [
+                'id' => $schedule->id . '-' . $eventStart->format('Y-m-d'),
+                'title' => $schedule->title,
+                'start' => $eventStart,
+                'end' => $eventEnd,
+                'color' => $schedule->color,
+                'extendedProps' => [
+                    'isRecurring' => true,
+                    'parentId' => $schedule->id,
+                ],
+            ];
+        }
+
+        return $events;
     }
 
     protected function modalActions(): array
@@ -75,6 +141,9 @@ class CalendarWidget extends FullCalendarWidget
                         'color' => $record->color,
                         'laboratory_id' => $record->laboratory_id,
                         'user_id' => $record->user_id,
+                        'is_recurring' => $record->recurrence_days !== null,
+                        'recurrence_days' => $record->recurrence_days ? explode(',', $record->recurrence_days) : [],
+                        'recurrence_until' => $record->recurrence_until,
                         'academic_program_name' => $record->structured->academic_program_name ?? '',
                         'semester' => $record->structured->semester ?? null,
                         'student_count' => $record->structured->student_count ?? null,
@@ -82,7 +151,8 @@ class CalendarWidget extends FullCalendarWidget
                     ]);
                 })
                 ->action(function (Schedule $record, array $data) {
-                    // Actualiza el schedule principal
+                    $recurrenceData = $this->processRecurrenceData($data);
+
                     $record->update([
                         'title' => $data['title'],
                         'start_at' => $data['start_at'],
@@ -90,9 +160,10 @@ class CalendarWidget extends FullCalendarWidget
                         'color' => $data['color'] ?? $record->color,
                         'laboratory_id' => $data['laboratory_id'],
                         'user_id' => $data['user_id'],
+                        'recurrence_days' => $recurrenceData['recurrence_days'],
+                        'recurrence_until' => $recurrenceData['recurrence_until'],
                     ]);
 
-                    // Actualiza o crea los detalles estructurados
                     $record->structured()->updateOrCreate(
                         ['schedule_id' => $record->id],
                         [
@@ -116,6 +187,7 @@ class CalendarWidget extends FullCalendarWidget
     protected function headerActions(): array
     {
         return [
+
             CreateAction::make()
                 ->label('Crear Horario')
                 ->icon('heroicon-o-plus')
@@ -127,7 +199,22 @@ class CalendarWidget extends FullCalendarWidget
                         'type' => 'structured',
                     ]);
                 })
-                ->using(function (array $data, string $model): Model {
+
+                ->using(function (array $data, string $model): ?Model {
+                    $startDay = Carbon::parse($data['start_at'])->dayOfWeek;
+
+                    if (in_array($startDay, [0, 6])) {
+                        Notification::make()
+                            ->title('Día no permitido')
+                            ->body('No se pueden crear horarios los días sábado o domingo.')
+                            ->danger()
+                            ->send();
+
+                        return null; // <- esto evita que se cree el horario
+                    }
+
+                    $recurrenceData = $this->processRecurrenceData($data);
+
                     $schedule = $model::create([
                         'type' => 'structured',
                         'title' => $data['title'],
@@ -136,6 +223,8 @@ class CalendarWidget extends FullCalendarWidget
                         'color' => $data['color'] ?? '#3b82f6',
                         'laboratory_id' => $data['laboratory_id'],
                         'user_id' => $data['user_id'],
+                        'recurrence_days' => $recurrenceData['recurrence_days'],
+                        'recurrence_until' => $recurrenceData['recurrence_until'],
                     ]);
 
                     $schedule->structured()->create([
@@ -147,7 +236,24 @@ class CalendarWidget extends FullCalendarWidget
 
                     return $schedule->load('structured');
                 })
+
+
         ];
+    }
+
+    protected function processRecurrenceData(array $data): array
+    {
+        $result = [
+            'recurrence_days' => null,
+            'recurrence_until' => null,
+        ];
+
+        if ($data['is_recurring'] ?? false) {
+            $result['recurrence_days'] = implode(',', $data['recurrence_days']);
+            $result['recurrence_until'] = $data['recurrence_until'];
+        }
+
+        return $result;
     }
 
     public function getFormSchema(): array
@@ -221,12 +327,12 @@ class CalendarWidget extends FullCalendarWidget
             Section::make('Configuración del Horario')
                 ->schema([
                     DateTimePicker::make('start_at')
-                        ->label('Hora de Inicio')
+                        ->label('Fecha y Hora de Inicio')
                         ->required()
                         ->seconds(false),
 
                     DateTimePicker::make('end_at')
-                        ->label('Hora de Finalización')
+                        ->label('Fecha y Hora de Finalización')
                         ->required()
                         ->seconds(false)
                         ->after('start_at'),
@@ -236,6 +342,31 @@ class CalendarWidget extends FullCalendarWidget
                         ->default('#3b82f6'),
                 ])
                 ->columns(3),
+
+            Section::make('Recurrencia')
+                ->schema([
+                    Toggle::make('is_recurring')
+                        ->label('Evento recurrente')
+                        ->reactive(),
+
+                    CheckboxList::make('recurrence_days')
+                        ->label('Días de la semana')
+                        ->options([
+                            '1' => 'Lunes',
+                            '2' => 'Martes',
+                            '3' => 'Miércoles',
+                            '4' => 'Jueves',
+                            '5' => 'Viernes',
+                        ])
+                        ->columns(5)
+                        ->visible(fn(callable $get) => $get('is_recurring')),
+
+                    DatePicker::make('recurrence_until')
+                        ->label('Repetir hasta')
+                        ->minDate(fn(callable $get) => $get('start_at') ? Carbon::parse($get('start_at'))->addDay() : null)
+                        ->visible(fn(callable $get) => $get('is_recurring')),
+                ])
+                ->columns(1),
         ];
     }
 }

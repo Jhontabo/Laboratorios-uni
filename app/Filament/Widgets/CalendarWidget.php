@@ -10,6 +10,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -24,9 +25,7 @@ class CalendarWidget extends FullCalendarWidget
 
     public static function canView(): bool
     {
-        return !in_array(request()->route()->getName(), [
-            'filament.admin.pages.dashboard',
-        ]);
+        return !request()->routeIs('filament.admin.pages.dashboard');
     }
 
     public function config(): array
@@ -43,41 +42,75 @@ class CalendarWidget extends FullCalendarWidget
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
             'height' => 600,
-            'editable' => true,
-            'eventDurationEditable' => true,
         ];
     }
 
     public function fetchEvents(array $fetchInfo): array
     {
-        $query = Schedule::with(['laboratory', 'user', 'structured'])
-            ->where('type', 'structured')
-            ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
+        return Schedule::whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
+            ->get()
+            ->map(function (Schedule $schedule) {
+                return [
+                    'id' => $schedule->id,
+                    'title' => $schedule->title,
+                    'start' => $schedule->start_at,
+                    'end' => $schedule->end_at,
+                    'color' => $schedule->color,
+                ];
+            })
+            ->toArray();
+    }
 
-        if ($labId = session()->get('lab')) {
-            $query->where('laboratory_id', $labId);
-        }
+    protected function modalActions(): array
+    {
+        return [
+            EditAction::make()
+                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
+                    $record->loadMissing('structured');
 
-        return $query->get()->map(function (Schedule $schedule) {
-            // Verifica si existe la relación structured
-            $structured = $schedule->structured ?? new \App\Models\ScheduleStructured();
+                    $form->fill([
+                        'title' => $record->title,
+                        'start_at' => $arguments['event']['start'] ?? $record->start_at,
+                        'end_at' => $arguments['event']['end'] ?? $record->end_at,
+                        'color' => $record->color,
+                        'laboratory_id' => $record->laboratory_id,
+                        'user_id' => $record->user_id,
+                        'academic_program_name' => $record->structured->academic_program_name ?? '',
+                        'semester' => $record->structured->semester ?? null,
+                        'student_count' => $record->structured->student_count ?? null,
+                        'group_count' => $record->structured->group_count ?? null,
+                    ]);
+                })
+                ->action(function (Schedule $record, array $data) {
+                    // Actualiza el schedule principal
+                    $record->update([
+                        'title' => $data['title'],
+                        'start_at' => $data['start_at'],
+                        'end_at' => $data['end_at'],
+                        'color' => $data['color'] ?? $record->color,
+                        'laboratory_id' => $data['laboratory_id'],
+                        'user_id' => $data['user_id'],
+                    ]);
 
-            return [
-                'id' => $schedule->id,
-                'title' => $schedule->title,
-                'start' => $schedule->start_at,
-                'end' => $schedule->end_at,
-                'color' => $schedule->color,
-                'extendedProps' => [
-                    'laboratory' => $schedule->laboratory->name ?? 'No asignado',
-                    'professor' => $schedule->user->name ?? 'No asignado',
-                    'academic_program' => $structured->academic_program_name ?? 'No asignado',
-                    'semester' => $structured->semester ?? 'No asignado',
-                    'student_count' => $structured->student_count ?? 'No asignado',
-                    'group_count' => $structured->group_count ?? 'No asignado',
-                ],
-            ];
-        })->toArray();
+                    // Actualiza o crea los detalles estructurados
+                    $record->structured()->updateOrCreate(
+                        ['schedule_id' => $record->id],
+                        [
+                            'academic_program_name' => $data['academic_program_name'],
+                            'semester' => $data['semester'],
+                            'student_count' => $data['student_count'],
+                            'group_count' => $data['group_count'],
+                        ]
+                    );
+                }),
+
+            DeleteAction::make()
+                ->before(function (Schedule $record) {
+                    if ($record->structured) {
+                        $record->structured()->delete();
+                    }
+                }),
+        ];
     }
 
     protected function headerActions(): array
@@ -94,34 +127,25 @@ class CalendarWidget extends FullCalendarWidget
                         'type' => 'structured',
                     ]);
                 })
-                ->form($this->getFormSchema())
                 ->using(function (array $data, string $model): Model {
-                    \DB::beginTransaction();
-                    try {
-                        $schedule = $model::create([
-                            'type' => 'structured',
-                            'title' => $data['title'],
-                            'start_at' => $data['start_at'],
-                            'end_at' => $data['end_at'],
-                            'color' => $data['color'] ?? '#3b82f6',
-                            'laboratory_id' => $data['laboratory_id'],
-                            'user_id' => $data['user_id'],
-                        ]);
+                    $schedule = $model::create([
+                        'type' => 'structured',
+                        'title' => $data['title'],
+                        'start_at' => $data['start_at'],
+                        'end_at' => $data['end_at'],
+                        'color' => $data['color'] ?? '#3b82f6',
+                        'laboratory_id' => $data['laboratory_id'],
+                        'user_id' => $data['user_id'],
+                    ]);
 
-                        $schedule->structured()->create([
-                            'academic_program_name' => $data['academic_program_name'],
-                            'semester' => $data['semester'],
-                            'student_count' => $data['student_count'],
-                            'group_count' => $data['group_count'],
-                        ]);
+                    $schedule->structured()->create([
+                        'academic_program_name' => $data['academic_program_name'],
+                        'semester' => $data['semester'],
+                        'student_count' => $data['student_count'],
+                        'group_count' => $data['group_count'],
+                    ]);
 
-                        \DB::commit();
-
-                        return $schedule->load('structured');
-                    } catch (\Exception $e) {
-                        \DB::rollBack();
-                        throw $e;
-                    }
+                    return $schedule->load('structured');
                 })
         ];
     }
@@ -196,12 +220,12 @@ class CalendarWidget extends FullCalendarWidget
 
             Section::make('Configuración del Horario')
                 ->schema([
-                    TimePicker::make('start_at')
+                    DateTimePicker::make('start_at')
                         ->label('Hora de Inicio')
                         ->required()
                         ->seconds(false),
 
-                    TimePicker::make('end_at')
+                    DateTimePicker::make('end_at')
                         ->label('Hora de Finalización')
                         ->required()
                         ->seconds(false)
@@ -212,77 +236,6 @@ class CalendarWidget extends FullCalendarWidget
                         ->default('#3b82f6'),
                 ])
                 ->columns(3),
-        ];
-    }
-    protected function modalActions(): array
-    {
-        return [
-            EditAction::make()
-                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
-                    // Carga forzada de la relación structured
-                    $record->loadMissing('structured');
-
-                    // Si no existe, crea un objeto temporal
-                    if (!$record->structured) {
-                        $record->setRelation('structured', new \App\Models\ScheduleStructured([
-                            'academic_program_name' => '',
-                            'semester' => null,
-                            'student_count' => null,
-                            'group_count' => null
-                        ]));
-                    }
-
-                    $form->fill([
-                        'title' => $record->title,
-                        'start_at' => $arguments['event']['start'] ?? $record->start_at,
-                        'end_at' => $arguments['event']['end'] ?? $record->end_at,
-                        'color' => $record->color,
-                        'laboratory_id' => $record->laboratory_id,
-                        'user_id' => $record->user_id,
-                        'academic_program_name' => $record->structured->academic_program_name ?? '',
-                        'semester' => $record->structured->semester ?? null,
-                        'student_count' => $record->structured->student_count ?? null,
-                        'group_count' => $record->structured->group_count ?? null,
-                    ]);
-                })
-                ->form($this->getFormSchema())
-                ->action(function (Schedule $record, array $data) {
-                    \DB::beginTransaction();
-                    try {
-                        // Actualiza el schedule principal
-                        $record->update([
-                            'title' => $data['title'],
-                            'start_at' => $data['start_at'],
-                            'end_at' => $data['end_at'],
-                            'color' => $data['color'] ?? $record->color,
-                            'laboratory_id' => $data['laboratory_id'],
-                            'user_id' => $data['user_id'],
-                        ]);
-
-                        // Actualiza o crea los detalles estructurados
-                        $record->structured()->updateOrCreate(
-                            ['schedule_id' => $record->id],
-                            [
-                                'academic_program_name' => $data['academic_program_name'],
-                                'semester' => $data['semester'],
-                                'student_count' => $data['student_count'],
-                                'group_count' => $data['group_count'],
-                            ]
-                        );
-
-                        \DB::commit();
-                    } catch (\Exception $e) {
-                        \DB::rollBack();
-                        throw $e;
-                    }
-                }),
-
-            DeleteAction::make()
-                ->before(function (Schedule $record) {
-                    if ($record->structured) {
-                        $record->structured()->delete();
-                    }
-                }),
         ];
     }
 }

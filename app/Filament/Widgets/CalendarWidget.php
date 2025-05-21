@@ -2,10 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\AcademicProgram;
 use App\Models\Schedule;
 use App\Models\Laboratory;
-use App\Models\Product;
 use App\Models\User;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Section;
@@ -13,7 +11,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
@@ -53,7 +50,7 @@ class CalendarWidget extends FullCalendarWidget
 
     public function fetchEvents(array $fetchInfo): array
     {
-        $query = Schedule::query()
+        $query = Schedule::with(['laboratory', 'user', 'structured'])
             ->where('type', 'structured')
             ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
 
@@ -62,12 +59,23 @@ class CalendarWidget extends FullCalendarWidget
         }
 
         return $query->get()->map(function (Schedule $schedule) {
+            // Verifica si existe la relación structured
+            $structured = $schedule->structured ?? new \App\Models\ScheduleStructured();
+
             return [
                 'id' => $schedule->id,
                 'title' => $schedule->title,
                 'start' => $schedule->start_at,
                 'end' => $schedule->end_at,
                 'color' => $schedule->color,
+                'extendedProps' => [
+                    'laboratory' => $schedule->laboratory->name ?? 'No asignado',
+                    'professor' => $schedule->user->name ?? 'No asignado',
+                    'academic_program' => $structured->academic_program_name ?? 'No asignado',
+                    'semester' => $structured->semester ?? 'No asignado',
+                    'student_count' => $structured->student_count ?? 'No asignado',
+                    'group_count' => $structured->group_count ?? 'No asignado',
+                ],
             ];
         })->toArray();
     }
@@ -101,18 +109,15 @@ class CalendarWidget extends FullCalendarWidget
                         ]);
 
                         $schedule->structured()->create([
-                            'academic_program_name' => $data['academic_program_name'], // Cambiado de academic_program_id a academic_program_name
+                            'academic_program_name' => $data['academic_program_name'],
                             'semester' => $data['semester'],
                             'student_count' => $data['student_count'],
                             'group_count' => $data['group_count'],
                         ]);
 
-                        if (!empty($data['products'])) {
-                            $schedule->products()->sync($data['products']);
-                        }
-
                         \DB::commit();
-                        return $schedule;
+
+                        return $schedule->load('structured');
                     } catch (\Exception $e) {
                         \DB::rollBack();
                         throw $e;
@@ -132,8 +137,7 @@ class CalendarWidget extends FullCalendarWidget
                         ->required()
                         ->searchable()
                         ->preload()
-                        ->live()
-                        ->afterStateUpdated(fn($state, $set) => $set('products', [])),
+                        ->live(),
 
                     Select::make('user_id')
                         ->label('Profesor Responsable')
@@ -152,7 +156,7 @@ class CalendarWidget extends FullCalendarWidget
                         ->required()
                         ->maxLength(257),
                 ])
-                ->columns(4),
+                ->columns(3),
 
             Section::make('Detalles Académicos')
                 ->schema([
@@ -163,7 +167,6 @@ class CalendarWidget extends FullCalendarWidget
                             'Ingeniería Industrial' => 'Ingeniería Industrial',
                             'Contaduría Pública' => 'Contaduría Pública',
                             'Administración de Empresas' => 'Administración de Empresas',
-                            // ... agrega más según tu necesidad
                         ])
                         ->searchable()
                         ->preload()
@@ -171,22 +174,22 @@ class CalendarWidget extends FullCalendarWidget
 
                     Select::make('semester')
                         ->label('Semestre')
-                        ->options(collect(range(1, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
+                        ->options(collect(range(2, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
                         ->required()
                         ->native(false),
 
                     TextInput::make('student_count')
                         ->label('Número de Estudiantes')
                         ->numeric()
-                        ->minValue(3)
-                        ->maxValue(102)
+                        ->minValue(4)
+                        ->maxValue(103)
                         ->required(),
 
                     TextInput::make('group_count')
                         ->label('Número de Grupos')
                         ->numeric()
-                        ->minValue(3)
-                        ->maxValue(22)
+                        ->minValue(4)
+                        ->maxValue(23)
                         ->required(),
                 ])
                 ->columns(4),
@@ -206,21 +209,27 @@ class CalendarWidget extends FullCalendarWidget
 
                     ColorPicker::make('color')
                         ->label('Color del Evento')
-                        ->default('#5b82f6'),
+                        ->default('#3b82f6'),
                 ])
-                ->columns(4),
-
-
+                ->columns(3),
         ];
     }
-
     protected function modalActions(): array
     {
         return [
             EditAction::make()
                 ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
+                    // Carga forzada de la relación structured
+                    $record->loadMissing('structured');
+
+                    // Si no existe, crea un objeto temporal
                     if (!$record->structured) {
-                        throw new \Exception('Registro de práctica estructurada no encontrado');
+                        $record->setRelation('structured', new \App\Models\ScheduleStructured([
+                            'academic_program_name' => '',
+                            'semester' => null,
+                            'student_count' => null,
+                            'group_count' => null
+                        ]));
                     }
 
                     $form->fill([
@@ -230,16 +239,17 @@ class CalendarWidget extends FullCalendarWidget
                         'color' => $record->color,
                         'laboratory_id' => $record->laboratory_id,
                         'user_id' => $record->user_id,
-                        'academic_program_name' => $record->structured->academic_program_name, // Cambiado de academic_program_id a academic_program_name
-                        'semester' => $record->structured->semester,
-                        'student_count' => $record->structured->student_count,
-                        'group_count' => $record->structured->group_count,
-                        'products' => $record->products->pluck('id')->toArray(),
+                        'academic_program_name' => $record->structured->academic_program_name ?? '',
+                        'semester' => $record->structured->semester ?? null,
+                        'student_count' => $record->structured->student_count ?? null,
+                        'group_count' => $record->structured->group_count ?? null,
                     ]);
                 })
+                ->form($this->getFormSchema())
                 ->action(function (Schedule $record, array $data) {
                     \DB::beginTransaction();
                     try {
+                        // Actualiza el schedule principal
                         $record->update([
                             'title' => $data['title'],
                             'start_at' => $data['start_at'],
@@ -249,15 +259,16 @@ class CalendarWidget extends FullCalendarWidget
                             'user_id' => $data['user_id'],
                         ]);
 
-                        $record->structured()->update([
-                            'academic_program_name' => $data['academic_program_name'], // Usar academic_program_name en lugar de academic_program_id
-                            'semester' => $data['semester'],
-                            'student_count' => $data['student_count'],
-                            'group_count' => $data['group_count'],
-                        ]);
-
-
-                        $record->products()->sync($data['products'] ?? []);
+                        // Actualiza o crea los detalles estructurados
+                        $record->structured()->updateOrCreate(
+                            ['schedule_id' => $record->id],
+                            [
+                                'academic_program_name' => $data['academic_program_name'],
+                                'semester' => $data['semester'],
+                                'student_count' => $data['student_count'],
+                                'group_count' => $data['group_count'],
+                            ]
+                        );
 
                         \DB::commit();
                     } catch (\Exception $e) {
@@ -268,8 +279,9 @@ class CalendarWidget extends FullCalendarWidget
 
             DeleteAction::make()
                 ->before(function (Schedule $record) {
-                    $record->structured()->delete();
-                    $record->products()->detach();
+                    if ($record->structured) {
+                        $record->structured()->delete();
+                    }
                 }),
         ];
     }

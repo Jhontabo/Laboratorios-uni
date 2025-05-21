@@ -41,7 +41,7 @@ class Schedule extends Model
 
     public function structured()
     {
-        return $this->hasOne(ScheduleStructured::class); // ✅ Esto está bien
+        return $this->hasOne(ScheduleStructured::class, 'schedule_id'); // Especifica la clave foránea
     }
 
 

@@ -13,16 +13,11 @@ class BookingResourceCalendar extends Page
     protected static string $resource = BookingResource::class;
 
     protected static string $view = 'filament.pages.reservation';
-    protected static ?string $pluralModelLabel = 'Reservar espacio';
+
 
     public ?int $laboratoryId = null;
 
 
-    public static function canView(): bool
-    {
-        // Aquí puedes controlar la visibilidad de la página según los permisos del usuario
-        return auth()->user()->hasRole('admin');  // Ejemplo de control de visibilidad basado en roles
-    }
 
     public function mount()
     {

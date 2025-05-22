@@ -11,20 +11,22 @@ return new class extends Migration
         Schema::create('schedule_unstructured', function (Blueprint $table) {
             $table->id();
 
-            // Clave foránea a schedules
             $table->foreignId('schedule_id')
                 ->constrained('schedules')
-                ->cascadeOnDelete(); // Elimina los registros asociados al eliminar schedule
+                ->cascadeOnDelete();
 
-            // Campos específicos para unstructured
-            $table->string('research_name');
-            $table->string('advisor_name');
-            $table->string('applicants_name');
+            $table->string('project_type');             // Proyecto integrador, trabajo de grado...
+            $table->string('academic_program');         // Ingeniería de Sistemas, etc.
+            $table->unsignedTinyInteger('semester');    // 1 al 10
+            $table->string('applicants');               // Nombres de los solicitantes
+            $table->string('research_name');            // Nombre de la investigación
+            $table->string('advisor');                  // Nombre del asesor
 
+            $table->text('equipment')->nullable();      // Equipos
+            $table->text('materials')->nullable();      // Materiales y herramientas
+            $table->text('supplies')->nullable();       // Insumos
 
-            $table->timestamps(); // Campos created_at y updated_at
-
-            // Índices para mejorar rendimiento en consultas
+            $table->timestamps();
             $table->index('research_name');
         });
     }

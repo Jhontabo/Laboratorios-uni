@@ -64,12 +64,12 @@ class Schedule extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function laboratory()
     {
-        return $this->belongsTo(Laboratory::class, 'laboratory_id');
+        return $this->belongsTo(Laboratory::class);
     }
 
     public function bookings()

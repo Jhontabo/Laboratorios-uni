@@ -23,7 +23,6 @@ use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 use Saade\FilamentFullCalendar\Actions\CreateAction;
 use Saade\FilamentFullCalendar\Actions\DeleteAction;
 use Saade\FilamentFullCalendar\Actions\EditAction;
-use Illuminate\Validation\ValidationException;
 
 class CalendarWidget extends FullCalendarWidget
 {

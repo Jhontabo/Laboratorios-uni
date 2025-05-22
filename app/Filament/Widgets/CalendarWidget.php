@@ -61,13 +61,25 @@ class CalendarWidget extends FullCalendarWidget
         $start = $fetchInfo['start'];
         $end   = $fetchInfo['end'];
 
-        return Schedule::whereBetween('start_at', [$start, $end])
-            ->orWhere(function ($q) use ($start, $end) {
-                $q->whereNotNull('recurrence_until')
-                    ->where('recurrence_until', '>=', $start)
-                    ->where('start_at', '<=', $end);
-            })
-            ->get()
+        // Inicia la query y filtra por tipo si es coordinador
+        $query = Schedule::query();
+
+        if (Auth::user()->hasRole('COORDINADOR')) {
+            // Solo eventos estructurados para coordinador
+            $query->where('type', 'structured');
+        }
+
+        // Aplica filtro común de rango y recurrencias
+        $query->where(function ($q) use ($start, $end) {
+            $q->whereBetween('start_at', [$start, $end])
+                ->orWhere(function ($q2) use ($start, $end) {
+                    $q2->whereNotNull('recurrence_until')
+                        ->where('recurrence_until', '>=', $start)
+                        ->where('start_at', '<=', $end);
+                });
+        });
+
+        return $query->get()
             ->flatMap(function (Schedule $schedule) use ($start, $end) {
                 if (! $schedule->recurrence_days) {
                     return [$this->formatEvent($schedule)];
@@ -118,6 +130,7 @@ class CalendarWidget extends FullCalendarWidget
                 ],
             ];
         }
+
         return $events;
     }
 
@@ -173,6 +186,7 @@ class CalendarWidget extends FullCalendarWidget
                         'recurrence_days'  => $recurrence['recurrence_days'],
                         'recurrence_until' => $recurrence['recurrence_until'],
                     ]);
+
                     if ($type === 'structured') {
                         $schedule->structured()->create([
                             'academic_program_name' => $data['academic_program_name'],
@@ -191,6 +205,7 @@ class CalendarWidget extends FullCalendarWidget
                             'equipment'        => $data['equipment'] ?? null,
                         ]);
                     }
+
                     return $schedule;
                 }),
         ];
@@ -198,7 +213,6 @@ class CalendarWidget extends FullCalendarWidget
 
     protected function modalActions(): array
     {
-        $role = Auth::user()->getRoleNames()->first();
         return [
             EditAction::make()
                 ->label('Editar')
@@ -249,6 +263,7 @@ class CalendarWidget extends FullCalendarWidget
                         'recurrence_days'  => $recurrence['recurrence_days'],
                         'recurrence_until' => $recurrence['recurrence_until'],
                     ]);
+
                     if ($record->type === 'structured') {
                         $record->structured()->updateOrCreate(
                             ['schedule_id' => $record->id],
@@ -293,9 +308,9 @@ class CalendarWidget extends FullCalendarWidget
                     Select::make('academic_program_name')
                         ->label('Programa académico')
                         ->options([
-                            'Ingeniería de Sistemas'    => 'Ingeniería de Sistemas',
-                            'Ingeniería Industrial'     => 'Ingeniería Industrial',
-                            'Contaduría Pública'        => 'Contaduría Pública',
+                            'Ingeniería de Sistemas'     => 'Ingeniería de Sistemas',
+                            'Ingeniería Industrial'      => 'Ingeniería Industrial',
+                            'Contaduría Pública'         => 'Contaduría Pública',
                             'Administración de Empresas' => 'Administración de Empresas',
                         ])
                         ->required()
@@ -374,9 +389,9 @@ class CalendarWidget extends FullCalendarWidget
                     Select::make('academic_program')
                         ->label('Programa académico')
                         ->options([
-                            'Ingeniería de Sistemas'    => 'Ingeniería de Sistemas',
-                            'Ingeniería Industrial'     => 'Ingeniería Industrial',
-                            'Contaduría Pública'        => 'Contaduría Pública',
+                            'Ingeniería de Sistemas'     => 'Ingeniería de Sistemas',
+                            'Ingeniería Industrial'      => 'Ingeniería Industrial',
+                            'Contaduría Pública'         => 'Contaduría Pública',
                             'Administración de Empresas' => 'Administración de Empresas',
                         ])
                         ->required()
@@ -423,9 +438,18 @@ class CalendarWidget extends FullCalendarWidget
             Section::make('Horario')
                 ->columns(3)
                 ->schema([
-                    DateTimePicker::make('start_at')->label('Fecha y Hora de Inicio')->required()->seconds(false),
-                    DateTimePicker::make('end_at')->label('Fecha y Hora de Finalización')->required()->seconds(false)->after('start_at'),
-                    ColorPicker::make('color')->label('Color del Evento')->default('#3b82f6'),
+                    DateTimePicker::make('start_at')
+                        ->label('Fecha y Hora de Inicio')
+                        ->required()
+                        ->seconds(false),
+                    DateTimePicker::make('end_at')
+                        ->label('Fecha y Hora de Finalización')
+                        ->required()
+                        ->seconds(false)
+                        ->after('start_at'),
+                    ColorPicker::make('color')
+                        ->label('Color del Evento')
+                        ->default('#3b82f6'),
                 ]),
         ];
     }

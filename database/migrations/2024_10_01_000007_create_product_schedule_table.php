@@ -15,9 +15,6 @@ return new class extends Migration {
             $table->foreignId('schedule_id')
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->integer('quantity')->default(1);
-            $table->string('condition')->nullable(); // Ej: "nuevo", "usado", "dañado"
-            $table->text('notes')->nullable(); // Observaciones específicas
             $table->timestamps();
 
             $table->unique(['product_id', 'schedule_id']);

@@ -29,6 +29,15 @@ class BookingCalendar extends FullCalendarWidget
     // {
     //     return !request()->routeIs('filament.admin.pages.dashboard');
     // }
+    public static function canView(): bool
+    {
+        if (request()->routeIs('filament.admin.pages.dashboard')) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     public function config(): array
     {
@@ -44,7 +53,6 @@ class BookingCalendar extends FullCalendarWidget
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
             'height' => 600,
-            'editable'              => false,
             'droppable'             => false,
             'weekends' => false,
         ];

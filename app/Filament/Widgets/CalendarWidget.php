@@ -6,324 +6,397 @@ use App\Models\Schedule;
 use App\Models\Laboratory;
 use App\Models\User;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\{
+    ColorPicker,
+    DateTimePicker,
+    Radio,
+    Section,
+    Select,
+    TextInput
+};
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
-use Saade\FilamentFullCalendar\Actions\CreateAction;
-use Saade\FilamentFullCalendar\Actions\DeleteAction;
-use Saade\FilamentFullCalendar\Actions\EditAction;
+use Saade\FilamentFullCalendar\Actions\{
+    CreateAction,
+    EditAction,
+    DeleteAction
+};
 
 class CalendarWidget extends FullCalendarWidget
 {
     public Model|string|null $model = Schedule::class;
-    protected string $viewId = 'structured-schedule';
-    // public static function canView(): bool
-    // {
-    //     return !request()->routeIs('filament.admin.pages.dashboard');
-    // }
+
+    public static function canView(): bool
+    {
+        if (request()->routeIs('filament.admin.pages.dashboard')) {
+            return false;
+        }
+
+        return Auth::check();
+    }
 
     public function config(): array
     {
         return [
-            'firstDay' => 0,
-            'slotMinTime' => '07:00:00',
-            'slotMaxTime' => '16:00:00',
-            'locale' => 'es',
-            'initialView' => 'timeGridWeek',
+            'firstDay'      => 0,
+            'slotMinTime'   => '07:00:00',
+            'slotMaxTime'   => '16:00:00',
+            'locale'        => 'es',
+            'initialView'   => 'timeGridWeek',
             'headerToolbar' => [
-                'left' => 'prev,next today',
+                'left'   => 'prev,next today',
                 'center' => 'title',
-                'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
+                'right'  => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
-            'height' => 600,
-
+            'height'   => 600,
+            'editable' => false,
         ];
     }
 
     public function fetchEvents(array $fetchInfo): array
     {
-        $start = $fetchInfo['start'];
-        $end = $fetchInfo['end'];
+        $query = Schedule::whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']]);
 
-        return Schedule::where(function ($query) use ($start, $end) {
-            $query->whereBetween('start_at', [$start, $end])
-                ->orWhere(function ($q) use ($start, $end) {
-                    $q->whereNotNull('recurrence_until')
-                        ->where('recurrence_until', '>=', $start)
-                        ->where('start_at', '<=', $end);
-                });
-        })
-            ->get()
-            ->flatMap(function (Schedule $schedule) use ($start, $end) {
-                if (!$schedule->recurrence_days) {
-                    return [$this->formatEvent($schedule)];
-                }
-
-                return $this->generateRecurringEvents($schedule, $start, $end);
-            })
-            ->toArray();
-    }
-
-    protected function formatEvent(Schedule $schedule): array
-    {
-        return [
-            'id' => $schedule->id,
-            'title' => $schedule->title,
-            'start' => $schedule->start_at,
-            'end' => $schedule->end_at,
-            'color' => $schedule->color,
-        ];
-    }
-
-    protected function generateRecurringEvents(Schedule $schedule, string $start, string $end): array
-    {
-        $events = [];
-        $startDate = Carbon::parse($schedule->start_at);
-        $endDate = Carbon::parse($schedule->end_at);
-        $duration = $startDate->diffInMinutes($endDate);
-        $recurrenceUntil = Carbon::parse($schedule->recurrence_until);
-        $daysOfWeek = explode(',', $schedule->recurrence_days);
-
-        $period = CarbonPeriod::create($startDate, $recurrenceUntil);
-
-        foreach ($period as $date) {
-            if (!in_array($date->dayOfWeek, $daysOfWeek)) {
-                continue;
-            }
-
-            $eventStart = $date->setTime($startDate->hour, $startDate->minute);
-            $eventEnd = (clone $eventStart)->addMinutes($duration);
-
-            // Solo incluir eventos dentro del rango solicitado
-            if ($eventEnd < $start || $eventStart > $end) {
-                continue;
-            }
-
-            $events[] = [
-                'id' => $schedule->id . '-' . $eventStart->format('Y-m-d'),
-                'title' => $schedule->title,
-                'start' => $eventStart,
-                'end' => $eventEnd,
-                'color' => $schedule->color,
-                'extendedProps' => [
-                    'isRecurring' => true,
-                    'parentId' => $schedule->id,
-                ],
-            ];
+        if (Auth::user()->hasRole('COORDINADOR')) {
+            $query->where('user_id', Auth::id());
         }
 
-        return $events;
-    }
-
-    protected function modalActions(): array
-    {
-        return [
-            EditAction::make()
-                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
-                    $record->loadMissing('structured');
-
-                    $form->fill([
-                        'title' => $record->title,
-                        'start_at' => $arguments['event']['start'] ?? $record->start_at,
-                        'end_at' => $arguments['event']['end'] ?? $record->end_at,
-                        'color' => $record->color,
-                        'laboratory_id' => $record->laboratory_id,
-                        'user_id' => $record->user_id,
-                        'is_recurring' => $record->recurrence_days !== null,
-                        'recurrence_days' => $record->recurrence_days ? explode(',', $record->recurrence_days) : [],
-                        'recurrence_until' => $record->recurrence_until,
-                        'academic_program_name' => $record->structured->academic_program_name ?? '',
-                        'semester' => $record->structured->semester ?? null,
-                        'student_count' => $record->structured->student_count ?? null,
-                        'group_count' => $record->structured->group_count ?? null,
-                    ]);
-                })
-                ->action(function (Schedule $record, array $data) {
-                    $recurrenceData = $this->processRecurrenceData($data);
-
-                    $record->update([
-                        'title' => $data['title'],
-                        'start_at' => $data['start_at'],
-                        'end_at' => $data['end_at'],
-                        'color' => $data['color'] ?? $record->color,
-                        'laboratory_id' => $data['laboratory_id'],
-                        'user_id' => $data['user_id'],
-                        'recurrence_days' => $recurrenceData['recurrence_days'],
-                        'recurrence_until' => $recurrenceData['recurrence_until'],
-                    ]);
-
-                    $record->structured()->updateOrCreate(
-                        ['schedule_id' => $record->id],
-                        [
-                            'academic_program_name' => $data['academic_program_name'],
-                            'semester' => $data['semester'],
-                            'student_count' => $data['student_count'],
-                            'group_count' => $data['group_count'],
-                        ]
-                    );
-                }),
-
-            DeleteAction::make()
-                ->before(function (Schedule $record) {
-                    if ($record->structured) {
-                        $record->structured()->delete();
-                    }
-                }),
-        ];
+        return $query->get()
+            ->map(fn(Schedule $s) => [
+                'id'           => $s->id,
+                'title'        => $s->title,
+                'start'        => $s->start_at,
+                'end'          => $s->end_at,
+                'color'        => $s->color,
+                'extendedProps' => [
+                    'type'    => $s->type,
+                    'ownerId' => $s->user_id,
+                ],
+            ])
+            ->toArray();
     }
 
     protected function headerActions(): array
     {
         return [
-
             CreateAction::make()
-                ->label('Crear Horario')
+                ->label(fn() => Auth::user()->hasRole('COORDINADOR')
+                    ? 'Crear Bloque Estructurado'
+                    : 'Crear Práctica No Estructurada')
                 ->icon('heroicon-o-plus')
                 ->color('primary')
-                ->mountUsing(function (Form $form, array $arguments) {
-                    $form->fill([
-                        'start_at' => $arguments['start'] ?? null,
-                        'end_at' => $arguments['end'] ?? null,
-                        'type' => 'structured',
-                    ]);
-                })
+                ->form($this->getFormSchema())
+                ->using(function (array $data): ?Schedule {
+                    $user  = Auth::user();
+                    $role  = $user->getRoleNames()->first();
+                    $start = Carbon::parse($data['start_at']);
+                    $end   = Carbon::parse($data['end_at']);
 
-                ->using(function (array $data, string $model): ?Model {
-                    $startDay = Carbon::parse($data['start_at'])->dayOfWeek;
-
-                    if (in_array($startDay, [0, 6])) {
+                    if ($end->hour >= 16) {
                         Notification::make()
-                            ->title('Día no permitido')
-                            ->body('No se pueden crear horarios los días sábado o domingo.')
+                            ->title('Hora inválida')
+                            ->body('La hora de finalización no puede ser después de las 16:00.')
                             ->danger()
                             ->send();
 
-                        return null; // <- esto evita que se cree el horario
+                        return null;
                     }
 
-                    $recurrenceData = $this->processRecurrenceData($data);
+                    $type = $role === 'COORDINADOR' ? 'structured' : 'unstructured';
 
-                    $schedule = $model::create([
-                        'type' => 'structured',
-                        'title' => $data['title'],
-                        'start_at' => $data['start_at'],
-                        'end_at' => $data['end_at'],
-                        'color' => $data['color'] ?? '#3b82f6',
+                    if ($type === 'unstructured') {
+                        $conflict = Schedule::where('type', 'structured')
+                            ->where(
+                                fn($q) => $q
+                                    ->whereBetween('start_at', [$start, $end])
+                                    ->orWhereBetween('end_at',   [$start, $end])
+                                    ->orWhere(
+                                        fn($q2) => $q2
+                                            ->where('start_at', '<=', $start)
+                                            ->where('end_at',   '>=', $end)
+                                    )
+                            )
+                            ->exists();
+
+                        if ($conflict) {
+                            Notification::make()
+                                ->title('Espacio ocupado')
+                                ->body('No puedes solapar una práctica sobre un bloque estructurado.')
+                                ->danger()
+                                ->send();
+
+                            return null;
+                        }
+                    }
+
+                    $schedule = Schedule::create([
+                        'type'          => $type,
+                        'title'         => $type === 'structured' ? $data['title'] : 'Reserva',
+                        'start_at'      => $data['start_at'],
+                        'end_at'        => $data['end_at'],
+                        'color'         => $data['color'] ?? '#3b82f6',
                         'laboratory_id' => $data['laboratory_id'],
-                        'user_id' => $data['user_id'],
-                        'recurrence_days' => $recurrenceData['recurrence_days'],
-                        'recurrence_until' => $recurrenceData['recurrence_until'],
+                        'user_id'       => $user->id,
                     ]);
 
-                    $schedule->structured()->create([
-                        'academic_program_name' => $data['academic_program_name'],
-                        'semester' => $data['semester'],
-                        'student_count' => $data['student_count'],
-                        'group_count' => $data['group_count'],
-                    ]);
+                    if ($type === 'structured') {
+                        $schedule->structured()->create([
+                            'academic_program_name' => $data['academic_program_name'],
+                            'semester'              => $data['semester'],
+                            'student_count'         => $data['student_count'],
+                            'group_count'           => $data['group_count'],
+                        ]);
+                    } else {
+                        $schedule->unstructured()->create([
+                            'project_type'     => $data['project_type'],
+                            'academic_program' => $data['academic_program'],
+                            'semester'         => $data['semester'],
+                            'applicants'       => $data['applicants'],
+                            'research_name'    => $data['research_name'],
+                            'advisor'          => $data['advisor'],
+                            'equipment'        => $data['equipment'] ?? null,
+                        ]);
+                    }
 
-                    return $schedule->load('structured');
-                })
-
-
+                    return $schedule;
+                }),
         ];
     }
 
-    protected function processRecurrenceData(array $data): array
+    protected function modalActions(): array
     {
-        $result = [
-            'recurrence_days' => null,
-            'recurrence_until' => null,
+        $role = Auth::user()->getRoleNames()->first();
+
+        return [
+            EditAction::make()
+                ->label('Editar')
+                ->visible(fn(?Schedule $record) => $record instanceof Schedule && (
+                    ($role === 'COORDINADOR' && $record->type === 'structured') ||
+                    (! Auth::user()->hasRole('COORDINADOR') && $record->type === 'unstructured')
+                ))
+                ->form($this->getFormSchema())
+                ->mountUsing(function (Schedule $record, Form $form, array $args) {
+                    $base = [
+                        'start_at'      => $args['event']['start'] ?? $record->start_at,
+                        'end_at'        => $args['event']['end']   ?? $record->end_at,
+                        'color'         => $record->color,
+                        'laboratory_id' => $record->laboratory_id,
+                    ];
+
+                    if ($record->type === 'structured') {
+                        $detail = $record->structured->only([
+                            'title',
+                            'academic_program_name',
+                            'semester',
+                            'student_count',
+                            'group_count',
+                        ]);
+                    } else {
+                        $detail = $record->unstructured->only([
+                            'project_type',
+                            'academic_program',
+                            'semester',
+                            'applicants',
+                            'research_name',
+                            'advisor',
+                            'equipment',
+                        ]);
+                    }
+
+                    $form->fill(array_merge($base, $detail));
+                })
+                ->action(function (Schedule $record, array $data) {
+                    $end = Carbon::parse($data['end_at']);
+                    if ($end->hour >= 16) {
+                        Notification::make()
+                            ->title('Hora inválida')
+                            ->body('La hora de finalización no puede ser después de las 16:00.')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    $record->update([
+                        'start_at'      => $data['start_at'],
+                        'end_at'        => $data['end_at'],
+                        'color'         => $data['color'] ?? $record->color,
+                        'laboratory_id' => $data['laboratory_id'],
+                    ]);
+
+                    if ($record->type === 'structured') {
+                        $record->structured()->update([
+                            'title'                 => $data['title'],
+                            'academic_program_name' => $data['academic_program_name'],
+                            'semester'              => $data['semester'],
+                            'student_count'         => $data['student_count'],
+                            'group_count'           => $data['group_count'],
+                        ]);
+                    } else {
+                        $record->unstructured()->update([
+                            'project_type'     => $data['project_type'],
+                            'academic_program' => $data['academic_program'],
+                            'semester'         => $data['semester'],
+                            'applicants'       => $data['applicants'],
+                            'research_name'    => $data['research_name'],
+                            'advisor'          => $data['advisor'],
+                            'equipment'        => $data['equipment'] ?? null,
+                        ]);
+                    }
+                }),
+
+            DeleteAction::make()
+                ->label('Eliminar')
+                ->visible(fn(?Schedule $record) => $record instanceof Schedule && (
+                    ($role === 'COORDINADOR' && $record->type === 'structured') ||
+                    (! Auth::user()->hasRole('COORDINADOR') && $record->type === 'unstructured')
+                ))
+                ->before(fn(Schedule $r) => tap(
+                    $r->{$r->type}(),
+                    fn($q) => $q->delete()
+                )->getModel()->delete()),
         ];
-
-        if ($data['is_recurring'] ?? false) {
-            $result['recurrence_days'] = implode(',', $data['recurrence_days']);
-            $result['recurrence_until'] = $data['recurrence_until'];
-        }
-
-        return $result;
     }
 
     public function getFormSchema(): array
     {
         return [
-            Section::make('Información Básica')
-                ->schema([
-                    Select::make('laboratory_id')
-                        ->label('Laboratorio')
-                        ->options(Laboratory::pluck('name', 'id'))
-                        ->required()
-                        ->searchable()
-                        ->preload()
-                        ->live(),
-
-                    Select::make('user_id')
-                        ->label('Profesor Responsable')
-                        ->relationship(
-                            name: 'user',
-                            titleAttribute: 'name',
-                            modifyQueryUsing: fn(Builder $query) => $query->role('docente')
-                        )
-                        ->getOptionLabelFromRecordUsing(fn(User $user) => "{$user->name} {$user->last_name}")
-                        ->searchable(['name', 'last_name'])
-                        ->preload()
-                        ->required(),
-
-                    TextInput::make('title')
-                        ->label('Nombre de la actividad')
-                        ->required()
-                        ->maxLength(257),
-                ])
-                ->columns(3),
-
-            Section::make('Detalles Académicos')
+            //
+            // 1) PRÁCTICA ESTRUCTURADA — SOLO COORDINADOR
+            //
+            Section::make('PRÁCTICA ESTRUCTURADA')
+                ->visible(fn() => Auth::user()->hasRole('COORDINADOR'))
+                ->columns(4)
                 ->schema([
                     Select::make('academic_program_name')
-                        ->label('Programa Académico')
+                        ->label('Programa académico')
                         ->options([
-                            'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
-                            'Ingeniería Industrial' => 'Ingeniería Industrial',
-                            'Contaduría Pública' => 'Contaduría Pública',
+                            'Ingeniería de Sistemas'     => 'Ingeniería de Sistemas',
+                            'Ingeniería Industrial'      => 'Ingeniería Industrial',
+                            'Contaduría Pública'         => 'Contaduría Pública',
                             'Administración de Empresas' => 'Administración de Empresas',
                         ])
-                        ->searchable()
-                        ->preload()
-                        ->required(),
+                        ->required()
+                        ->columnSpan(4),
+
+                    Select::make('laboratory_id')
+                        ->label('Espacio académico')
+                        ->options(Laboratory::pluck('name', 'id'))
+                        ->required()
+                        ->columnSpan(4),
 
                     Select::make('semester')
                         ->label('Semestre')
-                        ->options(collect(range(1, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
+                        ->options(array_combine(range(1, 10), range(1, 10)))
                         ->required()
-                        ->native(false),
+                        ->columnSpan(4),
+
+                    Select::make('user_id')
+                        ->label('Profesor responsable')
+                        ->options(User::role('COORDINADOR')->pluck('name', 'id'))
+                        ->required()
+                        ->columnSpan(4),
+
+                    TextInput::make('title')
+                        ->label('Nombre de la práctica académica')
+                        ->required()
+                        ->columnSpan(4),
 
                     TextInput::make('student_count')
-                        ->label('Número de Estudiantes')
+                        ->label('Número de estudiantes')
                         ->numeric()
-                        ->minValue(4)
-                        ->maxValue(103)
-                        ->required(),
+                        ->required()
+                        ->columnSpan(2),
 
                     TextInput::make('group_count')
-                        ->label('Número de Grupos')
+                        ->label('Número de grupos')
                         ->numeric()
-                        ->minValue(4)
-                        ->maxValue(23)
-                        ->required(),
-                ])
-                ->columns(4),
+                        ->required()
+                        ->columnSpan(2),
 
-            Section::make('Configuración del Horario')
+
+                ]),
+
+            //
+            // 2) PRÁCTICA NO ESTRUCTURADA — TODOS MENOS COORDINADOR
+            //
+            Section::make('PRÁCTICA NO ESTRUCTURADA')
+                ->visible(fn() => ! Auth::user()->hasRole('COORDINADOR'))
+                ->columns(4)
+                ->schema([
+                    // Tres opciones en línea, pero ocupa todo el ancho
+                    Radio::make('project_type')
+                        ->label('Proyecto integrador / Trabajo de grado / Investigación profesoral')
+                        ->options([
+                            'Trabajo de grado'         => 'Trabajo de grado',
+                            'Investigación profesoral' => 'Investigación profesoral',
+                        ])
+                        ->columns(3)
+                        ->columnSpan(4)
+                        ->required(),
+
+                    Select::make('academic_program')
+                        ->label('Programa académico')
+                        ->options([
+                            'Ingeniería de Sistemas'     => 'Ingeniería de Sistemas',
+                            'Ingeniería Industrial'      => 'Ingeniería Industrial',
+                            'Contaduría Pública'         => 'Contaduría Pública',
+                            'Administración de Empresas' => 'Administración de Empresas',
+                        ])
+                        ->required()
+                        ->columnSpan(4),
+
+                    Select::make('semester')
+                        ->label('Semestre')
+                        ->options(array_combine(range(1, 10), range(1, 10)))
+                        ->required()
+                        ->columnSpan(4),
+
+                    TextInput::make('applicants')
+                        ->label('Nombre de los solicitantes')
+                        ->required()
+                        ->columnSpan(4),
+
+                    TextInput::make('research_name')
+                        ->label('Nombre de la investigación')
+                        ->required()
+                        ->columnSpan(4),
+
+                    TextInput::make('advisor')
+                        ->label('Nombre del asesor')
+                        ->required()
+                        ->columnSpan(4),
+                ]),
+
+            //
+            // 3) MATERIALES Y EQUIPOS
+            //
+            Section::make('MATERIALES Y EQUIPOS')
+                ->visible(fn() => ! Auth::user()->hasRole('COORDINADOR'))
+                ->columns(1)
+                ->schema([
+                    Select::make('products')
+                        ->label('Productos disponibles')
+                        ->multiple()
+                        ->reactive()
+                        ->options(
+                            fn(callable $get) =>
+                            $get('laboratory_id')
+                                ? \App\Models\Product::where('laboratory_id', $get('laboratory_id'))->pluck('name', 'id')
+                                : []
+                        )
+                        ->searchable()
+                        ->required(),
+                ]),
+
+            //
+            // 4) HORARIO (COMÚN)
+            //
+            Section::make('Horario')
+                ->columns(3)
                 ->schema([
                     DateTimePicker::make('start_at')
                         ->label('Fecha y Hora de Inicio')
@@ -339,33 +412,7 @@ class CalendarWidget extends FullCalendarWidget
                     ColorPicker::make('color')
                         ->label('Color del Evento')
                         ->default('#3b82f6'),
-                ])
-                ->columns(3),
-
-            Section::make('Recurrencia')
-                ->schema([
-                    Toggle::make('is_recurring')
-                        ->label('Evento recurrente')
-                        ->reactive(),
-
-                    CheckboxList::make('recurrence_days')
-                        ->label('Días de la semana')
-                        ->options([
-                            '1' => 'Lunes',
-                            '2' => 'Martes',
-                            '3' => 'Miércoles',
-                            '4' => 'Jueves',
-                            '5' => 'Viernes',
-                        ])
-                        ->columns(5)
-                        ->visible(fn(callable $get) => $get('is_recurring')),
-
-                    DatePicker::make('recurrence_until')
-                        ->label('Repetir hasta')
-                        ->minDate(fn(callable $get) => $get('start_at') ? Carbon::parse($get('start_at'))->addDay() : null)
-                        ->visible(fn(callable $get) => $get('is_recurring')),
-                ])
-                ->columns(1),
+                ]),
         ];
     }
 }

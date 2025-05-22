@@ -8,12 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class ScheduleUnstructured extends Model
 {
     use HasFactory;
+    protected $table = 'schedule_unstructured';
 
     protected $fillable = [
         'schedule_id',
+        'project_type',
+        'academic_program',
+        'semester',
+        'applicants',
         'research_name',
-        'advisor_name',
-        'applicants_name',
+        'advisor',
     ];
 
     public function schedule()

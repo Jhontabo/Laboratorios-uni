@@ -27,11 +27,11 @@ use Saade\FilamentFullCalendar\Actions\EditAction;
 class CalendarWidget extends FullCalendarWidget
 {
     public Model|string|null $model = Schedule::class;
-
-    public static function canView(): bool
-    {
-        return !request()->routeIs('filament.admin.pages.dashboard');
-    }
+    protected string $viewId = 'structured-schedule';
+    // public static function canView(): bool
+    // {
+    //     return !request()->routeIs('filament.admin.pages.dashboard');
+    // }
 
     public function config(): array
     {

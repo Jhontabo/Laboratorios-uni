@@ -22,9 +22,6 @@ return new class extends Migration
             $table->string('research_name');            // Nombre de la investigación
             $table->string('advisor');                  // Nombre del asesor
 
-            $table->text('equipment')->nullable();      // Equipos
-            $table->text('materials')->nullable();      // Materiales y herramientas
-            $table->text('supplies')->nullable();       // Insumos
 
             $table->timestamps();
             $table->index('research_name');

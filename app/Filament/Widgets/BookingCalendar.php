@@ -24,11 +24,11 @@ use Illuminate\Database\Eloquent\Model;
 class BookingCalendar extends FullCalendarWidget
 {
     public Model|string|null $model = Schedule::class;
-
-    public static function canView(): bool
-    {
-        return !request()->routeIs('filament.admin.pages.dashboard');
-    }
+    protected string $viewId = 'booking-calendar';
+    // public static function canView(): bool
+    // {
+    //     return !request()->routeIs('filament.admin.pages.dashboard');
+    // }
 
     public function config(): array
     {
@@ -44,15 +44,20 @@ class BookingCalendar extends FullCalendarWidget
                 'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
             'height' => 600,
+            'editable'              => false,
+            'droppable'             => false,
+            'weekends' => false,
         ];
     }
+
     public function fetchEvents(array $fetchInfo): array
     {
+        // El id debe ser siempre el id puro del modelo
         return Schedule::where('type', 'unstructured')
             ->whereBetween('start_at', [$fetchInfo['start'], $fetchInfo['end']])
             ->get()
             ->map(fn(Schedule $schedule) => [
-                'id' => $schedule->id,
+                'id' => $schedule->id, // <= solo el número
                 'title' => $schedule->title,
                 'start' => $schedule->start_at,
                 'end' => $schedule->end_at,
@@ -61,51 +66,102 @@ class BookingCalendar extends FullCalendarWidget
             ->toArray();
     }
 
+    protected function getDefaultEventHandlers(): array
+    {
+        return array_merge(parent::getDefaultEventHandlers(), [
+            'eventDrop' => 'handleUnstructuredDrop',
+        ]);
+    }
+
+    public function handleUnstructuredDrop(array $event, array $delta): void
+    {
+        $schedule = Schedule::find($event['id']);
+        if (! $schedule || $schedule->type !== 'unstructured') {
+            return;
+        }
+        $schedule->update([
+            'start_at' => $event['start'],
+            'end_at'   => $event['end'],
+        ]);
+        Notification::make()
+            ->title('Reserva actualizada')
+            ->success()
+            ->send();
+        $this->dispatchBrowserEvent('refreshCalendar'); // o el método que uses para recargar
+    }
+
     protected function modalActions(): array
     {
         return [
             EditAction::make()
-                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
+                ->label('Editar Reserva')
+                ->mountUsing(function ($record, Form $form, array $arguments) {
+                    if (! $record instanceof Schedule) {
+                        Notification::make()
+                            ->title('Reserva no encontrada')
+                            ->body('No se pudo cargar la reserva. Tal vez fue eliminada o hay un error de sincronización.')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
+
                     $record->loadMissing('unstructured');
 
                     $form->fill([
-                        'title' => $record->title,
-                        'start_at' => $arguments['event']['start'] ?? $record->start_at,
-                        'end_at' => $arguments['event']['end'] ?? $record->end_at,
-                        'color' => $record->color,
-                        'laboratory_id' => $record->laboratory_id,
-                        'user_id' => $record->user_id,
-                        'project_type' => $record->unstructured->project_type ?? '',
+                        'start_at'        => $arguments['event']['start'] ?? $record->start_at,
+                        'end_at'          => $arguments['event']['end']   ?? $record->end_at,
+                        'color'           => $record->color,
+                        'laboratory_id'   => $record->laboratory_id,
+                        'user_id'         => $record->user_id,
+                        'project_type'    => $record->unstructured->project_type   ?? '',
                         'academic_program' => $record->unstructured->academic_program ?? '',
-                        'semester' => $record->unstructured->semester ?? null,
-                        'applicants' => $record->unstructured->applicants ?? '',
-                        'research_name' => $record->unstructured->research_name ?? '',
-                        'advisor' => $record->unstructured->advisor ?? '',
-                        'equipment' => $record->unstructured->equipment ?? '',
-                        'products' => $record->products->pluck('id')->toArray(),
+                        'semester'        => $record->unstructured->semester       ?? null,
+                        'applicants'      => $record->unstructured->applicants     ?? '',
+                        'research_name'   => $record->unstructured->research_name  ?? '',
+                        'advisor'         => $record->unstructured->advisor        ?? '',
+                        'products'        => $record->products->pluck('id')->toArray(),
                     ]);
                 })
                 ->form($this->getFormSchema())
-                ->action(function (Schedule $record, array $data) {
+                ->action(function ($record, array $data) {
+                    // 1) Es Schedule válido?
+                    if (! $record instanceof Schedule) {
+                        Notification::make()
+                            ->title('Reserva no encontrada')
+                            ->body('No se pudo actualizar porque no existe.')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
+
+                    // 2) Validación de hora de fin <= 16:00
+                    if (Carbon::parse($data['end_at'])->format('H') > 16) {
+                        Notification::make()
+                            ->title('Hora inválida')
+                            ->body('La hora de finalización no puede ser posterior a las 16:00.')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
+
                     $record->update([
-                        'title' => $data['title'],
-                        'start_at' => $data['start_at'],
-                        'end_at' => $data['end_at'],
-                        'color' => $data['color'] ?? '#3b82f6',
+                        'title'         => 'Reserva', // siempre fija
+                        'start_at'      => $data['start_at'],
+                        'end_at'        => $data['end_at'],
+                        'color'         => $data['color'] ?? '#3b82f6',
                         'laboratory_id' => $data['laboratory_id'],
-                        'user_id' => $data['user_id'],
+                        'user_id'       => $data['user_id'],
                     ]);
 
                     $record->unstructured()->updateOrCreate(
                         ['schedule_id' => $record->id],
                         [
-                            'project_type' => $data['project_type'],
+                            'project_type'    => $data['project_type'],
                             'academic_program' => $data['academic_program'],
-                            'semester' => $data['semester'],
-                            'applicants' => $data['applicants'],
-                            'research_name' => $data['research_name'],
-                            'advisor' => $data['advisor'],
-                            'equipment' => $data['equipment'] ?? null,
+                            'semester'        => $data['semester'],
+                            'applicants'      => $data['applicants'],
+                            'research_name'   => $data['research_name'],
+                            'advisor'         => $data['advisor'],
                         ]
                     );
 
@@ -113,16 +169,16 @@ class BookingCalendar extends FullCalendarWidget
                 }),
 
             DeleteAction::make()
-                ->before(function (Schedule $record) {
-                    if ($record->unstructured) {
-                        $record->unstructured()->delete();
+                ->label('Eliminar Reserva')
+                ->before(function ($record) {
+                    if (! $record instanceof Schedule) {
+                        return;
                     }
-
+                    $record->unstructured?->delete();
                     $record->products()->detach();
                 }),
         ];
     }
-
     public function headerActions(): array
     {
         return [
@@ -137,20 +193,17 @@ class BookingCalendar extends FullCalendarWidget
                         'end_at' => $arguments['end'] ?? null,
                     ]);
                 })
-                ->using(function (array $data, string $model): ?Model {
+                ->using(function (array $data): ?Model {
                     $startDay = Carbon::parse($data['start_at'])->dayOfWeek;
-
                     if (in_array($startDay, [0, 6])) {
                         Notification::make()
                             ->title('No se pueden crear prácticas los fines de semana.')
                             ->danger()
                             ->send();
-
                         return null;
                     }
-
-                    $schedule = $model::create([
-                        'title' => $data['title'],
+                    $schedule = \App\Models\Schedule::create([
+                        'title' => 'Reserva', // ← SIEMPRE RESERVA
                         'start_at' => $data['start_at'],
                         'end_at' => $data['end_at'],
                         'color' => $data['color'] ?? '#3b82f6',
@@ -158,7 +211,6 @@ class BookingCalendar extends FullCalendarWidget
                         'user_id' => $data['user_id'],
                         'type' => 'unstructured',
                     ]);
-
                     $schedule->unstructured()->create([
                         'project_type' => $data['project_type'],
                         'academic_program' => $data['academic_program'],
@@ -166,16 +218,12 @@ class BookingCalendar extends FullCalendarWidget
                         'applicants' => $data['applicants'],
                         'research_name' => $data['research_name'],
                         'advisor' => $data['advisor'],
-                        'equipment' => $data['equipment'] ?? null,
                     ]);
-
                     $schedule->products()->sync($data['products'] ?? []);
-
                     return $schedule->load('unstructured');
                 }),
         ];
     }
-
     public function getFormSchema(): array
     {
         return [
@@ -189,11 +237,10 @@ class BookingCalendar extends FullCalendarWidget
                         ->preload()
                         ->live()
                         ->reactive(),
-
                     Select::make('user_id')
                         ->label('Responsable')
                         ->options(
-                            \App\Models\User::role('docente')  // ← usando Spatie directamente
+                            \App\Models\User::role('docente')
                                 ->get()
                                 ->mapWithKeys(fn($user) => [
                                     $user->id => "{$user->name} {$user->last_name}"
@@ -201,7 +248,6 @@ class BookingCalendar extends FullCalendarWidget
                         )
                         ->searchable()
                         ->required(),
-
                     Select::make('academic_program')
                         ->label('Programa Académico')
                         ->options([
@@ -212,8 +258,7 @@ class BookingCalendar extends FullCalendarWidget
                         ])
                         ->required(),
                 ])
-                ->columns(3),
-
+                ->columns(4),
             Section::make('Detalles de la Práctica')
                 ->schema([
                     Select::make('project_type')
@@ -223,22 +268,18 @@ class BookingCalendar extends FullCalendarWidget
                             'Investigación profesoral' => 'Investigación profesoral',
                         ])
                         ->required(),
-
                     TextInput::make('research_name')
                         ->label('Nombre de la investigación')
                         ->required(),
-
                     TextInput::make('advisor')
                         ->label('Nombre del asesor')
                         ->required(),
-
                     TextInput::make('applicants')
                         ->label('Solicitantes')
                         ->required(),
-
                     Select::make('semester')
                         ->label('Semestre')
-                        ->options(collect(range(1, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
+                        ->options(collect(range(2, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
                         ->required()
                         ->native(false),
                     Select::make('products')
@@ -248,32 +289,28 @@ class BookingCalendar extends FullCalendarWidget
                         ->options(function (callable $get) {
                             $labId = $get('laboratory_id');
                             if (!$labId) return [];
-
                             return \App\Models\Product::where('laboratory_id', $labId)->pluck('name', 'id');
                         })
                         ->searchable()
                         ->required(),
                 ])
-                ->columns(2),
-
+                ->columns(3),
             Section::make('Horario')
                 ->schema([
                     DateTimePicker::make('start_at')
                         ->label('Inicio')
                         ->required()
                         ->seconds(false),
-
                     DateTimePicker::make('end_at')
                         ->label('Finalización')
                         ->required()
                         ->seconds(false)
                         ->after('start_at'),
-
                     ColorPicker::make('color')
                         ->label('Color del Evento')
-                        ->default('#3b82f6'),
+                        ->default('#4b82f6'),
                 ])
-                ->columns(3),
+                ->columns(4),
         ];
     }
 }

@@ -46,7 +46,6 @@ class BookingCalendar extends FullCalendarWidget
             'height' => 600,
         ];
     }
-
     public function fetchEvents(array $fetchInfo): array
     {
         return Schedule::where('type', 'unstructured')
@@ -83,8 +82,7 @@ class BookingCalendar extends FullCalendarWidget
                         'research_name' => $record->unstructured->research_name ?? '',
                         'advisor' => $record->unstructured->advisor ?? '',
                         'equipment' => $record->unstructured->equipment ?? '',
-                        'materials' => $record->unstructured->materials ?? '',
-                        'supplies' => $record->unstructured->supplies ?? '',
+                        'products' => $record->products->pluck('id')->toArray(),
                     ]);
                 })
                 ->form($this->getFormSchema())
@@ -93,7 +91,7 @@ class BookingCalendar extends FullCalendarWidget
                         'title' => $data['title'],
                         'start_at' => $data['start_at'],
                         'end_at' => $data['end_at'],
-                        'color' => $data['color'] ?? $record->color,
+                        'color' => $data['color'] ?? '#3b82f6',
                         'laboratory_id' => $data['laboratory_id'],
                         'user_id' => $data['user_id'],
                     ]);
@@ -107,11 +105,11 @@ class BookingCalendar extends FullCalendarWidget
                             'applicants' => $data['applicants'],
                             'research_name' => $data['research_name'],
                             'advisor' => $data['advisor'],
-                            'equipment' => $data['equipment'],
-                            'materials' => $data['materials'],
-                            'supplies' => $data['supplies'],
+                            'equipment' => $data['equipment'] ?? null,
                         ]
                     );
+
+                    $record->products()->sync($data['products'] ?? []);
                 }),
 
             DeleteAction::make()
@@ -119,10 +117,11 @@ class BookingCalendar extends FullCalendarWidget
                     if ($record->unstructured) {
                         $record->unstructured()->delete();
                     }
+
+                    $record->products()->detach();
                 }),
         ];
     }
-
 
     public function headerActions(): array
     {
@@ -132,6 +131,12 @@ class BookingCalendar extends FullCalendarWidget
                 ->icon('heroicon-o-plus')
                 ->color('primary')
                 ->form($this->getFormSchema())
+                ->mountUsing(function (Form $form, array $arguments) {
+                    $form->fill([
+                        'start_at' => $arguments['start'] ?? null,
+                        'end_at' => $arguments['end'] ?? null,
+                    ]);
+                })
                 ->using(function (array $data, string $model): ?Model {
                     $startDay = Carbon::parse($data['start_at'])->dayOfWeek;
 
@@ -161,10 +166,10 @@ class BookingCalendar extends FullCalendarWidget
                         'applicants' => $data['applicants'],
                         'research_name' => $data['research_name'],
                         'advisor' => $data['advisor'],
-                        'equipment' => $data['equipment'],
-                        'materials' => $data['materials'],
-                        'supplies' => $data['supplies'],
+                        'equipment' => $data['equipment'] ?? null,
                     ]);
+
+                    $schedule->products()->sync($data['products'] ?? []);
 
                     return $schedule->load('unstructured');
                 }),
@@ -174,7 +179,7 @@ class BookingCalendar extends FullCalendarWidget
     public function getFormSchema(): array
     {
         return [
-            Section::make('Información Básica')
+            Section::make('Información General')
                 ->schema([
                     Select::make('laboratory_id')
                         ->label('Laboratorio')
@@ -182,28 +187,13 @@ class BookingCalendar extends FullCalendarWidget
                         ->required()
                         ->searchable()
                         ->preload()
-                        ->live(),
-
-
+                        ->live()
+                        ->reactive(),
 
                     Select::make('user_id')
                         ->label('Responsable')
                         ->options(User::whereHas('roles', fn($q) => $q->where('name', 'docente'))->pluck('name', 'id'))
                         ->searchable()
-                        ->required(),
-
-
-                ])
-                ->columns(3),
-
-            Section::make('Detalles de la Práctica')
-                ->schema([
-                    Select::make('project_type')
-                        ->label('Proyecto integrador')
-                        ->options([
-                            'Trabajo de grado' => 'Trabajo de grado',
-                            'Investigación profesoral' => 'Investigación profesoral',
-                        ])
                         ->required(),
 
                     Select::make('academic_program')
@@ -215,16 +205,17 @@ class BookingCalendar extends FullCalendarWidget
                             'Administración de Empresas' => 'Administración de Empresas',
                         ])
                         ->required(),
+                ])
+                ->columns(3),
 
-                    TextInput::make('semester')
-                        ->label('Semestre')
-                        ->numeric()
-                        ->minValue(1)
-                        ->maxValue(10)
-                        ->required(),
-
-                    TextInput::make('applicants')
-                        ->label('Nombre de los solicitantes')
+            Section::make('Detalles de la Práctica')
+                ->schema([
+                    Select::make('project_type')
+                        ->label('Tipo de Proyecto')
+                        ->options([
+                            'Trabajo de grado' => 'Trabajo de grado',
+                            'Investigación profesoral' => 'Investigación profesoral',
+                        ])
                         ->required(),
 
                     TextInput::make('research_name')
@@ -234,27 +225,42 @@ class BookingCalendar extends FullCalendarWidget
                     TextInput::make('advisor')
                         ->label('Nombre del asesor')
                         ->required(),
+
+                    TextInput::make('applicants')
+                        ->label('Solicitantes')
+                        ->required(),
+
+                    TextInput::make('semester')
+                        ->label('Semestre')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(10)
+                        ->required(),
+
+                    Select::make('products')
+                        ->label('Productos disponibles')
+                        ->multiple()
+                        ->reactive()
+                        ->options(function (callable $get) {
+                            $labId = $get('laboratory_id');
+                            if (!$labId) return [];
+
+                            return \App\Models\Product::where('laboratory_id', $labId)->pluck('name', 'id');
+                        })
+                        ->searchable()
+                        ->required(),
                 ])
                 ->columns(2),
-
-            Section::make('Materiales, Equipos e Insumos')
-                ->schema([
-                    Textarea::make('equipment')
-                        ->label('Materiales')
-                        ->columnSpan(1)
-
-                ])
-                ->columns(3),
 
             Section::make('Horario')
                 ->schema([
                     DateTimePicker::make('start_at')
-                        ->label('Fecha y Hora de Inicio')
+                        ->label('Inicio')
                         ->required()
                         ->seconds(false),
 
                     DateTimePicker::make('end_at')
-                        ->label('Fecha y Hora de Finalización')
+                        ->label('Finalización')
                         ->required()
                         ->seconds(false)
                         ->after('start_at'),

@@ -303,7 +303,7 @@ class CalendarWidget extends FullCalendarWidget
 
                     Select::make('semester')
                         ->label('Semestre')
-                        ->options(collect(range(2, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
+                        ->options(collect(range(1, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
                         ->required()
                         ->native(false),
 

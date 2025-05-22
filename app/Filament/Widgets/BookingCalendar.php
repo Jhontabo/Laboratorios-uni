@@ -192,7 +192,13 @@ class BookingCalendar extends FullCalendarWidget
 
                     Select::make('user_id')
                         ->label('Responsable')
-                        ->options(User::whereHas('roles', fn($q) => $q->where('name', 'docente'))->pluck('name', 'id'))
+                        ->options(
+                            \App\Models\User::role('docente')  // ← usando Spatie directamente
+                                ->get()
+                                ->mapWithKeys(fn($user) => [
+                                    $user->id => "{$user->name} {$user->last_name}"
+                                ])
+                        )
                         ->searchable()
                         ->required(),
 
@@ -230,13 +236,11 @@ class BookingCalendar extends FullCalendarWidget
                         ->label('Solicitantes')
                         ->required(),
 
-                    TextInput::make('semester')
+                    Select::make('semester')
                         ->label('Semestre')
-                        ->numeric()
-                        ->minValue(1)
-                        ->maxValue(10)
-                        ->required(),
-
+                        ->options(collect(range(1, 10))->mapWithKeys(fn($item) => [$item => (string)$item]))
+                        ->required()
+                        ->native(false),
                     Select::make('products')
                         ->label('Productos disponibles')
                         ->multiple()

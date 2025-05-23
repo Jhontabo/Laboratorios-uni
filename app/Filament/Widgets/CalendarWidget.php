@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Schedule;
 use App\Models\Laboratory;
+use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\{
 };
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
@@ -28,6 +30,7 @@ use Saade\FilamentFullCalendar\Actions\{
     EditAction,
     DeleteAction
 };
+use Illuminate\Support\Js;
 
 class CalendarWidget extends FullCalendarWidget
 {
@@ -38,6 +41,8 @@ class CalendarWidget extends FullCalendarWidget
         return ! request()->routeIs('filament.admin.pages.dashboard') && Auth::check();
     }
 
+
+
     public function config(): array
     {
         return [
@@ -46,6 +51,19 @@ class CalendarWidget extends FullCalendarWidget
             'slotMaxTime'   => '16:00:00',
             'locale'        => 'es',
             'initialView'   => 'timeGridWeek',
+
+            // Habilita selección de rangos
+            'selectable'    => true,
+
+            // Sólo permite seleccionar donde NO haya un evento structured
+            'selectAllow'   => "function(selectInfo) {
+            return ! this.getEvents().some(function(ev) {
+                return ev.extendedProps.type === 'structured'
+                    && ev.start < selectInfo.end
+                    && ev.end   > selectInfo.start;
+            });
+        }",
+
             'headerToolbar' => [
                 'left'   => 'prev,next today',
                 'center' => 'title',
@@ -56,20 +74,18 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 
+
     public function fetchEvents(array $fetchInfo): array
     {
         $start = $fetchInfo['start'];
         $end   = $fetchInfo['end'];
 
-        // Inicia la query y filtra por tipo si es coordinador
         $query = Schedule::query();
 
         if (Auth::user()->hasRole('COORDINADOR')) {
-            // Solo eventos estructurados para coordinador
             $query->where('type', 'structured');
         }
 
-        // Aplica filtro común de rango y recurrencias
         $query->where(function ($q) use ($start, $end) {
             $q->whereBetween('start_at', [$start, $end])
                 ->orWhere(function ($q2) use ($start, $end) {
@@ -92,11 +108,11 @@ class CalendarWidget extends FullCalendarWidget
     protected function formatEvent(Schedule $schedule): array
     {
         return [
-            'id'    => $schedule->id,
-            'title' => $schedule->title,
-            'start' => $schedule->start_at,
-            'end'   => $schedule->end_at,
-            'color' => $schedule->color,
+            'id'           => $schedule->id,
+            'title'        => $schedule->title,
+            'start'        => $schedule->start_at,
+            'end'          => $schedule->end_at,
+            'color'        => $schedule->color,
             'extendedProps' => [
                 'type' => $schedule->type,
             ],
@@ -147,44 +163,79 @@ class CalendarWidget extends FullCalendarWidget
         return $result;
     }
 
+    protected function hasStructuredOverlap(int $labId, Carbon $start, Carbon $end): bool
+    {
+        return Schedule::where('type', 'structured')
+            ->where('laboratory_id', $labId)
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('start_at', [$start, $end])
+                    ->orWhereBetween('end_at',   [$start, $end])
+                    ->orWhere(function ($q2) use ($start, $end) {
+                        $q2->where('start_at', '<=', $start)
+                            ->where('end_at',   '>=', $end);
+                    });
+            })
+            ->exists();
+    }
+
     protected function headerActions(): array
     {
         return [
             CreateAction::make()
-                ->label(fn() => Auth::user()->hasRole('COORDINADOR') ? 'Crear Bloque Estructurado' : 'Crear Práctica No Estructurada')
+                ->label(fn() => Auth::user()->hasRole('COORDINADOR')
+                    ? 'Crear Bloque Estructurado'
+                    : 'Crear Práctica No Estructurada')
                 ->icon('heroicon-o-plus')
                 ->color('primary')
                 ->mountUsing(function (Form $form, array $arguments) {
                     $form->fill([
                         'start_at'         => $arguments['start'] ?? null,
                         'end_at'           => $arguments['end']   ?? null,
+                        'laboratory_id'    => null,
                         'color'            => '#3b82f6',
                         'is_recurring'     => false,
                         'recurrence_days'  => [],
                         'recurrence_until' => null,
+                        'title'            => null,
+                        'project_type'     => null,
+                        'academic_program' => null,
+                        'semester'         => null,
+                        'applicants'       => null,
+                        'research_name'    => null,
+                        'advisor'          => null,
                     ]);
                 })
                 ->form($this->getFormSchema())
-                ->using(function (array $data): ?Schedule {
+                ->using(function (array $data): Schedule {
                     $start = Carbon::parse($data['start_at']);
                     $end   = Carbon::parse($data['end_at']);
-                    if ($end->hour >= 16) {
-                        Notification::make()
-                            ->title('Hora inválida')
-                            ->body('La hora de finalización no puede ser después de las 16:00.')
-                            ->danger()
-                            ->send();
-                        return null;
+                    $labId = $data['laboratory_id'];
+
+                    if (
+                        ! Auth::user()->hasRole('COORDINADOR')
+                        && $this->hasStructuredOverlap($labId, $start, $end)
+                    ) {
+                        throw ValidationException::withMessages([
+                            'laboratory_id' => 'Ese espacio ya está bloqueado por un bloque estructurado.',
+                        ]);
                     }
+
+                    if ($end->hour >= 16) {
+                        throw ValidationException::withMessages([
+                            'end_at' => 'La hora de finalización no puede ser después de las 16:00.',
+                        ]);
+                    }
+
                     $type       = Auth::user()->hasRole('COORDINADOR') ? 'structured' : 'unstructured';
                     $recurrence = $this->processRecurrenceData($data);
-                    $schedule   = Schedule::create([
+
+                    $schedule = Schedule::create([
                         'type'            => $type,
                         'title'           => $type === 'structured' ? $data['title'] : 'Reserva',
                         'start_at'        => $data['start_at'],
                         'end_at'          => $data['end_at'],
                         'color'           => $data['color'],
-                        'laboratory_id'   => $data['laboratory_id'],
+                        'laboratory_id'   => $labId,
                         'user_id'         => Auth::id(),
                         'recurrence_days'  => $recurrence['recurrence_days'],
                         'recurrence_until' => $recurrence['recurrence_until'],
@@ -245,19 +296,29 @@ class CalendarWidget extends FullCalendarWidget
                 })
                 ->form($this->getFormSchema())
                 ->action(function (Schedule $record, array $data) {
-                    $end = Carbon::parse($data['end_at']);
-                    if ($end->hour >= 16) {
-                        Notification::make()
-                            ->title('Hora inválida')
-                            ->body('La hora de finalización no puede ser después de las 16:00.')
-                            ->danger()
-                            ->send();
-                        return;
+                    $start = Carbon::parse($data['start_at']);
+                    $end   = Carbon::parse($data['end_at']);
+                    $labId = $data['laboratory_id'];
+
+                    if (
+                        ! Auth::user()->hasRole('COORDINADOR')
+                        && $this->hasStructuredOverlap($labId, $start, $end)
+                    ) {
+                        throw ValidationException::withMessages([
+                            'start_at' => 'No puedes mover esta práctica; el espacio está bloqueado por un bloque estructurado.',
+                        ]);
                     }
+
+                    if ($end->hour >= 16) {
+                        throw ValidationException::withMessages([
+                            'end_at' => 'La hora de finalización no puede ser después de las 16:00.',
+                        ]);
+                    }
+
                     $recurrence = $this->processRecurrenceData($data);
                     $record->update([
-                        'title'            => $data['title'],
-                        'laboratory_id'    => $data['laboratory_id'],
+                        'title'            => $data['title'] ?? $record->title,
+                        'laboratory_id'    => $labId,
                         'start_at'         => $data['start_at'],
                         'end_at'           => $data['end_at'],
                         'color'            => $data['color'],
@@ -300,7 +361,6 @@ class CalendarWidget extends FullCalendarWidget
     public function getFormSchema(): array
     {
         return [
-            // PRÁCTICA ESTRUCTURADA (solo COORDINADOR)
             Section::make('PRÁCTICA ESTRUCTURADA')
                 ->visible(fn() => Auth::user()->hasRole('COORDINADOR'))
                 ->columns(4)
@@ -327,7 +387,7 @@ class CalendarWidget extends FullCalendarWidget
                         ->columnSpan(4),
                     Select::make('user_id')
                         ->label('Profesor responsable')
-                        ->options(User::role('DOCENTE')->pluck('name', 'id'))
+                        ->options(User::role('COORDINADOR')->pluck('name', 'id'))
                         ->required()
                         ->columnSpan(4),
                     TextInput::make('title')
@@ -346,7 +406,6 @@ class CalendarWidget extends FullCalendarWidget
                         ->columnSpan(2),
                 ]),
 
-            // Sección de recurrencia (solo COORDINADOR)
             Section::make('Recurrencia')
                 ->visible(fn() => Auth::user()->hasRole('COORDINADOR'))
                 ->columns(1)
@@ -371,7 +430,6 @@ class CalendarWidget extends FullCalendarWidget
                         ->visible(fn($get) => $get('is_recurring')),
                 ]),
 
-            // PRÁCTICA NO ESTRUCTURADA (resto)
             Section::make('PRÁCTICA NO ESTRUCTURADA')
                 ->visible(fn() => ! Auth::user()->hasRole('COORDINADOR'))
                 ->columns(4)
@@ -382,10 +440,9 @@ class CalendarWidget extends FullCalendarWidget
                             'Trabajo de grado'         => 'Trabajo de grado',
                             'Investigación profesoral' => 'Investigación profesoral',
                         ])
-                        ->columns(2)
+                        ->columns(3)
                         ->columnSpan(4)
                         ->required(),
-
                     Select::make('laboratory_id')
                         ->label('Espacio académico')
                         ->options(Laboratory::pluck('name', 'id'))
@@ -420,8 +477,6 @@ class CalendarWidget extends FullCalendarWidget
                         ->columnSpan(4),
                 ]),
 
-            // MATERIALES Y EQUIPOS
-
             Section::make('MATERIALES Y EQUIPOS')
                 ->visible(fn() => ! Auth::user()->hasRole('COORDINADOR'))
                 ->columns(1)
@@ -431,22 +486,17 @@ class CalendarWidget extends FullCalendarWidget
                         ->multiple()
                         ->reactive()
                         ->options(function () {
-                            return \App\Models\Product::with('laboratory')
+                            return Product::with('laboratory')
                                 ->get()
-                                ->mapWithKeys(function ($product) {
-                                    return [
-                                        $product->id => "{$product->name} — {$product->laboratory->name}"
-                                    ];
-                                })
+                                ->mapWithKeys(fn($product) => [
+                                    $product->id => "{$product->name} — {$product->laboratory->name}",
+                                ])
                                 ->toArray();
                         })
                         ->searchable()
                         ->required(),
                 ]),
 
-
-
-            // Horario común
             Section::make('Horario')
                 ->columns(3)
                 ->schema([

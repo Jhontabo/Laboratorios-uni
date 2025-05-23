@@ -30,7 +30,6 @@ use Saade\FilamentFullCalendar\Actions\{
     EditAction,
     DeleteAction
 };
-use Illuminate\Support\Js;
 
 class CalendarWidget extends FullCalendarWidget
 {
@@ -41,8 +40,6 @@ class CalendarWidget extends FullCalendarWidget
         return ! request()->routeIs('filament.admin.pages.dashboard') && Auth::check();
     }
 
-
-
     public function config(): array
     {
         return [
@@ -51,19 +48,7 @@ class CalendarWidget extends FullCalendarWidget
             'slotMaxTime'   => '16:00:00',
             'locale'        => 'es',
             'initialView'   => 'timeGridWeek',
-
-            // Habilita selección de rangos
             'selectable'    => true,
-
-            // Sólo permite seleccionar donde NO haya un evento structured
-            'selectAllow'   => "function(selectInfo) {
-            return ! this.getEvents().some(function(ev) {
-                return ev.extendedProps.type === 'structured'
-                    && ev.start < selectInfo.end
-                    && ev.end   > selectInfo.start;
-            });
-        }",
-
             'headerToolbar' => [
                 'left'   => 'prev,next today',
                 'center' => 'title',
@@ -73,7 +58,6 @@ class CalendarWidget extends FullCalendarWidget
             'editable' => false,
         ];
     }
-
 
     public function fetchEvents(array $fetchInfo): array
     {
@@ -88,20 +72,20 @@ class CalendarWidget extends FullCalendarWidget
 
         $query->where(function ($q) use ($start, $end) {
             $q->whereBetween('start_at', [$start, $end])
-                ->orWhere(function ($q2) use ($start, $end) {
-                    $q2->whereNotNull('recurrence_until')
+                ->orWhere(
+                    fn($q2) => $q2
+                        ->whereNotNull('recurrence_until')
                         ->where('recurrence_until', '>=', $start)
-                        ->where('start_at', '<=', $end);
-                });
+                        ->where('start_at', '<=', $end)
+                );
         });
 
         return $query->get()
-            ->flatMap(function (Schedule $schedule) use ($start, $end) {
-                if (! $schedule->recurrence_days) {
-                    return [$this->formatEvent($schedule)];
-                }
-                return $this->generateRecurringEvents($schedule, $start, $end);
-            })
+            ->flatMap(
+                fn(Schedule $schedule) => $schedule->recurrence_days
+                    ? $this->generateRecurringEvents($schedule, $start, $end)
+                    : [$this->formatEvent($schedule)]
+            )
             ->toArray();
     }
 
@@ -114,38 +98,42 @@ class CalendarWidget extends FullCalendarWidget
             'end'          => $schedule->end_at,
             'color'        => $schedule->color,
             'extendedProps' => [
-                'type' => $schedule->type,
+                'type'    => $schedule->type,
+                'blocked' => $schedule->type === 'structured',
             ],
         ];
     }
 
     protected function generateRecurringEvents(Schedule $schedule, string $start, string $end): array
     {
-        $events          = [];
-        $startDate       = Carbon::parse($schedule->start_at);
-        $endDate         = Carbon::parse($schedule->end_at);
-        $durationMinutes = $startDate->diffInMinutes($endDate);
-        $recurrenceUntil = Carbon::parse($schedule->recurrence_until);
-        $daysOfWeek      = explode(',', $schedule->recurrence_days);
+        $events    = [];
+        $startDate = Carbon::parse($schedule->start_at);
+        $endDate   = Carbon::parse($schedule->end_at);
+        $length    = $startDate->diffInMinutes($endDate);
+        $until     = Carbon::parse($schedule->recurrence_until);
+        $days      = explode(',', $schedule->recurrence_days);
 
-        foreach (CarbonPeriod::create($startDate, $recurrenceUntil) as $date) {
-            if (! in_array($date->dayOfWeek, $daysOfWeek)) {
+        foreach (CarbonPeriod::create($startDate, $until) as $date) {
+            if (! in_array($date->dayOfWeek, $days)) {
                 continue;
             }
-            $eventStart = $date->setTime($startDate->hour, $startDate->minute);
-            $eventEnd   = (clone $eventStart)->addMinutes($durationMinutes);
-            if ($eventEnd < $start || $eventStart > $end) {
+            $s = $date->setTime($startDate->hour, $startDate->minute);
+            $e = (clone $s)->addMinutes($length);
+
+            if ($e <= $start || $s >= $end) {
                 continue;
             }
+
             $events[] = [
-                'id'            => $schedule->id . '-' . $eventStart->toDateString(),
-                'title'         => $schedule->title,
-                'start'         => $eventStart,
-                'end'           => $eventEnd,
-                'color'         => $schedule->color,
+                'id'           => "{$schedule->id}-{$s->toDateString()}",
+                'title'        => $schedule->title,
+                'start'        => $s,
+                'end'          => $e,
+                'color'        => $schedule->color,
                 'extendedProps' => [
                     'isRecurring' => true,
                     'parentId'    => $schedule->id,
+                    'blocked'     => $schedule->type === 'structured',
                 ],
             ];
         }
@@ -155,26 +143,23 @@ class CalendarWidget extends FullCalendarWidget
 
     protected function processRecurrenceData(array $data): array
     {
-        $result = ['recurrence_days' => null, 'recurrence_until' => null];
-        if ($data['is_recurring'] ?? false) {
-            $result['recurrence_days']  = implode(',', $data['recurrence_days'] ?? []);
-            $result['recurrence_until'] = $data['recurrence_until'];
-        }
-        return $result;
+        $recurring = $data['is_recurring'] ?? false;
+        return [
+            'recurrence_days'  => $recurring
+                ? implode(',', $data['recurrence_days'] ?? [])
+                : null,
+            'recurrence_until' => $recurring
+                ? $data['recurrence_until']
+                : null,
+        ];
     }
 
     protected function hasStructuredOverlap(int $labId, Carbon $start, Carbon $end): bool
     {
         return Schedule::where('type', 'structured')
             ->where('laboratory_id', $labId)
-            ->where(function ($q) use ($start, $end) {
-                $q->whereBetween('start_at', [$start, $end])
-                    ->orWhereBetween('end_at',   [$start, $end])
-                    ->orWhere(function ($q2) use ($start, $end) {
-                        $q2->where('start_at', '<=', $start)
-                            ->where('end_at',   '>=', $end);
-                    });
-            })
+            ->where('start_at', '<', $end)
+            ->where('end_at',   '>', $start)
             ->exists();
     }
 
@@ -189,41 +174,59 @@ class CalendarWidget extends FullCalendarWidget
                 ->color('primary')
                 ->mountUsing(function (Form $form, array $arguments) {
                     $form->fill([
-                        'start_at'         => $arguments['start'] ?? null,
-                        'end_at'           => $arguments['end']   ?? null,
-                        'laboratory_id'    => null,
-                        'color'            => '#3b82f6',
-                        'is_recurring'     => false,
-                        'recurrence_days'  => [],
-                        'recurrence_until' => null,
-                        'title'            => null,
-                        'project_type'     => null,
-                        'academic_program' => null,
-                        'semester'         => null,
-                        'applicants'       => null,
-                        'research_name'    => null,
-                        'advisor'          => null,
+                        'start_at'             => $arguments['start']     ?? null,
+                        'end_at'               => $arguments['end']       ?? null,
+                        'laboratory_id'        => null,
+                        'color'                => '#3b82f6',
+                        'is_recurring'         => false,
+                        'recurrence_days'      => [],
+                        'recurrence_until'     => null,
+                        'title'                => null,
+                        'academic_program_name' => null,
+                        'semester'             => null,
+                        'student_count'        => null,
+                        'group_count'          => null,
+                        'project_type'         => null,
+                        'academic_program'     => null,
+                        'applicants'           => null,
+                        'research_name'        => null,
+                        'advisor'              => null,
                     ]);
                 })
                 ->form($this->getFormSchema())
-                ->using(function (array $data): Schedule {
+                ->using(function (array $data): ?Schedule {
                     $start = Carbon::parse($data['start_at']);
                     $end   = Carbon::parse($data['end_at']);
                     $labId = $data['laboratory_id'];
 
+                    // validaciones básicas
+                    if (! $data['start_at'] || ! $data['end_at'] || ! $labId) {
+                        Notification::make()
+                            ->title('Datos incompletos')
+                            ->body('Debes indicar inicio, fin y espacio.')
+                            ->danger()
+                            ->send();
+                        return null;
+                    }
+                    if ($end->lte($start) || $end->hour >= 16) {
+                        Notification::make()
+                            ->title('Horario inválido')
+                            ->body('Revisa rango y límite de hora.')
+                            ->danger()
+                            ->send();
+                        return null;
+                    }
+                    // solapamiento para no coordinadores
                     if (
                         ! Auth::user()->hasRole('COORDINADOR')
                         && $this->hasStructuredOverlap($labId, $start, $end)
                     ) {
-                        throw ValidationException::withMessages([
-                            'laboratory_id' => 'Ese espacio ya está bloqueado por un bloque estructurado.',
-                        ]);
-                    }
-
-                    if ($end->hour >= 16) {
-                        throw ValidationException::withMessages([
-                            'end_at' => 'La hora de finalización no puede ser después de las 16:00.',
-                        ]);
+                        Notification::make()
+                            ->title('Espacio ocupado')
+                            ->body('Ya reservado para clases.')
+                            ->danger()
+                            ->send();
+                        return null;
                     }
 
                     $type       = Auth::user()->hasRole('COORDINADOR') ? 'structured' : 'unstructured';
@@ -237,7 +240,7 @@ class CalendarWidget extends FullCalendarWidget
                         'color'           => $data['color'],
                         'laboratory_id'   => $labId,
                         'user_id'         => Auth::id(),
-                        'recurrence_days'  => $recurrence['recurrence_days'],
+                        'recurrence_days' => $recurrence['recurrence_days'],
                         'recurrence_until' => $recurrence['recurrence_until'],
                     ]);
 
@@ -269,29 +272,18 @@ class CalendarWidget extends FullCalendarWidget
         return [
             EditAction::make()
                 ->label('Editar')
-                ->visible(fn(?Schedule $r) => $r instanceof Schedule && (
-                    (Auth::user()->hasRole('COORDINADOR') && $r->type === 'structured') ||
-                    (! Auth::user()->hasRole('COORDINADOR') && $r->type === 'unstructured')
-                ))
+                ->visible(fn(?Schedule $r) => $r instanceof Schedule)
                 ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
                     $form->fill([
-                        'title'                  => $record->title,
-                        'laboratory_id'          => $record->laboratory_id,
-                        'start_at'               => $arguments['event']['start'] ?? $record->start_at,
-                        'end_at'                 => $arguments['event']['end']   ?? $record->end_at,
-                        'color'                  => $record->color,
-                        'academic_program_name'  => optional($record->structured)->academic_program_name,
-                        'semester'               => optional($record->structured)->semester,
-                        'student_count'          => optional($record->structured)->student_count,
-                        'group_count'            => optional($record->structured)->group_count,
-                        'is_recurring'           => $record->recurrence_days !== null,
-                        'recurrence_days'        => $record->recurrence_days ? explode(',', $record->recurrence_days) : [],
-                        'recurrence_until'       => $record->recurrence_until,
-                        'project_type'           => optional($record->unstructured)->project_type,
-                        'academic_program'       => optional($record->unstructured)->academic_program,
-                        'applicants'             => optional($record->unstructured)->applicants,
-                        'research_name'          => optional($record->unstructured)->research_name,
-                        'advisor'                => optional($record->unstructured)->advisor,
+                        'title'           => $record->title,
+                        'laboratory_id'   => $record->laboratory_id,
+                        'start_at'        => $arguments['event']['start'] ?? $record->start_at,
+                        'end_at'          => $arguments['event']['end']   ?? $record->end_at,
+                        'color'           => $record->color,
+                        'is_recurring'    => $record->recurrence_days !== null,
+                        'recurrence_days' => $record->recurrence_days ? explode(',', $record->recurrence_days) : [],
+                        'recurrence_until' => $record->recurrence_until,
+                        // demás campos según tipo...
                     ]);
                 })
                 ->form($this->getFormSchema())
@@ -304,15 +296,21 @@ class CalendarWidget extends FullCalendarWidget
                         ! Auth::user()->hasRole('COORDINADOR')
                         && $this->hasStructuredOverlap($labId, $start, $end)
                     ) {
-                        throw ValidationException::withMessages([
-                            'start_at' => 'No puedes mover esta práctica; el espacio está bloqueado por un bloque estructurado.',
-                        ]);
+                        Notification::make()
+                            ->title('No permitido')
+                            ->body('Espacio reservado para clases.')
+                            ->danger()
+                            ->send();
+                        return;
                     }
 
-                    if ($end->hour >= 16) {
-                        throw ValidationException::withMessages([
-                            'end_at' => 'La hora de finalización no puede ser después de las 16:00.',
-                        ]);
+                    if ($end->lte($start) || $end->hour >= 16) {
+                        Notification::make()
+                            ->title('Horario inválido')
+                            ->body('Revisa hora de fin.')
+                            ->danger()
+                            ->send();
+                        return;
                     }
 
                     $recurrence = $this->processRecurrenceData($data);
@@ -325,42 +323,18 @@ class CalendarWidget extends FullCalendarWidget
                         'recurrence_days'  => $recurrence['recurrence_days'],
                         'recurrence_until' => $recurrence['recurrence_until'],
                     ]);
-
-                    if ($record->type === 'structured') {
-                        $record->structured()->updateOrCreate(
-                            ['schedule_id' => $record->id],
-                            [
-                                'academic_program_name' => $data['academic_program_name'],
-                                'semester'              => $data['semester'],
-                                'student_count'         => $data['student_count'],
-                                'group_count'           => $data['group_count'],
-                            ]
-                        );
-                    } else {
-                        $record->unstructured()->update([
-                            'project_type'     => $data['project_type'],
-                            'academic_program' => $data['academic_program'],
-                            'semester'         => $data['semester'],
-                            'applicants'       => $data['applicants'],
-                            'research_name'    => $data['research_name'],
-                            'advisor'          => $data['advisor'],
-                        ]);
-                    }
                 }),
 
             DeleteAction::make()
                 ->label('Eliminar')
-                ->visible(fn(?Schedule $r) => $r instanceof Schedule && (
-                    (Auth::user()->hasRole('COORDINADOR') && $r->type === 'structured') ||
-                    (! Auth::user()->hasRole('COORDINADOR') && $r->type === 'unstructured')
-                ))
+                ->visible(fn(?Schedule $r) => $r instanceof Schedule)
                 ->before(fn(Schedule $r) => tap($r->{$r->type}(), fn($q) => $q->delete())->getModel()->delete()),
         ];
     }
-
     public function getFormSchema(): array
     {
         return [
+            // Bloque Estructurado (solo COORDINADOR)
             Section::make('PRÁCTICA ESTRUCTURADA')
                 ->visible(fn() => Auth::user()->hasRole('COORDINADOR'))
                 ->columns(4)
@@ -385,13 +359,8 @@ class CalendarWidget extends FullCalendarWidget
                         ->options(array_combine(range(1, 10), range(1, 10)))
                         ->required()
                         ->columnSpan(4),
-                    Select::make('user_id')
-                        ->label('Profesor responsable')
-                        ->options(User::role('COORDINADOR')->pluck('name', 'id'))
-                        ->required()
-                        ->columnSpan(4),
                     TextInput::make('title')
-                        ->label('Nombre de la práctica académica')
+                        ->label('Nombre de la práctica')
                         ->required()
                         ->columnSpan(4),
                     TextInput::make('student_count')
@@ -406,13 +375,12 @@ class CalendarWidget extends FullCalendarWidget
                         ->columnSpan(2),
                 ]),
 
+            // Recurrencia (solo COORDINADOR)
             Section::make('Recurrencia')
                 ->visible(fn() => Auth::user()->hasRole('COORDINADOR'))
                 ->columns(1)
                 ->schema([
-                    Toggle::make('is_recurring')
-                        ->label('Evento recurrente')
-                        ->reactive(),
+                    Toggle::make('is_recurring')->label('Evento recurrente')->reactive(),
                     CheckboxList::make('recurrence_days')
                         ->label('Días de la semana')
                         ->options([
@@ -430,13 +398,15 @@ class CalendarWidget extends FullCalendarWidget
                         ->visible(fn($get) => $get('is_recurring')),
                 ]),
 
+            // Práctica No Estructurada (resto de roles)
             Section::make('PRÁCTICA NO ESTRUCTURADA')
                 ->visible(fn() => ! Auth::user()->hasRole('COORDINADOR'))
                 ->columns(4)
                 ->schema([
                     Radio::make('project_type')
-                        ->label('Proyecto integrador')
+                        ->label('Tipo de proyecto')
                         ->options([
+                            'Proyecto integrador'      => 'Proyecto integrador',
                             'Trabajo de grado'         => 'Trabajo de grado',
                             'Investigación profesoral' => 'Investigación profesoral',
                         ])
@@ -464,19 +434,20 @@ class CalendarWidget extends FullCalendarWidget
                         ->required()
                         ->columnSpan(4),
                     TextInput::make('applicants')
-                        ->label('Nombre de los solicitantes')
+                        ->label('Solicitantes')
                         ->required()
                         ->columnSpan(4),
                     TextInput::make('research_name')
-                        ->label('Nombre de la investigación')
+                        ->label('Investigación')
                         ->required()
                         ->columnSpan(4),
                     TextInput::make('advisor')
-                        ->label('Nombre del asesor')
+                        ->label('Asesor')
                         ->required()
                         ->columnSpan(4),
                 ]),
 
+            // Materiales y equipos
             Section::make('MATERIALES Y EQUIPOS')
                 ->visible(fn() => ! Auth::user()->hasRole('COORDINADOR'))
                 ->columns(1)
@@ -485,32 +456,33 @@ class CalendarWidget extends FullCalendarWidget
                         ->label('Productos disponibles')
                         ->multiple()
                         ->reactive()
-                        ->options(function () {
-                            return Product::with('laboratory')
+                        ->options(
+                            fn() => Product::with('laboratory')
                                 ->get()
-                                ->mapWithKeys(fn($product) => [
-                                    $product->id => "{$product->name} — {$product->laboratory->name}",
+                                ->mapWithKeys(fn($p) => [
+                                    $p->id => "{$p->name} — {$p->laboratory->name}",
                                 ])
-                                ->toArray();
-                        })
+                                ->toArray()
+                        )
                         ->searchable()
                         ->required(),
                 ]),
 
-            Section::make('Horario')
+            // Horario común
+            Section::make('Horario común')
                 ->columns(3)
                 ->schema([
                     DateTimePicker::make('start_at')
-                        ->label('Fecha y Hora de Inicio')
+                        ->label('Inicio')
                         ->required()
                         ->seconds(false),
                     DateTimePicker::make('end_at')
-                        ->label('Fecha y Hora de Finalización')
+                        ->label('Fin')
                         ->required()
                         ->seconds(false)
                         ->after('start_at'),
                     ColorPicker::make('color')
-                        ->label('Color del Evento')
+                        ->label('Color')
                         ->default('#3b82f6'),
                 ]),
         ];

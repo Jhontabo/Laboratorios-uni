@@ -97,6 +97,9 @@ class CalendarWidget extends FullCalendarWidget
             'start' => $schedule->start_at,
             'end'   => $schedule->end_at,
             'color' => $schedule->color,
+            'extendedProps' => [
+                'type' => $schedule->type,
+            ],
         ];
     }
 
@@ -202,7 +205,6 @@ class CalendarWidget extends FullCalendarWidget
                             'applicants'       => $data['applicants'],
                             'research_name'    => $data['research_name'],
                             'advisor'          => $data['advisor'],
-                            'equipment'        => $data['equipment'] ?? null,
                         ]);
                     }
 
@@ -239,7 +241,6 @@ class CalendarWidget extends FullCalendarWidget
                         'applicants'             => optional($record->unstructured)->applicants,
                         'research_name'          => optional($record->unstructured)->research_name,
                         'advisor'                => optional($record->unstructured)->advisor,
-                        'equipment'              => optional($record->unstructured)->equipment,
                     ]);
                 })
                 ->form($this->getFormSchema())
@@ -282,7 +283,6 @@ class CalendarWidget extends FullCalendarWidget
                             'applicants'       => $data['applicants'],
                             'research_name'    => $data['research_name'],
                             'advisor'          => $data['advisor'],
-                            'equipment'        => $data['equipment'] ?? null,
                         ]);
                     }
                 }),
@@ -327,7 +327,7 @@ class CalendarWidget extends FullCalendarWidget
                         ->columnSpan(4),
                     Select::make('user_id')
                         ->label('Profesor responsable')
-                        ->options(User::role('COORDINADOR')->pluck('name', 'id'))
+                        ->options(User::role('DOCENTE')->pluck('name', 'id'))
                         ->required()
                         ->columnSpan(4),
                     TextInput::make('title')
@@ -377,15 +377,20 @@ class CalendarWidget extends FullCalendarWidget
                 ->columns(4)
                 ->schema([
                     Radio::make('project_type')
-                        ->label('Proyecto integrador / Trabajo de grado / Investigación profesoral')
+                        ->label('Proyecto integrador')
                         ->options([
-                            'Proyecto integrador'      => 'Proyecto integrador',
                             'Trabajo de grado'         => 'Trabajo de grado',
                             'Investigación profesoral' => 'Investigación profesoral',
                         ])
-                        ->columns(3)
+                        ->columns(2)
                         ->columnSpan(4)
                         ->required(),
+
+                    Select::make('laboratory_id')
+                        ->label('Espacio académico')
+                        ->options(Laboratory::pluck('name', 'id'))
+                        ->required()
+                        ->columnSpan(4),
                     Select::make('academic_program')
                         ->label('Programa académico')
                         ->options([
@@ -416,6 +421,7 @@ class CalendarWidget extends FullCalendarWidget
                 ]),
 
             // MATERIALES Y EQUIPOS
+
             Section::make('MATERIALES Y EQUIPOS')
                 ->visible(fn() => ! Auth::user()->hasRole('COORDINADOR'))
                 ->columns(1)
@@ -424,15 +430,21 @@ class CalendarWidget extends FullCalendarWidget
                         ->label('Productos disponibles')
                         ->multiple()
                         ->reactive()
-                        ->options(
-                            fn($get) =>
-                            $get('laboratory_id')
-                                ? \App\Models\Product::where('laboratory_id', $get('laboratory_id'))->pluck('name', 'id')
-                                : []
-                        )
+                        ->options(function () {
+                            return \App\Models\Product::with('laboratory')
+                                ->get()
+                                ->mapWithKeys(function ($product) {
+                                    return [
+                                        $product->id => "{$product->name} — {$product->laboratory->name}"
+                                    ];
+                                })
+                                ->toArray();
+                        })
                         ->searchable()
                         ->required(),
                 ]),
+
+
 
             // Horario común
             Section::make('Horario')

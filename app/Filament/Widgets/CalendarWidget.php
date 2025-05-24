@@ -400,26 +400,22 @@ class CalendarWidget extends FullCalendarWidget
                         ]),
                 ]),
 
-            Section::make('PRÁCTICA NO ESTRUCTURADA')
+            Section::make()  // <— aquí ya no sale ningún título
                 ->visible(fn($get) => ! $get('is_structured'))
-                ->columns(4)
                 ->schema([
-                    Section::make('Horario no estructurada')
-                        ->columns(3)
-                        ->schema([
-                            DateTimePicker::make('start_at')
-                                ->label('Inicio')
-                                ->required()
-                                ->seconds(false),
-                            DateTimePicker::make('end_at')
-                                ->label('Fin')
-                                ->required()
-                                ->seconds(false)
-                                ->after('start_at'),
-                            ColorPicker::make('color')
-                                ->label('Color'),
-                        ]),
-                ]),
+                    DateTimePicker::make('start_at')
+                        ->label('Inicio')
+                        ->required()
+                        ->seconds(false),
+                    DateTimePicker::make('end_at')
+                        ->label('Fin')
+                        ->required()
+                        ->seconds(false)
+                        ->after('start_at'),
+                    ColorPicker::make('color')
+                        ->label('Color'),
+                ])
+                ->columns(4),
 
             Section::make('Recurrencia')
                 ->columns(1)

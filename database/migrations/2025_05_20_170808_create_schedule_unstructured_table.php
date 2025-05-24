@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('schedule_unstructured', function (Blueprint $table) {
             $table->id();
@@ -15,20 +15,18 @@ return new class extends Migration
                 ->constrained('schedules')
                 ->cascadeOnDelete();
 
-            $table->string('project_type');             // Proyecto integrador, trabajo de grado...
-            $table->string('academic_program');         // Ingeniería de Sistemas, etc.
-            $table->unsignedTinyInteger('semester');    // 1 al 10
-            $table->string('applicants');               // Nombres de los solicitantes
-            $table->string('research_name');            // Nombre de la investigación
-            $table->string('advisor');                  // Nombre del asesor
-
+            $table->string('project_type')->nullable();  // nullable para integradores, grados...
+            $table->string('academic_program')->nullable();  // nullable para programa académico
+            $table->unsignedTinyInteger('semester')->nullable();  // 1 al 10, ahora nullable
+            $table->string('applicants')->nullable();  // nullable para nombres
+            $table->string('research_name')->nullable()->index(); // nullable + index
+            $table->string('advisor')->nullable();  // nullable para asesor
 
             $table->timestamps();
-            $table->index('research_name');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('schedule_unstructured');
     }

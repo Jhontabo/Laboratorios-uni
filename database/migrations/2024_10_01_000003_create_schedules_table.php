@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
@@ -17,12 +17,11 @@ return new class extends Migration
             $table->dateTime('end_at');
             $table->string('color')->default('#3b82f6');
             $table->text('description')->nullable();
-            $table->boolean('is_available')->default(true);
             $table->enum('type', ['structured', 'unstructured'])->default('structured');
-
 
             // Relaciones
             $table->foreignId('laboratory_id')
+                ->nullable()
                 ->constrained('laboratories')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
@@ -32,19 +31,17 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 
-
-
             $table->timestamps();
 
             // Índices
-            $table->index(['type', 'is_available']);
+            $table->index('type');
             $table->index('start_at');
             $table->index('end_at');
             $table->index(['laboratory_id', 'start_at']);
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('schedules');
     }

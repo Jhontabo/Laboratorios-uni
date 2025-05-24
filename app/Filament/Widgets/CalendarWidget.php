@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Schedule;
 use App\Models\Laboratory;
-use App\Models\Product;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Filament\Forms\Components\{
@@ -12,7 +11,6 @@ use Filament\Forms\Components\{
     ColorPicker,
     DatePicker,
     DateTimePicker,
-    Radio,
     Section,
     Select,
     TextInput,
@@ -35,7 +33,6 @@ class CalendarWidget extends FullCalendarWidget
 
     public static function canView(): bool
     {
-        // ADMIN y COORDINADOR ven y usan el widget por igual
         return Auth::check() && Auth::user()->hasAnyRole(['ADMIN', 'COORDINADOR']);
     }
 
@@ -47,14 +44,12 @@ class CalendarWidget extends FullCalendarWidget
             'slotMaxTime'   => '16:00:00',
             'locale'        => 'es',
             'initialView'   => 'timeGridWeek',
-            'selectable'    => true,
-            'editable'      => true,            // <-- permitir drag & drop
             'headerToolbar' => [
                 'left'   => 'prev,next today',
                 'center' => 'title',
                 'right'  => 'dayGridMonth,timeGridWeek,timeGridDay',
             ],
-            'height'   => 600,
+            'height' => 600,
         ];
     }
 
@@ -75,7 +70,8 @@ class CalendarWidget extends FullCalendarWidget
             })
             ->get()
             ->flatMap(
-                fn(Schedule $s) => $s->recurrence_days
+                fn(Schedule $s) =>
+                $s->recurrence_days
                     ? $this->generateRecurringEvents($s, $start, $end)
                     : [$this->formatEvent($s)]
             )
@@ -85,11 +81,11 @@ class CalendarWidget extends FullCalendarWidget
     protected function formatEvent(Schedule $schedule): array
     {
         return [
-            'id'           => $schedule->id,
-            'title'        => $schedule->title,
-            'start'        => $schedule->start_at,
-            'end'          => $schedule->end_at,
-            'color'        => $schedule->color,
+            'id'            => $schedule->id,
+            'title'         => $schedule->title,
+            'start'         => $schedule->start_at,
+            'end'           => $schedule->end_at,
+            'color'         => $schedule->color,
             'extendedProps' => [
                 'type'    => $schedule->type,
                 'blocked' => $schedule->type === 'structured',
@@ -107,20 +103,22 @@ class CalendarWidget extends FullCalendarWidget
         $days      = explode(',', $schedule->recurrence_days);
 
         foreach (CarbonPeriod::create($startDate, $until) as $date) {
-            if (! in_array($date->dayOfWeek, $days)) continue;
+            if (! in_array($date->dayOfWeek, $days)) {
+                continue;
+            }
             $s = $date->setTime($startDate->hour, $startDate->minute);
             $e = (clone $s)->addMinutes($length);
-            if ($e <= $start || $s >= $end) continue;
+            if ($e <= $start || $s >= $end) {
+                continue;
+            }
 
             $events[] = [
-                'id'           => "{$schedule->id}-{$s->toDateString()}",
-                'title'        => $schedule->title,
-                'start'        => $s,
-                'end'          => $e,
-                'color'        => $schedule->color,
-                'extendedProps' => [
-                    'isRecurring' => true,
-                ],
+                'id'            => "{$schedule->id}-{$s->toDateString()}",
+                'title'         => $schedule->title,
+                'start'         => $s,
+                'end'           => $e,
+                'color'         => $schedule->color,
+                'extendedProps' => ['isRecurring' => true],
             ];
         }
 
@@ -130,6 +128,7 @@ class CalendarWidget extends FullCalendarWidget
     protected function processRecurrenceData(array $data): array
     {
         $recurring = $data['is_recurring'] ?? false;
+
         return [
             'recurrence_days'  => $recurring
                 ? implode(',', $data['recurrence_days'] ?? [])
@@ -149,24 +148,24 @@ class CalendarWidget extends FullCalendarWidget
                 ->color('primary')
                 ->mountUsing(function (Form $form, array $arguments) {
                     $form->fill([
-                        'is_structured'        => true,
-                        'is_recurring'         => false,
-                        'recurrence_days'      => [],
-                        'recurrence_until'     => null,
-                        'start_at'             => $arguments['start'] ?? null,
-                        'end_at'               => $arguments['end']   ?? null,
-                        'laboratory_id'        => null,
-                        'color'                => '#3b82f6',
-                        'title'                => null,
+                        'is_structured'         => true,
+                        'is_recurring'          => false,
+                        'recurrence_days'       => [],
+                        'recurrence_until'      => null,
+                        'start_at'              => $arguments['start'] ?? null,
+                        'end_at'                => $arguments['end']   ?? null,
+                        'laboratory_id'         => null,
+                        'color'                 => '#3b82f6',
+                        'title'                 => null,
                         'academic_program_name' => null,
-                        'semester'             => null,
-                        'student_count'        => null,
-                        'group_count'          => null,
-                        'project_type'         => null,
-                        'academic_program'     => null,
-                        'applicants'           => null,
-                        'research_name'        => null,
-                        'advisor'              => null,
+                        'semester'              => null,
+                        'student_count'         => null,
+                        'group_count'           => null,
+                        'project_type'          => null,
+                        'academic_program'      => null,
+                        'applicants'            => null,
+                        'research_name'         => null,
+                        'advisor'               => null,
                     ]);
                 })
                 ->form($this->getFormSchema())
@@ -192,6 +191,7 @@ class CalendarWidget extends FullCalendarWidget
                     }
 
                     $recurrence = $this->processRecurrenceData($data);
+
                     $schedule = Schedule::create([
                         'type'             => $data['is_structured'] ? 'structured' : 'unstructured',
                         'title'            => $data['is_structured'] ? $data['title'] : 'Reserva',
@@ -207,18 +207,18 @@ class CalendarWidget extends FullCalendarWidget
                     if ($data['is_structured']) {
                         $schedule->structured()->create([
                             'academic_program_name' => $data['academic_program_name'],
-                            'semester'             => $data['semester'],
-                            'student_count'        => $data['student_count'],
-                            'group_count'          => $data['group_count'],
+                            'semester'              => $data['semester'],
+                            'student_count'         => $data['student_count'],
+                            'group_count'           => $data['group_count'],
                         ]);
                     } else {
                         $schedule->unstructured()->create([
-                            'project_type'     => $data['project_type'],
-                            'academic_program' => $data['academic_program'],
-                            'semester'         => $data['semester'],
-                            'applicants'       => $data['applicants'],
-                            'research_name'    => $data['research_name'],
-                            'advisor'          => $data['advisor'],
+                            'project_type'     => $data['project_type']          ?? null,
+                            'academic_program' => $data['academic_program']      ?? null,
+                            'semester'         => $data['semester']              ?? null,
+                            'applicants'       => $data['applicants']            ?? null,
+                            'research_name'    => $data['research_name']         ?? null,
+                            'advisor'          => $data['advisor']               ?? null,
                         ]);
                     }
 
@@ -233,45 +233,50 @@ class CalendarWidget extends FullCalendarWidget
             EditAction::make()
                 ->label('Editar')
                 ->visible(fn(?Schedule $r) => $r instanceof Schedule)
-                ->mountUsing(function (Schedule $record, Form $form, array $args) {
+                ->mountUsing(function (Schedule $record, Form $form, array $arguments) {
                     $form->fill([
-                        'is_structured'        => $record->type === 'structured',
-                        'title'                => $record->title,
-                        'laboratory_id'        => $record->laboratory_id,
-                        'start_at'             => $args['event']['start'] ?? $record->start_at,
-                        'end_at'               => $args['event']['end']   ?? $record->end_at,
-                        'color'                => $record->color,
-                        'is_recurring'         => $record->recurrence_days !== null,
-                        'recurrence_days'      => $record->recurrence_days
+                        // siempre definir todos los campos, usan el operador ?? null
+                        'laboratory_id'         => $record->laboratory_id,
+                        'is_structured'         => $record->type === 'structured',
+                        'title'                 => $record->title,
+                        'start_at'              => $arguments['event']['start'] ?? $record->start_at,
+                        'end_at'                => $arguments['event']['end']   ?? $record->end_at,
+                        'color'                 => $record->color,
+                        'is_recurring'          => $record->recurrence_days !== null,
+                        'recurrence_days'       => $record->recurrence_days
                             ? explode(',', $record->recurrence_days)
                             : [],
-                        'recurrence_until'     => $record->recurrence_until,
-                        'project_type'         => $record->type === 'unstructured'
-                            ? $record->unstructured->project_type
-                            : null,
-                        'academic_program'     => $record->type === 'unstructured'
-                            ? $record->unstructured->academic_program
-                            : null,
-                        'semester'             => $record->type === 'unstructured'
-                            ? $record->unstructured->semester
-                            : null,
-                        'applicants'           => $record->type === 'unstructured'
-                            ? $record->unstructured->applicants
-                            : null,
-                        'research_name'        => $record->type === 'unstructured'
-                            ? $record->unstructured->research_name
-                            : null,
-                        'advisor'              => $record->type === 'unstructured'
-                            ? $record->unstructured->advisor
-                            : null,
+                        'recurrence_until'      => $record->recurrence_until,
+
+                        // campos estructurados (o null)
                         'academic_program_name' => $record->type === 'structured'
                             ? $record->structured->academic_program_name
                             : null,
-                        'student_count'        => $record->type === 'structured'
+                        'semester'              => $record->type === 'structured'
+                            ? $record->structured->semester
+                            : null,
+                        'student_count'         => $record->type === 'structured'
                             ? $record->structured->student_count
                             : null,
-                        'group_count'          => $record->type === 'structured'
+                        'group_count'           => $record->type === 'structured'
                             ? $record->structured->group_count
+                            : null,
+
+                        // campos no estructurados (o null)
+                        'project_type'          => $record->type === 'unstructured'
+                            ? $record->unstructured->project_type
+                            : null,
+                        'academic_program'      => $record->type === 'unstructured'
+                            ? $record->unstructured->academic_program
+                            : null,
+                        'applicants'            => $record->type === 'unstructured'
+                            ? $record->unstructured->applicants
+                            : null,
+                        'research_name'         => $record->type === 'unstructured'
+                            ? $record->unstructured->research_name
+                            : null,
+                        'advisor'               => $record->type === 'unstructured'
+                            ? $record->unstructured->advisor
                             : null,
                     ]);
                 })
@@ -290,16 +295,38 @@ class CalendarWidget extends FullCalendarWidget
                     }
 
                     $recurrence = $this->processRecurrenceData($data);
+
+                    // actualizamos tabla padre
                     $record->update([
                         'type'             => $data['is_structured'] ? 'structured' : 'unstructured',
                         'title'            => $data['is_structured'] ? $data['title'] : $record->title,
-                        'laboratory_id'    => $data['laboratory_id'],
+                        'laboratory_id'    => $data['laboratory_id'] ?? $record->laboratory_id,
                         'start_at'         => $data['start_at'],
                         'end_at'           => $data['end_at'],
                         'color'            => $data['color'],
                         'recurrence_days'  => $recurrence['recurrence_days'],
                         'recurrence_until' => $recurrence['recurrence_until'],
                     ]);
+
+                    if ($data['is_structured']) {
+                        // actualizamos hijo structured
+                        $record->structured()->update([
+                            'academic_program_name' => $data['academic_program_name'] ?? null,
+                            'semester'              => $data['semester']              ?? null,
+                            'student_count'         => $data['student_count']         ?? null,
+                            'group_count'           => $data['group_count']           ?? null,
+                        ]);
+                    } else {
+                        // actualizamos hijo unstructured
+                        $record->unstructured()->update([
+                            'project_type'     => $data['project_type']     ?? null,
+                            'academic_program' => $data['academic_program'] ?? null,
+                            'semester'         => $data['semester']         ?? null,
+                            'applicants'       => $data['applicants']       ?? null,
+                            'research_name'    => $data['research_name']    ?? null,
+                            'advisor'          => $data['advisor']          ?? null,
+                        ]);
+                    }
                 }),
 
             DeleteAction::make()
@@ -317,7 +344,6 @@ class CalendarWidget extends FullCalendarWidget
                 ->reactive()
                 ->default(true),
 
-            // Sección Estructurada
             Section::make('PRÁCTICA ESTRUCTURADA')
                 ->visible(fn($get) => $get('is_structured'))
                 ->columns(4)
@@ -356,32 +382,6 @@ class CalendarWidget extends FullCalendarWidget
                         ->numeric()
                         ->required()
                         ->columnSpan(2),
-                    Section::make('Recurrencia')
-                        ->columns(1)
-                        ->schema([
-                            Toggle::make('is_recurring')
-                                ->label('Evento recurrente')
-                                ->reactive(),
-                            CheckboxList::make('recurrence_days')
-                                ->label('Días de la semana')
-                                ->options([
-                                    '1' => 'Lunes',
-                                    '2' => 'Martes',
-                                    '3' => 'Miércoles',
-                                    '4' => 'Jueves',
-                                    '5' => 'Viernes',
-                                ])
-                                ->columns(5)
-                                ->visible(fn($get) => $get('is_recurring')),
-                            DatePicker::make('recurrence_until')
-                                ->label('Repetir hasta')
-                                ->minDate(
-                                    fn($get) => $get('start_at')
-                                        ? Carbon::parse($get('start_at'))->addDay()
-                                        : null
-                                )
-                                ->visible(fn($get) => $get('is_recurring')),
-                        ]),
                     Section::make('Horario estructurada')
                         ->columns(3)
                         ->schema([
@@ -400,7 +400,6 @@ class CalendarWidget extends FullCalendarWidget
                         ]),
                 ]),
 
-            // Sección No Estructurada
             Section::make('PRÁCTICA NO ESTRUCTURADA')
                 ->visible(fn($get) => ! $get('is_structured'))
                 ->columns(4)
@@ -418,9 +417,10 @@ class CalendarWidget extends FullCalendarWidget
                                 ->seconds(false)
                                 ->after('start_at'),
                             ColorPicker::make('color')
-                                ->label('Color')
+                                ->label('Color'),
                         ]),
                 ]),
+
             Section::make('Recurrencia')
                 ->columns(1)
                 ->schema([
@@ -447,9 +447,6 @@ class CalendarWidget extends FullCalendarWidget
                         )
                         ->visible(fn($get) => $get('is_recurring')),
                 ]),
-
-            // Horario común
-
         ];
     }
 }

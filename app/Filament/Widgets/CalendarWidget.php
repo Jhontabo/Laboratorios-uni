@@ -33,8 +33,13 @@ class CalendarWidget extends FullCalendarWidget
 
     public static function canView(): bool
     {
+        if (request()->routeIs('filament.admin.pages.dashboard')) {
+            return false;
+        }
         return Auth::check() && Auth::user()->hasAnyRole(['ADMIN', 'COORDINADOR']);
     }
+
+
 
     public function config(): array
     {
@@ -194,7 +199,7 @@ class CalendarWidget extends FullCalendarWidget
 
                     $schedule = Schedule::create([
                         'type'             => $data['is_structured'] ? 'structured' : 'unstructured',
-                        'title'            => $data['is_structured'] ? $data['title'] : 'Reserva',
+                        'title'            => $data['is_structured'] ? $data['title'] : 'Disponible para reserva',
                         'start_at'         => $data['start_at'],
                         'end_at'           => $data['end_at'],
                         'color'            => $data['color'],

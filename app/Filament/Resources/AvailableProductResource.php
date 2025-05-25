@@ -18,13 +18,16 @@ class AvailableProductResource extends Resource
     protected static ?string $model = AvailableProduct::class;
     protected static ?string $navigationIcon = 'heroicon-m-shopping-cart';
     protected static ?string $navigationGroup = 'Prestamos';
-    protected static ?string $navigationLabel = 'Productos para prestamos';
-    protected static ?string $modelLabel = 'prestamo';
-    protected static ?string $pluralLabel = 'Productos para prestamos';
+    protected static ?string $navigationLabel = 'Productos para préstamos';
+    protected static ?string $modelLabel = 'producto';
+    protected static ?string $pluralLabel = 'Productos para préstamos';
+
     public static function getEloquentQuery(): Builder
     {
+        // Solo productos nuevos y disponibles para préstamo
         return parent::getEloquentQuery()
-            ->where('available_for_loan', true);
+            ->where('available_for_loan', true)
+            ->whereIn('status', ['new', 'used']);
     }
 
     public static function table(Table $table): Table
@@ -52,20 +55,6 @@ class AvailableProductResource extends Resource
                     ->color(fn($record) => $record->available_quantity > 10 ? 'success' : ($record->available_quantity > 0 ? 'warning' : 'danger'))
                     ->icon(fn($record) => $record->available_quantity > 10 ? 'heroicon-o-check-circle' : ($record->available_quantity > 0 ? 'heroicon-o-exclamation-circle' : 'heroicon-o-x-circle')),
 
-                TextColumn::make('status')
-                    ->label('Condicion')
-                    ->badge()
-                    ->color(fn($state) => match ($state) {
-                        'new' => 'success',
-                        'used' => 'warning',
-                        'damaged' => 'danger',
-                        'discarded' => 'gray',
-                        'lost' => 'danger',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn($state) => ucfirst(str_replace('_', ' ', $state)))
-                    ->sortable(),
-
                 TextColumn::make('product_type')
                     ->label('Tipo')
                     ->badge()
@@ -86,59 +75,57 @@ class AvailableProductResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('Ver')
-                    ->icon('heroicon-o-eye'),
-            ])
-            ->headerActions([
-                Tables\Actions\Action::make('infoSelection')
-                    ->label('como pedir un producto')
-                    ->color('gray')
-                    ->icon('heroicon-o-question-mark-circle')
-                    ->modalContent(view('filament.pages.instructions-request'))
+                    ->icon('heroicon-o-eye')
+                    ->modalHeading(fn($record) => "Detalles del producto: {$record->name}")
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Understood'),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('requestLoan')
-                    ->label('Request Products (max. 5)')
+                    ->modalCancelActionLabel('Cerrar')
+                    ->modalContent(function ($record) {
+                        return view('filament.pages.view-AvailableProduct', [
+                            'product' => $record
+                        ]);
+                    }),
+
+                Tables\Actions\Action::make('requestLoan')
+                    ->label('Solicitar')
                     ->icon('heroicon-o-clipboard-document-list')
-                    ->action(function ($records) {
-                        if ($records->count() > 5) {
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirmar solicitud')
+                    ->modalDescription(fn(AvailableProduct $record) => "¿Confirma la solicitud del producto '{$record->name}'?")
+                    ->action(function (AvailableProduct $record) {
+                        // Validar cantidad mínima
+                        if ($record->available_quantity < 5) {
                             Notification::make()
-                                ->title('Limit Exceeded')
-                                ->body('You can only select up to 5 products')
+                                ->title("{$record->name}: cantidad insuficiente")
+                                ->body('Debe haber al menos 5 unidades disponibles para solicitar este producto.')
                                 ->danger()
                                 ->send();
                             return;
                         }
 
-                        foreach ($records as $record) {
-                            if ($record->available_quantity <= 0) {
-                                Notification::make()
-                                    ->title("{$record->name} not available")
-                                    ->danger()
-                                    ->send();
-                                continue;
-                            }
-
-                            Loan::create([
-                                'product_id' => $record->id,
-                                'user_id' => auth()->id(),
-                                'status' => 'pending',
-                                'requested_at' => now(), // Change this from 'request_date' to 'requested_at'
-                            ]);
-                        }
+                        Loan::create([
+                            'product_id'   => $record->id,
+                            'user_id'      => auth()->id(),
+                            'status'       => 'pending',
+                            'requested_at' => now(),
+                        ]);
 
                         Notification::make()
-                            ->title('Request registered')
-                            ->body("{$records->count()} products requested successfully")
+                            ->title('Solicitud registrada')
                             ->success()
+                            ->body("Producto solicitado: {$record->name}")
                             ->send();
-                    })
-                    ->requiresConfirmation()
-                    ->modalHeading('Confirm Request')
-                    ->modalDescription(fn($records) => "Do you confirm the request of {$records->count()} products?")
-                    ->deselectRecordsAfterCompletion(),
+                    }),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('infoSelection')
+                    ->label('Cómo pedir un producto')
+                    ->color('gray')
+                    ->icon('heroicon-o-question-mark-circle')
+                    ->modalContent(view('filament.pages.instructions-request'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Entendido'),
+            ])
+            // Sin bulkActions
             ->emptyState(view('filament.pages.empty-state-products'))
             ->persistFiltersInSession()
             ->persistSearchInSession();
@@ -148,7 +135,6 @@ class AvailableProductResource extends Resource
     {
         return [
             'index' => Pages\ListAvailableProducts::route('/'),
-            'view' => Pages\ViewAvalibleProducts::route('/{record}'),
         ];
     }
 }

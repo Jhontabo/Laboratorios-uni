@@ -6,10 +6,18 @@ use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 
 class ReadOnlyCalendarWidget extends CalendarWidget
 {
+
     public static function canView(): bool
     {
+        // 1) Si estamos en la ruta del dashboard, no mostrar
+        if (request()->routeIs('filament.pages.dashboard')) {
+            return false;
+        }
+
+        // 2) En cualquier otra ruta, delegar a la implementación padre
         return parent::canView();
     }
+
 
     protected function headerActions(): array
     {

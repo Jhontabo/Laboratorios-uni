@@ -7,19 +7,21 @@
                     Detalles de la reserva #{{ $record->id }}
                 </h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Creado el  {{ $record->created_at->format('d/m/Y H:i') }}
+                    Creado el {{ $record->created_at->format('d/m/Y H:i') }}
                 </p>
             </div>
 
             <x-filament::badge :color="match ($record->status) {
-                'pending' => 'warning',
-                'accepted' => 'success',
+                'pending'  => 'warning',
+                'approved' => 'success',
                 'rejected' => 'danger',
+                default    => 'secondary',
             }" class="text-sm">
                 {{ match ($record->status) {
-                    'pending' => 'Pending Approval',
-                    'accepted' => 'Approved',
+                    'pending'  => 'Pending Approval',
+                    'approved' => 'Approved',
                     'rejected' => 'Rejected',
+                    default    => ucfirst($record->status),
                 } }}
             </x-filament::badge>
         </div>
@@ -31,7 +33,7 @@
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         <x-heroicon-o-building-office class="w-5 h-5 inline mr-2" />
-                        Informacion del Laboratorio
+                        Información del Laboratorio
                     </h3>
 
                     <div class="space-y-2">
@@ -40,7 +42,7 @@
                             {{ $record->laboratory->name ?? 'No especificada' }}
                         </p>
                         <p>
-                            <span class="font-medium">Localizacion:</span>
+                            <span class="font-medium">Localización:</span>
                             {{ $record->laboratory->location ?? 'No especificada' }}
                         </p>
                         <p>
@@ -60,15 +62,15 @@
                     <div class="space-y-2">
                         <p>
                             <span class="font-medium">Fecha:</span>
-                            {{ $record->schedule->start_at->format('d/m/Y') ?? 'No especicada' }}
+                            {{ $record->schedule->start_at->format('d/m/Y') ?? 'No especificada' }}
                         </p>
                         <p>
                             <span class="font-medium">Hora:</span>
-                            {{ $record->schedule->start_at->format('H:i') ?? '00:00' }} -
+                            {{ $record->schedule->start_at->format('H:i') ?? '00:00' }} –
                             {{ $record->schedule->end_at->format('H:i') ?? '00:00' }}
                         </p>
                         <p>
-                            <span class="font-medium">Duracion:</span>
+                            <span class="font-medium">Duración:</span>
                             {{ $record->schedule->start_at->diffInHours($record->schedule->end_at) }} horas
                         </p>
                     </div>
@@ -80,24 +82,24 @@
         <x-filament::card>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                 <x-heroicon-o-user class="w-5 h-5 inline mr-2" />
-                Informacion del aplicante
+                Información del solicitante
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <p class="font-medium">Nombre:</p>
-                    <p>{{ $record->first_name }} </p>
+                    <p>{{ $record->first_name }}</p>
                 </div>
 
                 <div>
                     <p class="font-medium">Apellido:</p>
                     <p>{{ $record->last_name }}</p>
-                    <br>
+                </div>
+
                 <div>
                     <p class="font-medium">Email:</p>
                     <p>{{ $record->email }}</p>
                 </div>
-
             </div>
         </x-filament::card>
 
@@ -112,11 +114,11 @@
 
                     <div class="space-y-2">
                         <p>
-                            <span class="font-medium">Fecha de peticion:</span>
+                            <span class="font-medium">Fecha de petición:</span>
                             {{ $record->created_at->format('d/m/Y H:i') }}
                         </p>
                         <p>
-                            <span class="font-medium">Ultima fecha de actualizacion:</span>
+                            <span class="font-medium">Última actualización:</span>
                             {{ $record->updated_at->format('d/m/Y H:i') }}
                         </p>
                     </div>
@@ -126,7 +128,7 @@
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                             <x-heroicon-o-x-circle class="w-5 h-5 inline mr-2 text-danger-500" />
-                            Reason for Rejection
+                            Motivo de Rechazo
                         </h3>
                         <p class="bg-danger-50 dark:bg-danger-900/50 p-4 rounded-lg">
                             {{ $record->rejection_reason }}

@@ -455,7 +455,7 @@ class ProductResource extends Resource
                     ->label('Marcar como Perdido')
                     ->icon('heroicon-o-shield-exclamation')
                     ->color('warning')
-                    ->action(fn(Collection $records) => $records->each->update(['status' => 'lost']))
+                    ->action(fn(Collection $records) => $records->each->update(['status' => 'lost', 'available_for_loan' => false,]))
                     ->requiresConfirmation()
                     ->modalHeading('Marcar productos seleccionados como perdidos')
                     ->modalDescription('¿Está seguro de marcar estos productos como perdidos?')
@@ -603,6 +603,7 @@ class ProductResource extends Resource
 
                             $record->update([
                                 'status' => 'decommissioned',
+                                'available_for_loan' => false,
                                 'decommissioned_at' => now(),
                                 'decommissioned_by' => auth()->id(),
                             ]);

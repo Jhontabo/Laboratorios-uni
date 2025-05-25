@@ -37,9 +37,9 @@ class ReservationRequestResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
 
-                TextColumn::make('schedule.laboratory.location') // Asegúrate de que 'schedule.laboratory.location' sea la ruta correcta
+                TextColumn::make('laboratory.name') // Asegúrate de que 'schedule.laboratory.location' sea la ruta correcta
                     ->label('Laboratorio')
-                    ->description(fn($record) => $record->schedule?->laboratory?->location ?? 'No location') // Usa 'schedule.laboratory.location'
+                    ->description(fn($record) => $record->laboratory?->location ?? 'No location') // Usa 'schedule.laboratory.location'
                     ->searchable()
                     ->icon('heroicon-o-building-office'),
                 TextColumn::make('user.name') // Usamos 'user.name' para acceder al nombre completo
@@ -49,7 +49,7 @@ class ReservationRequestResource extends Resource
                     ->icon('heroicon-o-user'),
 
                 TextColumn::make('interval')
-                    ->label('Estado')
+                    ->label('Intervalo')
                     ->getStateUsing(fn($record) => $record->schedule && $record->schedule->start_at && $record->schedule->end_at
                         ? $record->schedule->start_at->format('d M Y, H:i') . ' - ' . $record->schedule->end_at->format('H:i')
                         : 'Not assigned')
@@ -59,9 +59,9 @@ class ReservationRequestResource extends Resource
                 TextColumn::make('status')
                     ->label('Estado')
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'pending' => 'Pending Review',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
+                        'pending' => 'Pendiente',
+                        'approved' => 'Aprovado',
+                        'rejected' => 'Rechazado',
                         default => ucfirst($state),
                     })
                     ->badge()

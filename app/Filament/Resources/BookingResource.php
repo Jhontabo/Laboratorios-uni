@@ -18,7 +18,8 @@ use Filament\Forms\Components\{
     Radio,
     Select,
     TextInput,
-    DateTimePicker
+    DateTimePicker,
+    Placeholder
 };
 use Illuminate\Support\Facades\Auth;
 
@@ -28,17 +29,26 @@ class BookingResource extends Resource
 
     protected static ?string $navigationIcon  = 'heroicon-o-calendar-days';
     protected static ?string $navigationLabel = 'Reservar Espacio';
-    protected static ?string $navigationGroup = 'Gestión de Reservas';
+    protected static ?string $navigationGroup = 'Gestion de Reservas';
 
     public static function table(Table $table): Table
     {
         return $table
             ->query(Schedule::where('type', 'unstructured')->orderBy('start_at'))
             ->columns([
-                TextColumn::make('title')->label('Título')->sortable(),
-                TextColumn::make('start_at')->label('Inicio')->sortable(),
-                TextColumn::make('end_at')->label('Fin')->sortable(),
-                TextColumn::make('laboratory.name')->label('Laboratorio'),
+                TextColumn::make('title')
+                    ->label('Título')
+                    ->sortable(),
+
+                TextColumn::make('start_at')
+                    ->label('Inicio')
+                    ->sortable()
+                    ->dateTime('d/m/Y H:i'),
+
+                TextColumn::make('end_at')
+                    ->label('Fin')
+                    ->sortable()
+                    ->dateTime('d/m/Y H:i'),
             ])
             ->actions([
                 TableAction::make('reservar')
@@ -47,7 +57,7 @@ class BookingResource extends Resource
                     ->modalHeading('Solicitud de Reserva')
                     ->modalWidth('lg')
                     ->form([
-                        // Ya no preguntamos datos personales: los tomamos de Auth::user()
+                        // No solicitamos datos personales: los obtenemos de Auth::user()
                         Section::make('Detalles de la práctica')->schema([
                             Radio::make('project_type')
                                 ->label('Tipo de proyecto')
@@ -57,10 +67,12 @@ class BookingResource extends Resource
                                 ])
                                 ->columns(2)
                                 ->required(),
+
                             Select::make('laboratory_id')
                                 ->label('Espacio académico')
                                 ->options(fn() => \App\Models\Laboratory::pluck('name', 'id'))
                                 ->required(),
+
                             Select::make('academic_program')
                                 ->label('Programa académico')
                                 ->options([
@@ -70,20 +82,25 @@ class BookingResource extends Resource
                                     'Administración de Empresas' => 'Administración de Empresas',
                                 ])
                                 ->required(),
+
                             Select::make('semester')
                                 ->label('Semestre')
                                 ->options(array_combine(range(1, 10), range(1, 10)))
                                 ->required(),
+
                             TextInput::make('applicants')
                                 ->label('Solicitantes')
                                 ->required(),
+
                             TextInput::make('research_name')
-                                ->label('Investigación')
+                                ->label('Nombre de la investigación')
                                 ->required(),
+
                             TextInput::make('advisor')
                                 ->label('Asesor')
                                 ->required(),
                         ]),
+
                         Section::make('Materiales y equipos')->schema([
                             Select::make('products')
                                 ->label('Productos disponibles')
@@ -98,16 +115,19 @@ class BookingResource extends Resource
                                 )
                                 ->required(),
                         ]),
+
                         Section::make('Horario solicitado')->schema([
+                            // Mostrar campos como solo lectura
                             DateTimePicker::make('start_at')
                                 ->label('Inicio')
-                                ->required()
-                                ->default(fn(Schedule $record) => $record->start_at),
+                                ->default(fn(Schedule $record) => $record->start_at)
+                                ->readOnly(),
+
                             DateTimePicker::make('end_at')
                                 ->label('Fin')
-                                ->required()
                                 ->after('start_at')
-                                ->default(fn(Schedule $record) => $record->end_at),
+                                ->default(fn(Schedule $record) => $record->end_at)
+                                ->readOnly(),
                         ]),
                     ])
                     ->action(function (Schedule $record, array $data, TableAction $action): void {

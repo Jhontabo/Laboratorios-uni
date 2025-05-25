@@ -17,18 +17,17 @@ class LoanResource extends Resource
     protected static ?string $model = Loan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $navigationLabel = 'Mis prestamos';
+    protected static ?string $navigationLabel = 'Mis préstamos';
     protected static ?string $navigationGroup = 'Prestamos';
-    protected static ?string $modelLabel = 'Prestamo';
-    protected static ?string $pluralModelLabel = 'Mis prestamos';
+    protected static ?string $modelLabel = 'Préstamo';
+    protected static ?string $pluralModelLabel = 'Mis préstamos';
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with(['product'])
             ->where('user_id', Auth::id());
     }
-
-
 
     public static function table(Table $table): Table
     {
@@ -53,10 +52,16 @@ class LoanResource extends Resource
                         'returned' => 'info',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => ucfirst($state)),
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'pending' => 'Pendiente',
+                        'approved' => 'Aprobado',
+                        'rejected' => 'Rechazado',
+                        'returned' => 'Devuelto',
+                        default => ucfirst($state),
+                    }),
 
                 TextColumn::make('requested_at')
-                    ->label('Fecha peticion')
+                    ->label('Fecha petición')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
 
@@ -67,30 +72,27 @@ class LoanResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('estimated_return_at')
-                    ->label('Fecha devolucion')
+                    ->label('Fecha devolución')
                     ->dateTime('d M Y')
-                    ->placeholder('No Asigando'),
+                    ->placeholder('No asignado'),
 
                 TextColumn::make('actual_return_at')
                     ->label('Devuelto')
                     ->dateTime('d M Y H:i')
-                    ->placeholder('No Devuelto'),
+                    ->placeholder('No devuelto'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
-                        'returned' => 'Returned',
+                        'pending' => 'Pendiente',
+                        'approved' => 'Aprobado',
+                        'rejected' => 'Rechazado',
+                        'returned' => 'Devuelto',
                     ])
-                    ->label('Estado del prestamo'),
+                    ->label('Estado del préstamo'),
             ])
-
-            ->emptyStateHeading('You have no loans yet');
+            ->emptyStateHeading('Aún no tienes préstamos registrados');
     }
-
-
 
     public static function getPages(): array
     {

@@ -17,10 +17,10 @@ class ReservationHistorysResource extends Resource
 {
     protected static ?string $model = Booking::class;
     protected static ?string $navigationIcon = 'heroicon-o-clock';
-    protected static ?string $navigationLabel = 'Historial Reservas';
+    protected static ?string $navigationLabel = 'Historial de Reservas';
     protected static ?string $navigationGroup = 'Gestion de Reservas';
-    protected static ?string $modelLabel = 'Horario';
-    protected static ?string $pluralLabel = 'Mis reservas';
+    protected static ?string $modelLabel = 'Reserva';
+    protected static ?string $pluralLabel = 'Mis Reservas';
 
     public static function getNavigationBadge(): ?string
     {
@@ -29,11 +29,11 @@ class ReservationHistorysResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        $pending = static::getModel()::where('user_id', Auth::id())
+        $pendientes = static::getModel()::where('user_id', Auth::id())
             ->where('status', 'pending')
             ->count();
 
-        return $pending > 0 ? 'warning' : 'success';
+        return $pendientes > 0 ? 'warning' : 'success';
     }
 
     public static function query(Builder $query): Builder
@@ -55,7 +55,7 @@ class ReservationHistorysResource extends Resource
             ->columns([
                 TextColumn::make('laboratory.name')
                     ->label('Laboratorio')
-                    ->description(fn($record) => $record->laboratory?->location ?? 'No location')
+                    ->description(fn($record) => $record->laboratory?->location ?? 'Sin ubicación')
                     ->searchable()
                     ->sortable()
                     ->icon('heroicon-o-building-office'),
@@ -64,55 +64,43 @@ class ReservationHistorysResource extends Resource
                     ->label('Horario')
                     ->getStateUsing(function ($record) {
                         if (!$record->schedule) {
-                            return 'Not assigned';
+                            return 'No asignado';
                         }
-                        $start = $record->schedule->start_at->format('d M Y, H:i');
+                        $start = $record->schedule->start_at->format('d/m/Y H:i');
                         $end = $record->schedule->end_at->format('H:i');
-                        return "$start - $end";
+                        return "{$start} - {$end}";
                     })
-                    ->description(fn($record) => $record->schedule?->description ?? 'No description')
-                    ->sortable()
+                    ->description(fn($record) => $record->schedule?->description ?? 'Sin descripción')
                     ->icon('heroicon-o-clock'),
 
                 BadgeColumn::make('status')
                     ->label('Estado')
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'pending' => 'Pending Approval',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
-                        default => ucfirst($state),
+                        'pending'  => 'Pendiente de aprobación',
+                        'approved' => 'Aprobada',
+                        'rejected' => 'Rechazada',
+                        default    => ucfirst($state),
                     })
                     ->colors([
                         'warning' => 'pending',
                         'success' => 'approved',
-                        'danger' => 'rejected',
+                        'danger'  => 'rejected',
                     ])
                     ->icon(fn($state) => match ($state) {
-                        'pending' => 'heroicon-o-clock',
+                        'pending'  => 'heroicon-o-clock',
                         'approved' => 'heroicon-o-check-circle',
                         'rejected' => 'heroicon-o-x-circle',
-                        default => null,
+                        default    => null,
                     })
                     ->sortable(),
 
-                TextColumn::make('created_at')
-                    ->label('Rechazado')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->icon('heroicon-o-calendar'),
-
-                TextColumn::make('updated_at')
-                    ->label('Ultima actualizacion')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('status')
                     ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
+                        'pending'  => 'Pendiente',
+                        'approved' => 'Aprobada',
+                        'rejected' => 'Rechazada',
                     ])
                     ->label('Estado de la reserva'),
 
@@ -127,8 +115,8 @@ class ReservationHistorysResource extends Resource
                     ->label('Ver detalles'),
             ])
             ->bulkActions([])
-            ->emptyStateHeading('No reservations yet')
-            ->emptyStateDescription('Your reservations will appear here once you create them.')
+            ->emptyStateHeading('Aún no hay reservas')
+            ->emptyStateDescription('Tus reservas aparecerán aquí una vez que las crees.')
             ->emptyStateIcon('heroicon-o-calendar');
     }
 
@@ -136,7 +124,7 @@ class ReservationHistorysResource extends Resource
     {
         return [
             'index' => Pages\ListReservationHistories::route('/'),
-            'view' => Pages\ViewReservationHistory::route('/{record}'),
+            'view'  => Pages\ViewReservationHistory::route('/{record}'),
         ];
     }
 }

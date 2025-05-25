@@ -4,44 +4,107 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    Detallles de Reserva #{{ $record->id }}
+                    Detalles de la reserva #{{ $record->id }}
                 </h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Created on {{ $record->created_at->format('d/m/Y H:i') }}
+                    Creado el {{ $record->created_at->format('d/m/Y H:i') }}
                 </p>
             </div>
-
             <x-filament::badge :color="match ($record->status) {
                 'pending' => 'warning',
-                'accepted' => 'success',
+                'approved', 'accepted' => 'success',
                 'rejected' => 'danger',
+                default => 'secondary',
             }" class="text-sm">
                 {{ match ($record->status) {
-                    'pending' => 'Pending Approval',
-                    'accepted' => 'Approved',
-                    'rejected' => 'Rejected',
+                    'pending' => 'Pendiente por aprobar',
+                    'approved', 'accepted' => 'Aprobada',
+                    'rejected' => 'Rechazada',
+                    default => ucfirst($record->status),
                 } }}
             </x-filament::badge>
         </div>
 
-        <!-- Main Information Section -->
+        <!-- Información del Proyecto y Académica -->
+        <x-filament::card>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                <x-heroicon-o-academic-cap class="w-5 h-5 inline mr-2" />
+                Información del Proyecto y Académica
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <p class="font-medium">Tipo de proyecto:</p>
+                    <p>{{ $record->project_type ?? 'No especificado' }}</p>
+                </div>
+                <div>
+                    <p class="font-medium">Semestre:</p>
+                    <p>{{ $record->semester ?? 'No especificado' }}</p>
+                </div>
+                <div>
+                    <p class="font-medium">Laboratorio a utilizar:</p>
+                    <p>{{ $record->laboratory->name ?? 'No especificado' }}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <p class="font-medium">Solicitante:</p>
+                    <p>
+                        {{
+                            $record->applicant_name
+                                ?? trim(($record->first_name ?? '') . ' ' . ($record->last_name ?? ''))
+                                ?? 'No especificado'
+                        }}
+                    </p>
+                </div>
+                <div>
+                    <p class="font-medium">Investigador principal:</p>
+                    <p>
+                        {{ $record->research_name ?? 'No especificado' }}
+                    </p>
+                </div>
+                <div>
+                    <p class="font-medium">Asesor:</p>
+                    <p>
+                        {{ $record->advisor ?? 'No especificado' }}
+                    </p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="font-medium mb-1">Equipos, materiales e insumos solicitados:</p>
+                @php
+                    $nombresProductos = [];
+                    if (!empty($record->products)) {
+                        $nombresProductos = \App\Models\Product::whereIn('id', $record->products)->pluck('name')->toArray();
+                    }
+                @endphp
+                @if (count($nombresProductos))
+                    <ul class="list-disc ml-6">
+                        @foreach ($nombresProductos as $nombre)
+                            <li>{{ $nombre }}</li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p>No se especificaron equipos, materiales ni insumos.</p>
+                @endif
+            </div>
+        </x-filament::card>
+
+        <!-- Información del Laboratorio y Horario -->
         <x-filament::card>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Laboratory Information -->
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         <x-heroicon-o-building-office class="w-5 h-5 inline mr-2" />
-                        Informacion de laboratorio
+                        Información del Laboratorio
                     </h3>
-
                     <div class="space-y-2">
                         <p>
                             <span class="font-medium">Nombre:</span>
-                            {{ $record->laboratory->name ?? 'Not specified' }}
+                            {{ $record->laboratory->name ?? 'No especificada' }}
                         </p>
                         <p>
-                            <span class="font-medium">Localizacion:</span>
-                            {{ $record->laboratory->location ?? 'Not specified' }}
+                            <span class="font-medium">Localización:</span>
+                            {{ $record->laboratory->location ?? 'No especificada' }}
                         </p>
                         <p>
                             <span class="font-medium">Capacidad:</span>
@@ -49,87 +112,76 @@
                         </p>
                     </div>
                 </div>
-
-                <!-- Reservation Schedule -->
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         <x-heroicon-o-clock class="w-5 h-5 inline mr-2" />
                         Horario Reservado
                     </h3>
-
                     <div class="space-y-2">
                         <p>
                             <span class="font-medium">Fecha:</span>
-                            {{ $record->schedule->start_at->format('d/m/Y') ?? 'Not specified' }}
+                            {{ $record->schedule->start_at->format('d/m/Y') ?? 'No especificada' }}
                         </p>
                         <p>
                             <span class="font-medium">Hora:</span>
-                            {{ $record->schedule->start_at->format('H:i') ?? '00:00' }} -
+                            {{ $record->schedule->start_at->format('H:i') ?? '00:00' }} –
                             {{ $record->schedule->end_at->format('H:i') ?? '00:00' }}
                         </p>
                         <p>
-                            <span class="font-medium">Duracion:</span>
-                            {{ $record->schedule->start_at->diffInHours($record->schedule->end_at) }} hours
+                            <span class="font-medium">Duración:</span>
+                            {{ $record->schedule->start_at->diffInHours($record->schedule->end_at) }} horas
                         </p>
                     </div>
                 </div>
             </div>
         </x-filament::card>
 
-        <!-- Applicant Information Section -->
+        <!-- Información del solicitante -->
         <x-filament::card>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                 <x-heroicon-o-user class="w-5 h-5 inline mr-2" />
-                Applicant Information
+                Información del solicitante
             </h3>
-
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <p class="font-medium">Nombre:</p>
-                    <!-- Corrected to access the 'user' relationship -->
-                    <p>{{ $record->first_name ?? 'No first name provided' }}</p>
+                    <p>{{ $record->first_name }}</p>
                 </div>
-
                 <div>
                     <p class="font-medium">Apellido:</p>
-                    <!-- Corrected to access the 'user' relationship -->
-                    <p>{{ $record->last_name ?? 'No last name provided' }}</p>
+                    <p>{{ $record->last_name }}</p>
                 </div>
-
                 <div>
                     <p class="font-medium">Email:</p>
-                    <!-- Corrected to access the 'user' relationship -->
-                    <p>{{ $record->email ?? 'No email provided' }}</p>
+                    <p>{{ $record->email }}</p>
                 </div>
             </div>
         </x-filament::card>
 
-        <!-- Status and Comments Section -->
+        <!-- Detalles adicionales, estado, y motivo de rechazo si aplica -->
         <x-filament::card>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         <x-heroicon-o-document-text class="w-5 h-5 inline mr-2" />
-                        Detalles Adicionales
+                        Detalles adicionales
                     </h3>
-
                     <div class="space-y-2">
                         <p>
-                            <span class="font-medium">Fecha de peticion:</span>
+                            <span class="font-medium">Fecha de petición:</span>
                             {{ $record->created_at->format('d/m/Y H:i') }}
                         </p>
                         <p>
-                            <span class="font-medium">Ultima actualizacion:</span>
+                            <span class="font-medium">Última actualización:</span>
                             {{ $record->updated_at->format('d/m/Y H:i') }}
                         </p>
                     </div>
                 </div>
-
                 @if ($record->status === 'rejected' && $record->rejection_reason)
                     <div>
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                             <x-heroicon-o-x-circle class="w-5 h-5 inline mr-2 text-danger-500" />
-                            Reason for Rejection
+                            Motivo de Rechazo
                         </h3>
                         <p class="bg-danger-50 dark:bg-danger-900/50 p-4 rounded-lg">
                             {{ $record->rejection_reason }}

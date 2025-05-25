@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BookingResource\Pages\ListBookings;
+use App\Filament\Resources\BookingResource\Pages\ViewCalendar;
 use App\Filament\Widgets\CalendarWidget;
 use App\Models\Booking;
 use App\Models\Schedule;
@@ -10,14 +11,14 @@ use App\Models\Product;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\Action as TableAction;
 use Filament\Forms\Components\{
     Section,
     Radio,
     Select,
     TextInput,
-    DateTimePicker,
-    ColorPicker
+    DateTimePicker
 };
 use Illuminate\Support\Facades\Auth;
 
@@ -40,27 +41,26 @@ class BookingResource extends Resource
                 TextColumn::make('laboratory.name')->label('Laboratorio'),
             ])
             ->actions([
-                Action::make('reservar')
+                TableAction::make('reservar')
                     ->label('Reservar')
                     ->button()
                     ->modalHeading('Solicitud de Reserva')
                     ->modalWidth('lg')
                     ->form([
-                        Section::make()->schema([
+                        // Ya no preguntamos datos personales: los tomamos de Auth::user()
+                        Section::make('Detalles de la práctica')->schema([
                             Radio::make('project_type')
-                                ->label('Poryecto integrador')
+                                ->label('Tipo de proyecto')
                                 ->options([
                                     'Trabajo de grado'         => 'Trabajo de grado',
                                     'Investigación profesoral' => 'Investigación profesoral',
                                 ])
-                                ->columns(3)
+                                ->columns(2)
                                 ->required(),
-
                             Select::make('laboratory_id')
                                 ->label('Espacio académico')
                                 ->options(fn() => \App\Models\Laboratory::pluck('name', 'id'))
                                 ->required(),
-
                             Select::make('academic_program')
                                 ->label('Programa académico')
                                 ->options([
@@ -70,26 +70,21 @@ class BookingResource extends Resource
                                     'Administración de Empresas' => 'Administración de Empresas',
                                 ])
                                 ->required(),
-
                             Select::make('semester')
                                 ->label('Semestre')
                                 ->options(array_combine(range(1, 10), range(1, 10)))
                                 ->required(),
-
                             TextInput::make('applicants')
                                 ->label('Solicitantes')
                                 ->required(),
-
                             TextInput::make('research_name')
                                 ->label('Investigación')
                                 ->required(),
-
                             TextInput::make('advisor')
                                 ->label('Asesor')
                                 ->required(),
                         ]),
-
-                        Section::make('MATERIALES Y EQUIPOS')->schema([
+                        Section::make('Materiales y equipos')->schema([
                             Select::make('products')
                                 ->label('Productos disponibles')
                                 ->multiple()
@@ -103,26 +98,27 @@ class BookingResource extends Resource
                                 )
                                 ->required(),
                         ]),
-
-                        Section::make('Horario')->columns(3)->schema([
+                        Section::make('Horario solicitado')->schema([
                             DateTimePicker::make('start_at')
                                 ->label('Inicio')
                                 ->required()
-                                ->seconds(false),
+                                ->default(fn(Schedule $record) => $record->start_at),
                             DateTimePicker::make('end_at')
                                 ->label('Fin')
                                 ->required()
-                                ->seconds(false)
-                                ->after('start_at'),
-                            ColorPicker::make('color')
-                                ->label('Color')
-                                ->default('#3b82f6'),
+                                ->after('start_at')
+                                ->default(fn(Schedule $record) => $record->end_at),
                         ]),
                     ])
-                    ->action(function (Schedule $record, array $data): void {
+                    ->action(function (Schedule $record, array $data, TableAction $action): void {
+                        $user = Auth::user();
+
                         Booking::create([
                             'schedule_id'      => $record->id,
-                            'user_id'          => Auth::id(),
+                            'user_id'          => $user->id,
+                            'first_name'       => $user->first_name ?? $user->name,
+                            'last_name'        => $user->last_name  ?? null,
+                            'email'            => $user->email,
                             'project_type'     => $data['project_type'],
                             'laboratory_id'    => $data['laboratory_id'],
                             'academic_program' => $data['academic_program'],
@@ -130,24 +126,20 @@ class BookingResource extends Resource
                             'applicants'       => $data['applicants'],
                             'research_name'    => $data['research_name'],
                             'advisor'          => $data['advisor'],
-                            'products'         => json_encode($data['products']),
+                            'products'         => $data['products'], // se castea a array automáticamente
                             'start_at'         => $data['start_at'],
                             'end_at'           => $data['end_at'],
-                            'color'            => $data['color'],
-                            'status'           => 'pending',
+                            'status'           => Booking::STATUS_PENDING,
                         ]);
 
-                        Action::message('¡Solicitud enviada!');
+                        $action->success('¡Solicitud enviada y pendiente de aprobación!');
                     }),
-            ])
-            ->headerActions([
-                Action::make('ver_calendario')
+
+                ViewAction::make('ver_calendario')
                     ->label('Ver Calendario')
                     ->icon('heroicon-o-calendar')
-                    ->modalHeading('Calendario de Reservas')
-                    ->modalWidth('4xl')
-                    // Aquí la closure que retorna la vista
-                    ->modalContent(fn() => view('filament.pages.booking-calendar')),
+                    ->url(static::getUrl('calendar'))
+                    ->openUrlInNewTab(),
             ]);
     }
 
@@ -161,7 +153,8 @@ class BookingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListBookings::route('/'),
+            'index'    => ListBookings::route('/'),
+            'calendar' => ViewCalendar::route('/calendar'),
         ];
     }
 }

@@ -9,38 +9,49 @@ return new class extends Migration
     public function up()
     {
         Schema::create('bookings', function (Blueprint $table) {
-            $table->id(); // Primary key (id)
+            $table->id();
 
-            // Guest user information
-            $table->string('first_name')->nullable()->comment('First name of the user who made the booking');
-            $table->string('last_name')->nullable()->comment('Last name of the user who made the booking');
-            $table->string('email')->nullable()->comment('Email of the user who made the booking');
+            // Datos personales (del usuario autenticado)
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('email')->nullable();
 
-            // Rejection reason (optional)
-            $table->text('rejection_reason')->nullable()->comment('Reason for booking rejection');
+            // Motivo de rechazo
+            $table->text('rejection_reason')->nullable();
 
-            // Foreign key to schedules
+            // Relaciones
             $table->foreignId('schedule_id')
-                ->constrained('schedules') // It assumes schedules table has a simple 'id'
-                ->cascadeOnDelete()
-                ->cascadeOnUpdate();
-
-            // Foreign key to users
+                ->constrained('schedules')
+                ->cascadeOnDelete();
             $table->foreignId('user_id')
                 ->nullable()
                 ->constrained('users')
-                ->nullOnDelete(); // If the user is deleted, set NULL
-
-            // Foreign key to laboratories
+                ->nullOnDelete();
             $table->foreignId('laboratory_id')
                 ->nullable()
                 ->constrained('laboratories')
                 ->cascadeOnDelete();
 
-            // Booking status
+            // Datos de la solicitud
+            $table->string('project_type')->nullable();
+            $table->string('academic_program')->nullable();
+            $table->unsignedTinyInteger('semester')->nullable();
+            $table->text('applicants')->nullable();
+            $table->string('research_name')->nullable();
+            $table->string('advisor')->nullable();
+            $table->json('products')->nullable();
 
-            $table->enum('status', ['pending', 'approved', 'reserved', 'rejected'])->default('pending');
-            // Timestamps
+            // Horario solicitado
+            $table->dateTime('start_at')->nullable();
+            $table->dateTime('end_at')->nullable();
+
+            // Color opcional
+            $table->string('color')->default('#3b82f6');
+
+            // Estado de la solicitud
+            $table->enum('status', ['pending', 'approved', 'reserved', 'rejected'])
+                ->default('pending');
+
             $table->timestamps();
         });
     }

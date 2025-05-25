@@ -22,3 +22,7 @@ Route::get('/dashboard', function () {
     // Todos los usuarios van al dashboard admin
     return redirect('/admin');
 })->name('dashboard');
+
+
+
+Route::middleware(['web', 'auth'])->get('/calendar-only', fn() => view('filament.pages.booking-calendar'));

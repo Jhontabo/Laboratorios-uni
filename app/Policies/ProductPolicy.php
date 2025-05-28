@@ -10,44 +10,33 @@ class ProductPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine if the user can view any products.
-     */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view product panel');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver panel de productos');
     }
 
-    /**
-     * Determine if the user can view a specific product.
-     */
     public function view(User $user, Product $product): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view product');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver cualquier producto');
     }
 
-    /**
-     * Determine if the user can create a product.
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('create product');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('crear producto');
     }
 
-    /**
-     * Determine if the user can update a product.
-     */
     public function update(User $user, Product $product): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('update product');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('actualizar producto');
     }
 
-    /**
-     * Determine if the user can delete a product.
-     */
     public function delete(User $user, Product $product): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete product');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('eliminar producto');
     }
 }
-

@@ -10,44 +10,33 @@ class SchedulePolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any schedules.
-     */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view schedule panel');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver panel de horarios');
     }
 
-    /**
-     * Determine whether the user can view a specific schedule.
-     */
     public function view(User $user, Schedule $schedule): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view schedule');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver cualquier horario');
     }
 
-    /**
-     * Determine whether the user can create a schedule.
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('create schedule');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('crear horario');
     }
 
-    /**
-     * Determine whether the user can update a schedule.
-     */
     public function update(User $user, Schedule $schedule): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('update schedule');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('actualizar horario');
     }
 
-    /**
-     * Determine whether the user can delete a schedule.
-     */
     public function delete(User $user, Schedule $schedule): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete schedule');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('eliminar horario');
     }
 }
-

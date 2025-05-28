@@ -10,74 +10,48 @@ class BookingPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine if the user can view any reservations.
-     */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view reservation panel');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver panel de reservas');
     }
 
-    /**
-     * Determine if the user can view a specific reservation.
-     */
     public function view(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('view any reservation')
-            || $booking->user_id === $user->user_id;
+            || $user->hasPermissionTo('ver cualquier reserva')
+            || $booking->user_id === $user->id;
     }
 
-    /**
-     * Determine if the user can create a reservation.
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('create reservation');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('crear reserva');
     }
 
-    /**
-     * Determine if the user can update a reservation.
-     */
     public function update(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('update reservation')
-            || ($booking->user_id === $user->user_id && $booking->estado === 'pendiente');
+            || $user->hasPermissionTo('actualizar reserva')
+            || ($booking->user_id === $user->id && $booking->estado === 'pendiente');
     }
 
-    /**
-     * Determine if the user can delete a reservation.
-     */
     public function delete(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('delete reservation')
-            || ($booking->user_id === $user->user_id && $booking->estado === 'pendiente');
+            || $user->hasPermissionTo('eliminar reserva')
+            || ($booking->user_id === $user->id && $booking->estado === 'pendiente');
     }
 
-    /**
-     * Determine if the user can view the reservation requests panel.
-     */
+    // Panel de solicitudes de reserva
     public function viewRequests(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view reservation requests panel');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de solicitudes de reserva');
     }
 
-    /**
-     * Determine if the user can manage a specific reservation request.
-     */
-    public function manageRequest(User $user, Booking $booking): bool
-    {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('manage reservation requests');
-    }
-
-    /**
-     * Determine if the user can view the reservation history.
-     */
+    // Historial de reservas
     public function viewHistory(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view reservation history');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de historial de reservas');
     }
 }
-

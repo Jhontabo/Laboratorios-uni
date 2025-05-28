@@ -2,52 +2,41 @@
 
 namespace App\Policies;
 
-use App\Models\Role;
 use App\Models\User;
+use Spatie\Permission\Models\Role as RoleModel;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RolePolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any roles.
-     */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('view role panel');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver panel de roles');
     }
 
-    /**
-     * Determine whether the user can view a specific role.
-     */
-    public function view(User $user, Role $role): bool
+    public function view(User $user, RoleModel $role): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view role');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver cualquier rol');
     }
 
-    /**
-     * Determine whether the user can create a role.
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('create role');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('crear rol');
     }
 
-    /**
-     * Determine whether the user can update a role.
-     */
-    public function update(User $user, Role $role): bool
+    public function update(User $user, RoleModel $role): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('update role');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('actualizar rol');
     }
 
-    /**
-     * Determine whether the user can delete a role.
-     */
-    public function delete(User $user, Role $role): bool
+    public function delete(User $user, RoleModel $role): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete role');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('eliminar rol');
     }
 }
-

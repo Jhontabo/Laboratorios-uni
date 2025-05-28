@@ -9,36 +9,33 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any users.
-     */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('view user panel');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver panel de usuarios');
     }
 
-    /**
-     * Determine whether the user can create a user.
-     */
+    public function view(User $user, User $targetUser): bool
+    {
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver cualquier usuario');
+    }
+
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('crear usuario');
     }
 
-    /**
-     * Determine whether the user can update a user.
-     */
     public function update(User $user, User $targetUser): bool
     {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('actualizar usuario');
     }
 
-    /**
-     * Determine whether the user can delete a user.
-     */
     public function delete(User $user, User $targetUser): bool
     {
-        return $user->hasRole('ADMIN');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('eliminar usuario');
     }
 }
-

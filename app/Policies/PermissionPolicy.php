@@ -3,51 +3,40 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Permission;
+use Spatie\Permission\Models\Permission as Perm;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PermissionPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine if the user can view any permissions.
-     */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view permission panel');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver panel de permisos');
     }
 
-    /**
-     * Determine if the user can view a specific permission.
-     */
-    public function view(User $user, Permission $permission): bool
+    public function view(User $user, Perm $permission): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('view permission');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('ver cualquier permiso');
     }
 
-    /**
-     * Determine if the user can create a permission.
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('create permission');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('crear permiso');
     }
 
-    /**
-     * Determine if the user can update a permission.
-     */
-    public function update(User $user, Permission $permission): bool
+    public function update(User $user, Perm $permission): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('update permission');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('actualizar permiso');
     }
 
-    /**
-     * Determine if the user can delete a permission.
-     */
-    public function delete(User $user, Permission $permission): bool
+    public function delete(User $user, Perm $permission): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('delete permission');
+        return $user->hasRole('ADMIN') ||
+            $user->hasPermissionTo('eliminar permiso');
     }
 }
-

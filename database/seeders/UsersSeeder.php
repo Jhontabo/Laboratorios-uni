@@ -17,6 +17,7 @@ class UsersSeeder extends Seeder
             'DOCENTE',
             'LABORATORISTA',
             'ESTUDIANTE',
+            'COORDINADOR'
         ];
 
         foreach ($roles as $role) {
@@ -41,7 +42,7 @@ class UsersSeeder extends Seeder
                 'last_name' => 'Burbano',
                 'phone' => '987654321',
                 'address' => 'Calle Real 456',
-                'role' => 'ADMIN',
+                'role' => 'ESTUDIANTE',
                 'document_number' => '123456789',
 
 

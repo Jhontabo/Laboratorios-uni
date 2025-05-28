@@ -10,146 +10,111 @@ class PermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create roles
-        $admin = Role::firstOrCreate(['name' => 'ADMIN', 'guard_name' => 'web']);
+        // 1. Crear roles
+        $admin                = Role::firstOrCreate(['name' => 'ADMIN',         'guard_name' => 'web']);
         $laboratoryTechnician = Role::firstOrCreate(['name' => 'LABORATORISTA', 'guard_name' => 'web']);
-        $teacher = Role::firstOrCreate(['name' => 'DOCENTE', 'guard_name' => 'web']);
-        $student = Role::firstOrCreate(['name' => 'ESTUDIANTE', 'guard_name' => 'web']);
+        $teacher              = Role::firstOrCreate(['name' => 'DOCENTE',       'guard_name' => 'web']);
+        $student              = Role::firstOrCreate(['name' => 'ESTUDIANTE',    'guard_name' => 'web']);
+        $coordinator          = Role::firstOrCreate(['name' => 'COORDINADOR',   'guard_name' => 'web']);
 
-        // List of permissions (in English now)
+        // 2. Lista completa de permisos en español
         $permissions = [
-            // Panels
-            'view product panel',
-            'view reservation history panel',
-            'view schedule panel',
-            'view laboratory panel',
-            'view permission panel',
-            'view any reservation',
-            'view any schedule',
-            'view any laboratory',
-            'view any product',
-            'view any role',
-            'view any user',
-            'view role panel',
-            'view user panel',
-            'view reservation requests panel',
-            'view any reservation request',
-            'view any permission',
-            'view permissions',
-            'view role',
-            'view user',
-            'view reservation request',
-            'view schedule',
-            'view laboratory',
-            'view product',
-            'view reservation panel',
+            // Paneles
+            'ver panel de productos',
+            'ver panel de historial de reservas',
+            'ver panel de horarios',
+            'ver panel de laboratorios',
+            'ver panel de permisos',
+            'ver cualquier reserva',
+            'ver cualquier horario',
+            'ver cualquier laboratorio',
+            'ver cualquier producto',
+            'ver cualquier rol',
+            'ver cualquier usuario',
+            'ver panel de roles',
+            'ver panel de usuarios',
+            'ver panel de solicitudes de reserva',
+            'ver cualquier solicitud de reserva',
+            'ver cualquier permiso',
+            'ver permisos',
+            'ver rol',
+            'ver usuario',
+            'ver solicitud de reserva',
+            'ver horario',
+            'ver laboratorio',
+            'ver producto',
+            'ver panel de reservas',
 
-            // Update
-            'update schedule',
-            'update laboratory',
-            'update role',
-            'update product',
-            'update reservation',
-            'update user',
+            // Actualizar
+            'actualizar horario',
+            'actualizar laboratorio',
+            'actualizar rol',
+            'actualizar producto',
+            'actualizar reserva',
+            'actualizar usuario',
 
-            // Create
-            'create permission',
-            'create role',
-            'create user',
-            'create schedule',
-            'create reservation',
-            'create product',
-            'create laboratory',
-            'create reservation request',
+            // Crear
+            'crear permiso',
+            'crear rol',
+            'crear usuario',
+            'crear horario',
+            'crear reserva',
+            'crear producto',
+            'crear laboratorio',
+            'crear solicitud de reserva',
 
-            // Delete
-            'delete role',
-            'delete reservation',
-            'delete schedule',
-            'delete user',
-            'delete permission',
-            'delete reservation request',
-            'delete product',
-            'delete laboratory',
+            // Eliminar
+            'eliminar rol',
+            'eliminar reserva',
+            'eliminar horario',
+            'eliminar usuario',
+            'eliminar permiso',
+            'eliminar solicitud de reserva',
+            'eliminar producto',
+            'eliminar laboratorio',
         ];
 
-        // Create permissions in the database
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        // 3. Registrar todos los permisos
+        foreach ($permissions as $perm) {
+            Permission::firstOrCreate([
+                'name'       => $perm,
+                'guard_name' => 'web',
+            ]);
         }
 
-        // Assign all permissions to ADMIN
+        // 4. Asignación de permisos por rol
+
+        // 4.1 ADMIN: todos los permisos
         $admin->syncPermissions(Permission::all());
 
-        // Assign specific permissions to LABORATORISTA
-        $laboratoryTechnician->syncPermissions([
-            'view product panel',
-            'view reservation history panel',
-            'view schedule panel',
-            'view laboratory panel',
-            'view permission panel',
-            'view any reservation',
-            'view any schedule',
-            'view any laboratory',
-            'view any product',
-            'view any role',
-            'view any user',
-            'view role panel',
-            'view user panel',
-            'view reservation requests panel',
-            'view any reservation request',
-            'view any permission',
-            'view permissions',
-            'view role',
-            'view user',
-            'view reservation request',
-            'view schedule',
-            'view laboratory',
-            'view product',
-            'view reservation panel',
+        // 4.2 LABORATORISTA: igual que ADMIN pero *sin* crear horarios
+        $labPerms = array_filter($permissions, function ($p) {
+            return $p !== 'crear horario';
+        });
+        $laboratoryTechnician->syncPermissions($labPerms);
 
-            'update schedule',
-            'update laboratory',
-            'update role',
-            'update product',
-            'update reservation',
-            'update user',
-
-            'create permission',
-            'create role',
-            'create user',
-            'create schedule',
-            'create reservation',
-            'create product',
-            'create laboratory',
-            'create reservation request',
-
-            'delete role',
-            'delete reservation',
-            'delete schedule',
-            'delete user',
-            'delete permission',
-            'delete reservation request',
-            'delete product',
-            'delete laboratory',
-        ]);
-
-        // Assign limited permissions to DOCENTE
+        // 4.3 DOCENTE: solo reservar espacios y ver su historial
         $teacher->syncPermissions([
-            'view reservation history panel',
-            'view laboratory panel',
-            'view any reservation request',
-            'view reservation panel',
-            'create reservation request',
+            'ver panel de reservas',
+            'ver panel de historial de reservas',
+            'crear reserva',
         ]);
 
-        // Assign limited permissions to ESTUDIANTE
+        // 4.4 ESTUDIANTE: idéntico a DOCENTE
         $student->syncPermissions([
-            'view reservation history panel',
-            'view laboratory panel',
-            'view any reservation request',
-            'view reservation panel',
-            'create reservation request',
+            'ver panel de reservas',
+            'ver panel de historial de reservas',
+            'crear reserva',
+        ]);
+
+        $coordinator->syncPermissions([
+            // Horarios
+            'ver panel de horarios',
+            'ver cualquier horario',
+            'crear horario',
+            'actualizar horario',
+            'eliminar horario',
+
         ]);
     }
 }

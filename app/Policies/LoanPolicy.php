@@ -10,28 +10,53 @@ class LoanPolicy
 {
     use HandlesAuthorization;
 
+    /**
+     * ¿Puede ver el listado de préstamos (panel o “mis préstamos”)?
+     */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de productos');
+        return $user->hasRole('ADMIN')
+            || $user->hasPermissionTo('ver panel de préstamos')
+            || $user->hasPermissionTo('ver mis préstamos');
     }
 
+    /**
+     * ¿Puede ver un préstamo específico?
+     * - Admin y Coordinador: cualquiera.
+     * - Resto: solo el propio.
+     */
     public function view(User $user, Loan $loan): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver cualquier producto');
+        return $user->hasRole('ADMIN')
+            || $user->hasPermissionTo('ver cualquier préstamo')
+            || $loan->user_id === $user->id;
     }
 
+    /**
+     * ¿Puede crear un préstamo?
+     */
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear producto');
+        return $user->hasRole('ADMIN')
+            || $user->hasPermissionTo('crear préstamo');
     }
 
+    /**
+     * ¿Puede actualizar un préstamo?
+     * (Por ejemplo: cambiar estado, fechas, etc.)
+     */
     public function update(User $user, Loan $loan): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar producto');
+        return $user->hasRole('ADMIN')
+            || $user->hasPermissionTo('actualizar préstamo');
     }
 
+    /**
+     * ¿Puede eliminar un préstamo?
+     */
     public function delete(User $user, Loan $loan): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar producto');
+        return $user->hasRole('ADMIN')
+            || $user->hasPermissionTo('eliminar préstamo');
     }
 }

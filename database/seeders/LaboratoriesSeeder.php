@@ -10,23 +10,40 @@ class LaboratoriesSeeder extends Seeder
 {
     public function run()
     {
-        // Ensure there are users with the 'LABORATORISTA' role
         $laboratoristas = User::role('LABORATORISTA')->get();
 
         if ($laboratoristas->isEmpty()) {
-            $this->command->info('No users found with the "LABORATORISTA" role.');
+            $this->command->info('No hay usuarios con el rol "LABORATORISTA".');
             return;
         }
 
-        // Insert 10 laboratories
-        foreach (range(1, 10) as $i) {
+        $labNames = [
+            'Química',
+            'Física',
+            'Biología y Biotecnología',
+            'Análisis Instrumental',
+            'Operaciones Unitarias',
+            'Máquinas y Herramientas',
+            'Electrónica',
+            'Automatización',
+            'Fluidos',
+            'Procesos y Plantas Piloto',
+            'Materiales',
+            'Geotecnia',
+            'Vías y Pavimentos',
+            'Robótica y Control',
+            'Análisis Ambiental',
+        ];
+
+        foreach ($labNames as $name) {
             Laboratory::create([
-                'name' => "Laboratory $i",
-                'location' => "Building $i, Floor $i",
+                'name'     => $name,
+                'location' => 'Edificio principal, Piso 1',
                 'capacity' => rand(10, 50),
-                'user_id' => $laboratoristas->random()->id, // Correct reference to 'id'
+                'user_id'  => $laboratoristas->random()->id,
             ]);
         }
+
+        $this->command->info(count($labNames) . ' laboratorios creados correctamente.');
     }
 }
-

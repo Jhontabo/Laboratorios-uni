@@ -20,6 +20,7 @@ use Filament\Forms\Components\Wizard;
 use Illuminate\Support\Facades\Hash; // Necesario para hashear contraseñas
 use Filament\Forms\Get; // Necesario para lógica condicional en formularios
 use Filament\Forms\Components\Section; // Para agrupar campos visualmente
+use Filament\Forms\Components\Wizard\Step;
 
 class UserResource extends Resource
 {
@@ -44,14 +45,13 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Wizard::make([
-                    Wizard\Step::make('Identificación')
+                    Step::make('Identificación')
                         ->icon('heroicon-o-user-circle')
                         ->description('Información básica y foto del usuario.')
                         ->schema([
                             Section::make() // Quitamos el título de la sección si el título del paso es suficiente
                                 ->columns(12) // Usamos un grid de 12 columnas para mayor flexibilidad
                                 ->schema([
-                                    // Columna para la Foto de Perfil (aprox. 1/3 del ancho)
                                     Forms\Components\FileUpload::make('avatar_url')
                                         ->label('Foto de Perfil')
                                         ->image()
@@ -65,7 +65,6 @@ class UserResource extends Resource
                                             'md' => 4,      // En medianas y grandes, ocupa 4 columnas
                                         ]),
 
-                                    // Columna para Nombre y Apellido (aprox. 2/3 del ancho)
                                     Grid::make(1) // Grid anidado para nombre y apellido uno debajo del otro
                                         ->columnSpan([ // Ocupa 8 de 12 columnas
                                             'default' => 12,
@@ -87,7 +86,7 @@ class UserResource extends Resource
                                         ]),
                                 ]),
                         ]),
-                    Wizard\Step::make('Información de Contacto')
+                    Step::make('Información de Contacto')
                         ->icon('heroicon-o-identification')
                         ->description('Correo, teléfono y dirección.')
                         ->schema([
@@ -149,7 +148,7 @@ class UserResource extends Resource
                 ])
                     ->columnSpanFull() // Asegura que el Wizard ocupe todo el ancho
                     ->persistStepInQueryString() // Mantiene el paso actual en la URL
-                // ->skippable() // Considera si realmente quieres permitir saltar pasos. Para usuarios, usualmente no.
+                    ->skippable()
             ]);
     }
 

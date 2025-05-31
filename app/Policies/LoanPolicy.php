@@ -16,8 +16,7 @@ class LoanPolicy
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('ver panel de préstamos')
-            || $user->hasPermissionTo('ver mis préstamos');
+            || $user->hasPermissionTo('ver panel de préstamos');
     }
 
     /**

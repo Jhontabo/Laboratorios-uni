@@ -12,26 +12,27 @@ class AvailableProductPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de productos');
+        // Cambié el nombre del permiso a "ver panel de productos disponibles"
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de productos disponibles');
     }
 
-    public function view(User $user, AvailableProduct $product): bool
+    public function view(User $user, AvailableProduct $availableProduct): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver cualquier producto');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver cualquier producto disponible');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear producto');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear producto disponible');
     }
 
-    public function update(User $user, AvailableProduct $product): bool
+    public function update(User $user, AvailableProduct $availableProduct): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar producto');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar producto disponible');
     }
 
-    public function delete(User $user, AvailableProduct $product): bool
+    public function delete(User $user, AvailableProduct $availableProduct): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar producto');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar producto disponible');
     }
 }

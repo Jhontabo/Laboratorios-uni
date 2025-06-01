@@ -6,37 +6,37 @@ use App\Models\User;
 use App\Models\Schedule;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class SchedulePolicy
+class ReserveSpacePolicy
 {
     use HandlesAuthorization;
 
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver panel horarios');
+            $user->hasPermissionTo('ver panel reservar espacios');
     }
 
     public function view(User $user, Schedule $schedule): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver cualquier horario');
+            $user->hasPermissionTo('ver cualquier reservar espacio');
     }
 
     public function create(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('crear horario');
+            $user->hasPermissionTo('crear reservar espacio');
     }
 
     public function update(User $user, Schedule $schedule): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('actualizar horario');
+            $user->hasPermissionTo('actualizar resevar espacios');
     }
 
     public function delete(User $user, Schedule $schedule): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('eliminar horario');
+            $user->hasPermissionTo('eliminar reservar espacio');
     }
 }

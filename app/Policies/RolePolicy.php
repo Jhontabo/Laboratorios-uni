@@ -13,7 +13,7 @@ class RolePolicy
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver panel de roles');
+            $user->hasPermissionTo('ver panel roles');
     }
 
     public function view(User $user, RoleModel $role): bool

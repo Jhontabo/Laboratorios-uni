@@ -13,30 +13,30 @@ class ProductPolicy
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver panel de productos');
+            $user->hasPermissionTo('ver panel inventario');
     }
 
     public function view(User $user, Product $product): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver cualquier producto');
+            $user->hasPermissionTo('ver cualquier inventario');
     }
 
     public function create(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('crear producto');
+            $user->hasPermissionTo('crear inventario');
     }
 
     public function update(User $user, Product $product): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('actualizar producto');
+            $user->hasPermissionTo('actualizar inventario');
     }
 
     public function delete(User $user, Product $product): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('eliminar producto');
+            $user->hasPermissionTo('eliminar inventario');
     }
 }

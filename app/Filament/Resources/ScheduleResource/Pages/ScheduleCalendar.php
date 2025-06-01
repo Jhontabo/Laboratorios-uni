@@ -17,6 +17,7 @@ class ScheduleCalendar extends Page
 
     public ?int $laboratoryId = null;
 
+
     public function mount()
     {
         $labParam = request()->query('laboratory');

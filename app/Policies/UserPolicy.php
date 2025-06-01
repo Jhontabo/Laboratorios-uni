@@ -12,7 +12,7 @@ class UserPolicy
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver panel de usuarios');
+            $user->hasPermissionTo('ver panel usuarios');
     }
 
     public function view(User $user, User $targetUser): bool

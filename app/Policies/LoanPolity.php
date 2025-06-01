@@ -16,7 +16,7 @@ class LoanPolicy
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('ver panel de préstamos');
+            || $user->hasPermissionTo('ver panel mis prestamos');
     }
 
     /**
@@ -27,7 +27,7 @@ class LoanPolicy
     public function view(User $user, Loan $loan): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('ver cualquier préstamo')
+            || $user->hasPermissionTo('ver cualquier mis prestamos')
             || $loan->user_id === $user->id;
     }
 
@@ -37,7 +37,7 @@ class LoanPolicy
     public function create(User $user): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('crear préstamo');
+            || $user->hasPermissionTo('crear mis prestamos');
     }
 
     /**
@@ -47,7 +47,7 @@ class LoanPolicy
     public function update(User $user, Loan $loan): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('actualizar préstamo');
+            || $user->hasPermissionTo('actualizar mis prestamos');
     }
 
     /**
@@ -56,6 +56,6 @@ class LoanPolicy
     public function delete(User $user, Loan $loan): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('eliminar préstamo');
+            || $user->hasPermissionTo('eliminar mis prestamos');
     }
 }

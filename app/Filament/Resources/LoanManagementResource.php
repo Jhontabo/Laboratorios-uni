@@ -25,6 +25,14 @@ class LoanManagementResource extends Resource
     protected static ?string $modelLabel = 'Prestamo';
     protected static ?string $pluralModelLabel = 'Prestamos';
 
+
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        // Lógica personalizada
+        return $user && $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA') || $user->hasRole('COORDINADOR');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('user_id', Auth::id())->count();

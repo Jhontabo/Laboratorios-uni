@@ -60,7 +60,8 @@ php artisan key:generate
 ```bash
 php artisan storage:link
 ```
-7. 
+
+7.
 
 ## Configuración del Entorno
 
@@ -91,11 +92,13 @@ php artisan storage:link
 ```bash
 php artisan migrate
 ```
-2. 
+
+2.
 
 ```bash
 php artisan migrate:refresh --seed
 ```
+
 3. Inicia el servidor de desarrollo:
 
 ```bash

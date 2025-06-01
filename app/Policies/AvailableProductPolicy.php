@@ -13,26 +13,26 @@ class AvailableProductPolicy
     public function viewAny(User $user): bool
     {
         // Cambié el nombre del permiso a "ver panel de productos disponibles"
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de productos disponibles');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel solicitudes prestamos');
     }
 
     public function view(User $user, AvailableProduct $availableProduct): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver cualquier producto disponible');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver cualquier solicitud prestamo');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear producto disponible');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('crear solicitud prestamo');
     }
 
     public function update(User $user, AvailableProduct $availableProduct): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar producto disponible');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('actualizar solicitud prestamo');
     }
 
     public function delete(User $user, AvailableProduct $availableProduct): bool
     {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar producto disponible');
+        return $user->hasRole('ADMIN') || $user->hasPermissionTo('eliminar solicitud prestamo');
     }
 }

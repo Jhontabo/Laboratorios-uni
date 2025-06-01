@@ -13,7 +13,17 @@ class ScheduleResource extends Resource
     protected static ?string $navigationGroup = 'Gestion de Reservas';
     protected static ?string $navigationLabel = 'Crear Horarios';
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
 
+        if (!$user) {
+            return false;
+        }
+
+        // Solo ADMIN y COORDINADOR pueden acceder
+        return $user->hasRole('ADMIN') || $user->hasRole('COORDINADOR');
+    }
 
     public static function getPages(): array
     {

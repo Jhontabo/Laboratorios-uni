@@ -13,7 +13,7 @@ class LaboratoryPolicy
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver panel de laboratorios');
+            $user->hasPermissionTo('ver panel laboratorios');
     }
 
     public function view(User $user, Laboratory $laboratory): bool

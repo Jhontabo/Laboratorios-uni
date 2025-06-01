@@ -13,45 +13,33 @@ class BookingPolicy
     public function viewAny(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('ver panel de reservas');
+            $user->hasPermissionTo('ver panel reservar espacios');
     }
 
     public function view(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('ver cualquier reserva')
+            || $user->hasPermissionTo('ver cualquier reservar espacio')
             || $booking->user_id === $user->id;
     }
 
     public function create(User $user): bool
     {
         return $user->hasRole('ADMIN') ||
-            $user->hasPermissionTo('crear reserva');
+            $user->hasPermissionTo('crear reservar espacio');
     }
 
     public function update(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('actualizar reserva')
+            || $user->hasPermissionTo('actualizar resevar espacio')
             || ($booking->user_id === $user->id && $booking->estado === 'pendiente');
     }
 
     public function delete(User $user, Booking $booking): bool
     {
         return $user->hasRole('ADMIN')
-            || $user->hasPermissionTo('eliminar reserva')
+            || $user->hasPermissionTo('eliminar reservar espacio')
             || ($booking->user_id === $user->id && $booking->estado === 'pendiente');
-    }
-
-    // Panel de solicitudes de reserva
-    public function viewRequests(User $user): bool
-    {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de solicitudes de reserva');
-    }
-
-    // Historial de reservas
-    public function viewHistory(User $user): bool
-    {
-        return $user->hasRole('ADMIN') || $user->hasPermissionTo('ver panel de historial de reservas');
     }
 }

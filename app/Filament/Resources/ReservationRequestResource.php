@@ -21,6 +21,13 @@ class ReservationRequestResource extends Resource
     protected static ?string $navigationGroup = 'Gestion de Reservas';
     protected static ?string $modelLabel = 'Horario';
     protected static ?string $pluralLabel = 'Solicitud de reservas';
+
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        // Lógica personalizada
+        return $user && $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA') || $user->hasRole('COORDINADOR');
+    }
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('status', 'pending')->count();
@@ -28,7 +35,7 @@ class ReservationRequestResource extends Resource
 
     public static function getNavigationBadgeColor(): string
     {
-        return static::getModel()::where('status', 'pending')->count() > 0 ? 'warning' : 'success';
+        return static::getModel()::where('status', 'pending')->count() > 1 ? 'warning' : 'success';
     }
 
     public static function table(Table $table): Table
@@ -109,7 +116,7 @@ class ReservationRequestResource extends Resource
                             ->label('Reason for Rejection')
                             ->required()
                             ->placeholder('State the reason for rejecting this request')
-                            ->maxLength(500),
+                            ->maxLength(501),
                     ])
                     ->action(function (Booking $record, array $data) { // Using Booking instead of Reserva
                         $record->status = 'rejected';

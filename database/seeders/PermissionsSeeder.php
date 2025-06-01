@@ -18,11 +18,8 @@ class PermissionsSeeder extends Seeder
 
 
         $permissions = [
-            'ver panel solicitudes prestamo',
-            'ver panel administrar prestamos',
-            'ver panel mis prestamos',
+            'ver panel solicitudes prestamos',
             'ver panel reservar espacios',
-            'ver panel historial reservas',
             'ver panel solicitud reservas',
             'ver panel horarios',
             'ver panel laboratorios',
@@ -32,10 +29,7 @@ class PermissionsSeeder extends Seeder
 
             // — Ver cualquier —
             'ver cualquier solicitud prestamo',
-            'ver cualquier administrar prestamo',
-            'ver cualquier mis prestamo',
             'ver cualquier reservar espacio',
-            'ver cualquier historial reserva',
             'ver cualquier solicitud reserva',
             'ver cualquier horario',
             'ver cualquier laboratorio',
@@ -43,14 +37,9 @@ class PermissionsSeeder extends Seeder
             'ver cualquier rol',
             'ver cualquier usuario',
 
-
-
             // — Actualizar —
             'actualizar solicitud prestamo',
-            'actualizar administrar prestamo',
-            'actualizar mis prestamo',
             'actualizar reservar espacio',
-            'actualizar historial reserva',
             'actualizar solicitud reserva',
             'actualizar horario',
             'actualizar laboratorio',
@@ -60,10 +49,7 @@ class PermissionsSeeder extends Seeder
 
             // — Crear —
             'crear solicitud prestamo',
-            'crear administrar prestamo',
-            'crear mis prestamo',
             'crear reservar espacio',
-            'crear historial reserva',
             'crear solicitud reserva',
             'crear horario',
             'crear laboratorio',
@@ -73,10 +59,7 @@ class PermissionsSeeder extends Seeder
 
             // — Eliminar —
             'eliminar solicitud prestamo',
-            'eliminar administrar prestamo',
-            'eliminar mis prestamo',
             'eliminar reservar espacio',
-            'eliminar historial reserva',
             'eliminar solicitud reserva',
             'eliminar horario',
             'eliminar laboratorio',
@@ -95,52 +78,127 @@ class PermissionsSeeder extends Seeder
 
         $admin->syncPermissions(Permission::all());
 
-        $laboratory->syncPermissions([]);
-        $teacher->syncPermissions([]);
-
-        $student->syncPermissions([
-            'ver panel solicitudes prestamo',
-            'ver panel administrar prestamos',
-            'ver panel mis prestamos',
+        $laboratory->syncPermissions([
+            'ver panel solicitudes prestamos',
             'ver panel reservar espacios',
-            'ver panel historial reservas',
             'ver panel solicitud reservas',
+            'ver panel horarios',
+            'ver panel laboratorios',
+            'ver panel inventario',
+            'ver panel roles',
+            'ver panel usuarios',
 
             // — Ver cualquier —
             'ver cualquier solicitud prestamo',
-            'ver cualquier administrar prestamo',
-            'ver cualquier mis prestamo',
             'ver cualquier reservar espacio',
-            'ver cualquier historial reserva',
             'ver cualquier solicitud reserva',
-
-
+            'ver cualquier horario',
+            'ver cualquier laboratorio',
+            'ver cualquier inventario',
+            'ver cualquier rol',
+            'ver cualquier usuario',
 
             // — Actualizar —
             'actualizar solicitud prestamo',
-            'actualizar administrar prestamo',
-            'actualizar mis prestamo',
             'actualizar reservar espacio',
-            'actualizar historial reserva',
             'actualizar solicitud reserva',
+            'actualizar horario',
+            'actualizar laboratorio',
+            'actualizar inventario',
+            'actualizar rol',
+            'actualizar usuario',
 
             // — Crear —
             'crear solicitud prestamo',
-            'crear administrar prestamo',
-            'crear mis prestamo',
             'crear reservar espacio',
-            'crear historial reserva',
             'crear solicitud reserva',
+            'crear horario',
+            'crear laboratorio',
+            'crear inventario',
+            'crear rol',
+            'crear usuario',
 
             // — Eliminar —
             'eliminar solicitud prestamo',
-            'eliminar administrar prestamo',
-            'eliminar mis prestamo',
             'eliminar reservar espacio',
-            'eliminar historial reserva',
             'eliminar solicitud reserva',
+            'eliminar laboratorio',
+            'eliminar inventario',
+            'eliminar rol',
+            'eliminar usuario',
+        ]);
+        $teacher->syncPermissions([
+            'ver panel solicitudes prestamos',
+            'ver panel reservar espacios',
+            'ver panel horarios',
+            // — Ver cualquier —
+            'ver cualquier solicitud prestamo',
+            'ver cualquier reservar espacio',
+
+            // — Actualizar —
+            'actualizar solicitud prestamo',
+            'actualizar reservar espacio',
+
+            // — Crear —
+            'crear solicitud prestamo',
+            'crear reservar espacio',
+
+            // — Eliminar —
+            'eliminar solicitud prestamo',
+            'eliminar reservar espacio',
         ]);
 
-        $coordinator->syncPermissions([]);
+        $student->syncPermissions([
+            'ver panel solicitudes prestamos',
+            'ver panel reservar espacios',
+            'ver panel horarios',
+            // — Ver cualquier —
+            'ver cualquier solicitud prestamo',
+            'ver cualquier reservar espacio',
+
+            // — Actualizar —
+            'actualizar solicitud prestamo',
+            'actualizar reservar espacio',
+
+            // — Crear —
+            'crear solicitud prestamo',
+            'crear reservar espacio',
+
+            // — Eliminar —
+            'eliminar solicitud prestamo',
+            'eliminar reservar espacio',
+        ]);
+
+        $coordinator->syncPermissions([
+
+
+            'ver panel solicitudes prestamos',
+            'ver panel reservar espacios',
+            'ver panel solicitud reservas',
+            'ver panel horarios',
+
+            // — Ver cualquier —
+            'ver cualquier solicitud prestamo',
+            'ver cualquier reservar espacio',
+            'ver cualquier solicitud reserva',
+            'ver cualquier horario',
+
+            // — Actualizar —
+            'actualizar solicitud prestamo',
+            'actualizar reservar espacio',
+            'actualizar solicitud reserva',
+            'actualizar horario',
+            // — Crear —
+            'crear solicitud prestamo',
+            'crear reservar espacio',
+            'crear solicitud reserva',
+            'crear horario',
+
+            // — Eliminar —
+            'eliminar solicitud prestamo',
+            'eliminar reservar espacio',
+            'eliminar solicitud reserva',
+            'eliminar horario',
+        ]);
     }
 }

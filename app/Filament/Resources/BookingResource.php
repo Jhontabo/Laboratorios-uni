@@ -61,7 +61,7 @@ class BookingResource extends Resource
                 TableAction::make('reservar')
                     ->label('Reservar')
                     ->button()
-                    ->modalHeading('Solicitud de Reserva')
+                    ->modalHeading(' olicitud de Reserva')
                     ->modalWidth('lg')
                     ->form([
                         // No solicitamos datos personales: los obtenemos de Auth::user()

@@ -94,179 +94,175 @@ class ProductResource extends Resource
         return static::getModel()::count() > 10 ? 'success' : 'primary';
     }
 
+
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Wizard::make([
-                    Step::make('Información Básica')
-                        ->icon('heroicon-o-information-circle')
-                        ->schema([
-                            Grid::make(2)
-                                ->schema([
-                                    TextInput::make('name')
-                                        ->label('Nombre del Producto')
-                                        ->required()
-                                        ->maxLength(255)
-                                        ->columnSpan(1)
-                                        ->placeholder('Ej: Microscopio Digital')
-                                        ->helperText('Nombre descriptivo del producto')
-                                        ->live(onBlur: true),
+        return $form->schema([
+            Wizard::make([
+                Step::make('Información Básica')
+                    ->icon('heroicon-o-information-circle')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextInput::make('name')
+                                ->label('Nombre del Producto')
+                                ->required()
+                                ->maxLength(255)
+                                ->placeholder('Ej: Microscopio Digital'),
 
-                                    Select::make('laboratory_id')
-                                        ->label('Laboratorio Asignado')
-                                        ->options(Laboratory::all()->pluck('name', 'id'))
-                                        ->searchable()
-                                        ->preload()
-                                        ->required()
-                                        ->columnSpan(1),
-                                ]),
+                            TextInput::make('serial_number')
+                                ->label('Número de Serie / Identificación')
+                                ->maxLength(255)
+                                ->placeholder('Código, número de serie, etc.'),
 
-                            RichEditor::make('description')
-                                ->label('Descripción Detallada')
-                                ->maxLength(1000)
-                                ->columnSpanFull()
-                                ->fileAttachmentsDirectory('products/attachments')
-                                ->toolbarButtons([
-                                    'attachFiles',
-                                    'blockquote',
-                                    'bold',
-                                    'bulletList',
-                                    'codeBlock',
-                                    'h2',
-                                    'h3',
-                                    'italic',
-                                    'link',
-                                    'orderedList',
-                                    'redo',
-                                    'strike',
-                                    'underline',
-                                    'undo',
+                            TextInput::make('use')
+                                ->label('Uso del equipo')
+                                ->placeholder('Ej: Prácticas de laboratorio, investigación'),
+
+                            TextInput::make('unit_cost')
+                                ->label('Costo Unitario')
+                                ->numeric()
+                                ->prefix('$')
+                                ->step(0.01),
+
+                            Select::make('laboratory_id')
+                                ->label('Laboratorio Asignado')
+                                ->options(Laboratory::all()->pluck('name', 'id'))
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+
+                            CheckboxList::make('applies_to')
+                                ->label('Proceso al que aplica')
+                                ->options([
+                                    'investigacion' => 'Investigación',
+                                    'docencia' => 'Docencia',
                                 ])
-                                ->placeholder('Describa las características principales, especificaciones técnicas y cualquier detalle relevante...'),
-                        ]),
+                                ->columns(2),
 
-                    Step::make('Especificaciones Técnicas')
-                        ->icon('heroicon-o-clipboard-document-list')
-                        ->schema([
-                            Grid::make(3)
-                                ->schema([
-                                    TextInput::make('serial_number')
-                                        ->label('Número de Serie')
-                                        ->required()
-                                        ->maxLength(255)
-                                        ->unique(ignoreRecord: true)
-                                        ->validationMessages([
-                                            'unique' => 'Este número de serie ya está registrado',
-                                        ]),
-
-                                    Select::make('product_type')
-                                        ->label('Tipo de Producto')
-                                        ->options([
-                                            'supply' => 'Suministro',
-                                            'equipment' => 'Equipo',
-                                        ])
-                                        ->required()
-                                        ->native(false)
-                                        ->live(),
-
-                                    Select::make('status')
-                                        ->label('Condición Actual')
-                                        ->options([
-                                            'new' => 'Nuevo',
-                                            'used' => 'Usado - Buen Estado',
-                                            'damaged' => 'Dañado - Reparación Necesaria',
-                                            'decommissioned' => 'Fuera de Servicio',
-                                            'lost' => 'Perdido/Robo',
-                                            'miantenace' => 'Mantenimiento',
-
-                                        ])
-                                        ->required()
-                                        ->native(false),
-                                ]),
-
-                            Fieldset::make('Estado de Disponibilidad')
-                                ->schema([
-                                    Toggle::make('available_for_loan')
-                                        ->label('Disponible para Préstamo')
-                                        ->default(true)
-                                        ->inline(false)
-                                        ->onColor('success')
-                                        ->offColor('danger'),
-
-
-                                ]),
-                        ]),
-
-                    Step::make('Inventario y Costos')
-                        ->icon('heroicon-o-currency-dollar')
-                        ->schema([
-                            Grid::make(3)
-                                ->schema([
-                                    TextInput::make('available_quantity')
-                                        ->label('Cantidad en Inventario')
-                                        ->numeric()
-                                        ->required()
-                                        ->minValue(0)
-                                        ->step(1)
-                                        ->suffix('unidades'),
-
-
-                                    TextInput::make('unit_cost')
-                                        ->label('Costo Unitario')
-                                        ->numeric()
-                                        ->prefix('$')
-                                        ->required()
-                                        ->step(0.01),
-
-                                    DatePicker::make('acquisition_date')
-                                        ->label('Fecha de Adquisición')
-                                        ->required()
-                                        ->displayFormat('d/m/Y')
-                                        ->maxDate(now()),
-                                ]),
-
-                            Placeholder::make('cost_placeholder')
-                                ->content(function (Get $get) {
-                                    $quantity = $get('available_quantity') ?? 0;
-                                    $cost = $get('unit_cost') ?? 0;
-                                    $total = $quantity * $cost;
-
-                                    return "Costo total estimado: $" . number_format($total, 2);
-                                })
-                                ->hidden(fn(Get $get) => empty($get('available_quantity')) || empty($get('unit_cost'))),
-                        ]),
-
-                    Step::make('Documentación e Imágenes')
-                        ->icon('heroicon-o-photo')
-                        ->schema([
-                            FileUpload::make('image')
-                                ->label('Imagen Principal')
-                                ->image()
-                                ->imageEditor()
-                                ->imageEditorAspectRatios([
-                                    null,
-                                    '16:9',
-                                    '4:3',
-                                    '1:1',
+                            CheckboxList::make('authorized_personnel')
+                                ->label('Personal autorizado para el uso')
+                                ->options([
+                                    'laboratorista' => 'Laboratorista',
+                                    'monitor' => 'Monitor',
+                                    'profesor' => 'Profesor',
+                                    'investigador' => 'Investigador',
                                 ])
-                                ->directory('products/images')
-                                ->disk('public')
-                                ->visibility('public')
-                                ->maxSize(2048)
-                                ->openable()
-                                ->downloadable()
-                                ->previewable()
-                                ->helperText('Imagen representativa del producto (max 2MB)')
-                                ->columnSpanFull(),
+                                ->columns(2),
 
+                            Select::make('product_type')
+                                ->label('Tipo de Producto')
+                                ->options([
+                                    'equipment' => 'Equipo',
+                                    'supply' => 'Suministro',
+                                ])
+                                ->required(),
                         ]),
-                ])
-                    ->skippable()
-                    ->persistStepInQueryString()
-                    ->columnSpanFull(),
-            ]);
+                    ]),
+
+                Step::make('Especificaciones Técnicas')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextInput::make('brand')->label('Marca')->maxLength(255),
+                            TextInput::make('model')->label('Modelo')->maxLength(255),
+                            TextInput::make('manufacturer')->label('Fabricante')->maxLength(255),
+                            Select::make('status')
+                                ->label('Condición Actual')
+                                ->options([
+                                    'new' => 'Nuevo',
+                                    'used' => 'Usado',
+                                    'damaged' => 'Dañado',
+                                    'decommissioned' => 'Fuera de Servicio',
+                                    'lost' => 'Perdido',
+                                    'maintenance' => 'Mantenimiento',
+                                ])
+                                ->required(),
+                            Select::make('calibration_frequency')
+                                ->label('Frecuencia de calibración')
+                                ->options([
+                                    'semanal' => 'Semanal',
+                                    'mensual' => 'Mensual',
+                                    'semestral' => 'Semestral',
+                                    'anual' => 'Anual',
+                                ]),
+                            TextInput::make('upper_measure')->label('Medida Superior')->maxLength(255),
+                            TextInput::make('lower_measure')->label('Medida Inferior')->maxLength(255),
+                            TextInput::make('associated_software')->label('Software Asociado')->maxLength(255),
+                            Select::make('user_manual')
+                                ->label('Manual de Usuario')
+                                ->options([
+                                    'fisico' => 'Físico',
+                                    'digital' => 'Digital',
+                                ])
+                                ->required() // Solo si debe ser obligatorio
+                                ->native(false)
+                                ->helperText('Seleccione si el manual es físico o digital'),
+                            TextInput::make('dimensions')->label('Dimensiones')->maxLength(255),
+                            TextInput::make('weight')->label('Peso')->maxLength(50),
+                            TextInput::make('power')->label('Potencia')->maxLength(255),
+                            TagsInput::make('accessories')->label('Accesorios'),
+                        ]),
+                    ]),
+
+                Step::make('Condiciones de Uso y Observaciones')
+                    ->icon('heroicon-o-adjustments-vertical')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextInput::make('min_temperature')->label('Temperatura Mínima (°C)')->numeric(),
+                            TextInput::make('max_temperature')->label('Temperatura Máxima (°C)')->numeric(),
+                            TextInput::make('min_humidity')->label('Humedad Mínima (%)')->numeric(),
+                            TextInput::make('max_humidity')->label('Humedad Máxima (%)')->numeric(),
+                            TextInput::make('min_voltage')->label('Voltaje Mínimo (V)')->numeric(),
+                            TextInput::make('max_voltage')->label('Voltaje Máximo (V)')->numeric(),
+                        ]),
+                        Textarea::make('observations')->label('Observaciones')->rows(3),
+                    ]),
+
+
+
+                Step::make('Documentación e Imágenes')
+                    ->icon('heroicon-o-photo')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextInput::make('available_quantity')
+                                ->label('Cantidad en Inventario')
+                                ->numeric()
+                                ->minValue(0)
+                                ->step(1),
+
+                            DatePicker::make('acquisition_date')
+                                ->label('Fecha de Adquisición')
+                                ->displayFormat('d/m/Y')
+                                ->maxDate(now()),
+
+                            Toggle::make('available_for_loan')
+                                ->label('Disponible para Préstamo')
+                                ->default(true),
+                        ]),
+
+                        FileUpload::make('image')
+                            ->label('Imagen Principal')
+                            ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([null, '16:9', '4:3', '1:1'])
+                            ->directory('products/images')
+                            ->disk('public')
+                            ->visibility('public')
+                            ->maxSize(2048)
+                            ->openable()
+                            ->downloadable()
+                            ->previewable()
+                            ->helperText('Imagen representativa del producto (max 2MB)')
+                            ->columnSpanFull(),
+                    ]),
+
+            ])
+                ->skippable()
+                ->persistStepInQueryString()
+                ->columnSpanFull(),
+        ]);
     }
+
 
     public static function table(Table $table): Table
     {
@@ -306,11 +302,7 @@ class ProductResource extends Resource
                         }
                         return null;
                     })
-                    ->iconPosition(IconPosition::After)
-                    ->summarize([
-                        Sum::make()->label('Total Items'),
-                        Average::make()->label('Promedio'),
-                    ]),
+                    ->iconPosition(IconPosition::After),
 
                 TextColumn::make('product_type')
                     ->label('Tipo')
@@ -355,11 +347,7 @@ class ProductResource extends Resource
                 TextColumn::make('unit_cost')
                     ->label('Costo Unitario')
                     ->money('COP')
-                    ->sortable()
-                    ->summarize([
-                        Sum::make()->label('Total')->money('COP'),
-                        Average::make()->label('Promedio')->money('COP'),
-                    ]),
+                    ->sortable(),
 
                 ToggleColumn::make('available_for_loan')
                     ->label('Préstamo')
@@ -535,7 +523,6 @@ class ProductResource extends Resource
                                         $programs = [
                                             'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
                                             'Ingeniería Civil' => 'Ingeniería Civil',
-                                            // ... otros programas
                                         ];
 
                                         if ($userId = $get('responsible_user_id')) {

@@ -9,30 +9,84 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $table = 'products'; // Tabla en inglés plural
+    protected $table = 'products';
 
     protected $fillable = [
+        // Datos generales
         'name',
         'description',
         'available_quantity',
         'laboratory_id',
         'serial_number',
-        'acquisition_date',
         'unit_cost',
-        'status',
+        'location',
+        'acquisition_date',
+        'use',
+        'applies_to',
+        'authorized_personnel',
+        'brand',
+        'model',
+        'manufacturer',
+        'calibration_frequency',
+
+        // Datos específicos
+        'upper_measure',
+        'lower_measure',
+        'associated_software',
+        'user_manual',
+        'dimensions',
+        'weight',
+        'power',
+        'accessories',
+
+        // Condiciones tolerables
+        'min_temperature',
+        'max_temperature',
+        'min_humidity',
+        'max_humidity',
+        'min_voltage',
+        'max_voltage',
+
+        // Observaciones
+        'observations',
+
+        // Estado y tipo
         'product_type',
-        'loan_status',
+        'status',
         'available_for_loan',
+
+        // Registro de baja
+        'decommissioned_at',
+        'decommissioned_by',
+
+        // Auditoría
+        'created_by',
+        'updated_by',
+
+        // Media
         'image',
-        'user_id',
     ];
 
     protected $casts = [
-        'acquisition_date' => 'date',
+        'acquisition_date'      => 'date',
+        'decommissioned_at'     => 'datetime',
+
+        // JSON
+        'applies_to'            => 'array',
+        'authorized_personnel'  => 'array',
+        'accessories'           => 'array',
+
+        // Flotantes
+        'unit_cost'             => 'float',
+        'min_temperature'       => 'float',
+        'max_temperature'       => 'float',
+        'min_humidity'          => 'float',
+        'max_humidity'          => 'float',
+        'min_voltage'           => 'float',
+        'max_voltage'           => 'float',
     ];
 
     // Relaciones
-    //
     public function schedules()
     {
         return $this->belongsToMany(Schedule::class, 'product_schedule')
@@ -49,19 +103,18 @@ class Product extends Model
         return $this->hasMany(Loan::class, 'product_id');
     }
 
-    public function user()
+    public function decommissionedBy()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'decommissioned_by');
     }
 
-    public function equipmentDecommissions()
+    public function createdBy()
     {
-        return $this->hasMany(EquipmentDecommission::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    // Accesor para ubicación
-    public function getLocationAttribute(): string
+    public function updatedBy()
     {
-        return $this->laboratory ? $this->laboratory->location : 'No location assigned';
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

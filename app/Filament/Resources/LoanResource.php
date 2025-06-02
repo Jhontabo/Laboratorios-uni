@@ -28,7 +28,12 @@ class LoanResource extends Resource
             ->with(['product'])
             ->where('user_id', Auth::id());
     }
-
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        return $user &&
+            !$user->hasRole('COORDINADOR');
+    }
     public static function table(Table $table): Table
     {
         return $table

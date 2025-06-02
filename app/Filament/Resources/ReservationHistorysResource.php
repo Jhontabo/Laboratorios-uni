@@ -36,6 +36,13 @@ class ReservationHistorysResource extends Resource
         return $pendientes > 0 ? 'warning' : 'success';
     }
 
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        return $user &&
+            !$user->hasRole('COORDINADOR');
+    }
+
     public static function query(Builder $query): Builder
     {
         return $query->where('user_id', Auth::id())

@@ -30,7 +30,7 @@ class LoanManagementResource extends Resource
     {
         $user = auth()->user();
         // Lógica personalizada
-        return $user && $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA') || $user->hasRole('COORDINADOR');
+        return $user && $user->hasRole('ADMIN') || $user->hasRole('LABORATORISTA');
     }
 
     public static function getNavigationBadge(): ?string

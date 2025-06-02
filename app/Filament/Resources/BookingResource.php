@@ -31,6 +31,13 @@ class BookingResource extends Resource
     protected static ?string $navigationLabel = 'Reservar Espacio';
     protected static ?string $navigationGroup = 'Gestion de Reservas';
 
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        return $user &&
+            !$user->hasRole('LABORATORISTA') &&
+            !$user->hasRole('COORDINADOR');
+    }
     public static function table(Table $table): Table
     {
         return $table

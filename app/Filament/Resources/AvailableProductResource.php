@@ -30,6 +30,13 @@ class AvailableProductResource extends Resource
             ->whereIn('status', ['new', 'used']);
     }
 
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        return $user &&
+            !$user->hasRole('LABORATORISTA') &&
+            !$user->hasRole('COORDINADOR');
+    }
     public static function table(Table $table): Table
     {
         return $table

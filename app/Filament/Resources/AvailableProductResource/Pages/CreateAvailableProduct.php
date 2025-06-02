@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\AvailableProductResource\pages;
+namespace App\Filament\Resources\AvailableProductResource\Pages;
 
 
 use App\Filament\Resources\AvailableProductResource;

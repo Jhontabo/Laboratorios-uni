@@ -6,7 +6,7 @@ use App\Filament\Resources\RoleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class editRole extends EditRecord
+class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
 

@@ -6,7 +6,7 @@ use App\Filament\Resources\AvailableProductResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditAvailableProducts extends EditRecord
+class EditAvailableProduct extends EditRecord
 {
     protected static string $resource = AvailableProductResource::class;
     protected function getHeaderActions(): array

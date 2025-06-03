@@ -95,6 +95,7 @@ class ProductResource extends Resource
     }
 
 
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -112,7 +113,8 @@ class ProductResource extends Resource
                             TextInput::make('serial_number')
                                 ->label('Número de Serie / Identificación')
                                 ->maxLength(255)
-                                ->placeholder('Código, número de serie, etc.'),
+                                ->unique(ignoreRecord: true)
+                                ->helperText('Dejar vacío si no aplica'),
 
                             TextInput::make('use')
                                 ->label('Uso del equipo')
@@ -120,7 +122,10 @@ class ProductResource extends Resource
 
                             TextInput::make('unit_cost')
                                 ->label('Costo Unitario')
+                                ->required()
                                 ->numeric()
+                                ->minValue(0)
+                                ->maxValue(999999999999.99)
                                 ->prefix('$')
                                 ->step(0.01),
 
@@ -185,47 +190,106 @@ class ProductResource extends Resource
                                     'semestral' => 'Semestral',
                                     'anual' => 'Anual',
                                 ]),
-                            TextInput::make('upper_measure')->label('Medida Superior')->maxLength(255),
-                            TextInput::make('lower_measure')->label('Medida Inferior')->maxLength(255),
-                            TextInput::make('associated_software')->label('Software Asociado')->maxLength(255),
-                            Select::make('user_manual')
-                                ->label('Manual de Usuario')
-                                ->options([
-                                    'fisico' => 'Físico',
-                                    'digital' => 'Digital',
-                                ])
-                                ->required() // Solo si debe ser obligatorio
-                                ->native(false)
-                                ->helperText('Seleccione si el manual es físico o digital'),
-                            TextInput::make('dimensions')->label('Dimensiones')->maxLength(255),
-                            TextInput::make('weight')->label('Peso')->maxLength(50),
-                            TextInput::make('power')->label('Potencia')->maxLength(255),
-                            TagsInput::make('accessories')->label('Accesorios'),
                         ]),
                     ]),
 
                 Step::make('Condiciones de Uso y Observaciones')
                     ->icon('heroicon-o-adjustments-vertical')
                     ->schema([
-                        Grid::make(3)->schema([
-                            TextInput::make('min_temperature')->label('Temperatura Mínima (°C)')->numeric(),
-                            TextInput::make('max_temperature')->label('Temperatura Máxima (°C)')->numeric(),
-                            TextInput::make('min_humidity')->label('Humedad Mínima (%)')->numeric(),
-                            TextInput::make('max_humidity')->label('Humedad Máxima (%)')->numeric(),
-                            TextInput::make('min_voltage')->label('Voltaje Mínimo (V)')->numeric(),
-                            TextInput::make('max_voltage')->label('Voltaje Máximo (V)')->numeric(),
-                        ]),
-                        Textarea::make('observations')->label('Observaciones')->rows(3),
+                        Section::make('Condiciones Tolerables')
+                            ->description('Valores recomendados de operación para este equipo')
+                            ->schema([
+                                Grid::make(3)->schema([
+                                    TextInput::make('min_temperature')
+                                        ->label('Temp. Mínima (°C)')
+                                        ->numeric()
+                                        ->minValue(-80)
+                                        ->maxValue(200)
+                                        ->helperText('Dejar vacío si no aplica'),
+                                    TextInput::make('max_temperature')
+                                        ->label('Temp. Máxima (°C)')
+                                        ->numeric()
+                                        ->minValue(-80)
+                                        ->maxValue(200)
+                                        ->helperText('Dejar vacío si no aplica'),
+                                    TextInput::make('min_humidity')
+                                        ->label('Humedad Mín. (%)')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->maxValue(100)
+                                        ->helperText('Dejar vacío si no aplica'),
+                                    TextInput::make('max_humidity')
+                                        ->label('Humedad Máx. (%)')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->maxValue(100)
+                                        ->helperText('Dejar vacío si no aplica'),
+                                    TextInput::make('min_voltage')
+                                        ->label('Voltaje Mín. (V)')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->maxValue(10000)
+                                        ->helperText('Dejar vacío si no aplica'),
+                                    TextInput::make('max_voltage')
+                                        ->label('Voltaje Máx. (V)')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->maxValue(10000)
+                                        ->helperText('Dejar vacío si no aplica'),
+                                ]),
+                            ]),
+                        Textarea::make('observations')
+                            ->label('Observaciones')
+                            ->maxLength(500)
+                            ->rows(3),
                     ]),
 
-
-
+                Step::make('Datos Específicos del Equipo')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->schema([
+                        Section::make('Datos Técnicos y Accesorios')
+                            ->description('Información técnica, documentación y accesorios asociados')
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    TextInput::make('upper_measure')->label('Medida Superior')->maxLength(255),
+                                    TextInput::make('lower_measure')->label('Medida Inferior')->maxLength(255),
+                                    TextInput::make('associated_software')->label('Software Asociado')->maxLength(255),
+                                    Select::make('user_manual')
+                                        ->label('Manual de Usuario')
+                                        ->options([
+                                            'fisico' => 'Físico',
+                                            'digital' => 'Digital',
+                                        ])
+                                        ->native(false)
+                                        ->reactive()
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            if ($state !== 'digital') {
+                                                $set('manual_url', null);
+                                            }
+                                        })
+                                        ->helperText('Seleccione si el manual es físico o digital'),
+                                    // Campo dinámico: solo aparece si selecciona "digital"
+                                    TextInput::make('manual_url')
+                                        ->label('Enlace del manual digital')
+                                        ->url()
+                                        ->placeholder('https://...')
+                                        ->maxLength(255)
+                                        ->visible(fn(callable $get) => $get('user_manual') === 'digital')
+                                        ->required(fn(callable $get) => $get('user_manual') === 'digital'),
+                                    TextInput::make('dimensions')->label('Dimensiones')->maxLength(255),
+                                    TextInput::make('weight')->label('Peso')->maxLength(50),
+                                    TextInput::make('power')->label('Potencia')->maxLength(255),
+                                ]),
+                                TagsInput::make('accessories')->label('Accesorios'),
+                            ]),
+                    ]),
                 Step::make('Documentación e Imágenes')
                     ->icon('heroicon-o-photo')
                     ->schema([
                         Grid::make(3)->schema([
                             TextInput::make('available_quantity')
                                 ->label('Cantidad en Inventario')
+                                ->required()
                                 ->numeric()
                                 ->minValue(0)
                                 ->step(1),
@@ -257,7 +321,6 @@ class ProductResource extends Resource
                     ]),
 
             ])
-                ->skippable()
                 ->persistStepInQueryString()
                 ->columnSpanFull(),
         ]);
@@ -348,7 +411,6 @@ class ProductResource extends Resource
                     ->label('Costo Unitario')
                     ->money('COP')
                     ->sortable(),
-
                 ToggleColumn::make('available_for_loan')
                     ->label('Préstamo')
                     ->onColor('success')

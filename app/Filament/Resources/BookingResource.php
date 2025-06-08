@@ -6,21 +6,22 @@ use App\Filament\Resources\BookingResource\Pages\ListBookings;
 use App\Filament\Resources\BookingResource\Pages\ViewCalendar;
 use App\Filament\Widgets\CalendarWidget;
 use App\Models\Booking;
-use App\Models\Schedule;
 use App\Models\Product;
-use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Actions\Action as TableAction;
+use App\Models\Schedule;
+use Carbon\Carbon;
 use Filament\Forms\Components\{
-    Section,
-    Radio,
-    Select,
-    TextInput,
     DateTimePicker,
-    Placeholder
+    Placeholder,
+    Radio,
+    Section,
+    Select,
+    TextInput
 };
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\Action as TableAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
 class BookingResource extends Resource
@@ -33,15 +34,23 @@ class BookingResource extends Resource
 
     public static function canViewAny(): bool
     {
-        $user = auth()->user();
-        return $user &&
-            !$user->hasRole('LABORATORISTA') &&
-            !$user->hasRole('COORDINADOR');
+        $user = Auth::user();
+        return $user
+            && ! $user->hasRole('LABORATORISTA')
+            && ! $user->hasRole('COORDINADOR');
     }
+
     public static function table(Table $table): Table
     {
+        $today = Carbon::now()->startOfDay();
+        $limit = Carbon::now()->addMonth()->endOfDay();
+
         return $table
-            ->query(Schedule::where('type', 'unstructured')->orderBy('start_at'))
+            ->query(
+                Schedule::where('type', 'unstructured')
+                    ->whereBetween('start_at', [$today, $limit])
+                    ->orderBy('start_at')
+            )
             ->columns([
                 TextColumn::make('title')
                     ->label('Título')
@@ -61,10 +70,9 @@ class BookingResource extends Resource
                 TableAction::make('reservar')
                     ->label('Reservar')
                     ->button()
-                    ->modalHeading('solicitud de Reserva')
+                    ->modalHeading('Solicitud de Reserva')
                     ->modalWidth('lg')
                     ->form([
-                        // No solicitamos datos personales: los obtenemos de Auth::user()
                         Section::make('Detalles de la práctica')->schema([
                             Radio::make('project_type')
                                 ->label('Tipo de proyecto')
@@ -124,7 +132,6 @@ class BookingResource extends Resource
                         ]),
 
                         Section::make('Horario solicitado')->schema([
-                            // Mostrar campos como solo lectura
                             DateTimePicker::make('start_at')
                                 ->label('Inicio')
                                 ->default(fn(Schedule $record) => $record->start_at)
@@ -132,8 +139,8 @@ class BookingResource extends Resource
 
                             DateTimePicker::make('end_at')
                                 ->label('Fin')
-                                ->after('start_at')
                                 ->default(fn(Schedule $record) => $record->end_at)
+                                ->after('start_at')
                                 ->readOnly(),
                         ]),
                     ])
@@ -153,7 +160,7 @@ class BookingResource extends Resource
                             'applicants'       => $data['applicants'],
                             'research_name'    => $data['research_name'],
                             'advisor'          => $data['advisor'],
-                            'products'         => $data['products'], // se castea a array automáticamente
+                            'products'         => $data['products'],
                             'start_at'         => $data['start_at'],
                             'end_at'           => $data['end_at'],
                             'status'           => Booking::STATUS_PENDING,

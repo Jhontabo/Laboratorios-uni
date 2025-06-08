@@ -121,7 +121,8 @@ class CalendarWidget extends FullCalendarWidget
         $endDate   = Carbon::parse($schedule->end_at);
         $length    = $startDate->diffInMinutes($endDate);
         $until     = Carbon::parse($schedule->recurrence_until);
-        $days      = explode(',', $schedule->recurrence_days);
+        // Convertimos a enteros para comparar correctamente
+        $days      = array_map('intval', explode(',', $schedule->recurrence_days));
 
         foreach (CarbonPeriod::create($startDate, $until) as $date) {
             if (! in_array($date->dayOfWeek, $days, true)) {
@@ -561,11 +562,11 @@ class CalendarWidget extends FullCalendarWidget
             Section::make('Recurrencia')->columns(2)->schema([
                 Toggle::make('is_recurring')->label('Evento recurrente')->reactive(),
                 CheckboxList::make('recurrence_days')->label('Días de la semana')->options([
-                    '2' => 'Lunes',
-                    '3' => 'Martes',
-                    '4' => 'Miércoles',
-                    '5' => 'Jueves',
-                    '6' => 'Viernes',
+                    '1' => 'Lunes',
+                    '2' => 'Martes',
+                    '3' => 'Miércoles',
+                    '4' => 'Jueves',
+                    '5' => 'Viernes',
                 ])->columns(6)->visible(fn($get) => $get('is_recurring')),
                 DatePicker::make('recurrence_until')
                     ->label('Repetir hasta')

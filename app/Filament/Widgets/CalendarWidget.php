@@ -510,18 +510,28 @@ class CalendarWidget extends FullCalendarWidget
             'advisor'               => $record->unstructured->advisor          ?? null,
         ];
     }
-
-    /* -----------------------------------------------------------------
-     |  FORMULARIO PRINCIPAL
-     |-----------------------------------------------------------------*/
     public function getFormSchema(): array
     {
         return [
-            Toggle::make('is_structured')->label('¿Práctica estructurada?')->reactive()->default(true),
 
-            Section::make('PRÁCTICA ESTRUCTURADA')
+            /* ───────────────────────────────────────────────────────────────
+         |  Selector de tipo de práctica
+         ─────────────────────────────────────────────────────────────── */
+            Toggle::make('is_structured')
+                ->label('¿Práctica estructurada?')
+                ->reactive()
+                ->default(true)
+                ->inline(false),
+
+            /* ───────────────────────────────────────────────────────────────
+         |  PRÁCTICA ESTRUCTURADA
+         ─────────────────────────────────────────────────────────────── */
+            Section::make('Datos generales')
                 ->visible(fn($get) => $get('is_structured'))
-                ->columns(5)
+                ->columns([
+                    'sm' => 6,  // pantallas ≥640 px
+                    'xl' => 6,  // pantallas ≥1280 px
+                ])
                 ->schema([
                     Select::make('academic_program_name')
                         ->label('Programa académico')
@@ -530,52 +540,131 @@ class CalendarWidget extends FullCalendarWidget
                             'Ingeniería Industrial'      => 'Ingeniería Industrial',
                             'Contaduría Pública'         => 'Contaduría Pública',
                             'Administración de Empresas' => 'Administración de Empresas',
-                        ])->required()->columnSpan(5),
+                        ])
+                        ->required()
+                        ->columnSpan([
+                            'sm' => 6,   // fila completa en móviles
+                            'xl' => 4,   // 4 / 6 en escritorio
+                        ]),
 
                     Select::make('laboratory_id')
                         ->label('Espacio académico')
                         ->options(Laboratory::pluck('name', 'id'))
-                        ->required()->columnSpan(5),
+                        ->required()
+                        ->columnSpan([
+                            'sm' => 6,
+                            'xl' => 2,
+                        ]),
 
                     Select::make('semester')
                         ->label('Semestre')
                         ->options(array_combine(range(1, 10), range(1, 10)))
-                        ->required()->columnSpan(5),
+                        ->required()
+                        ->columnSpan([
+                            'sm' => 6,
+                            'xl' => 2,
+                        ]),
 
-                    TextInput::make('title')->label('Nombre de la práctica')->required()->columnSpan(5),
-                    TextInput::make('student_count')->label('Número de estudiantes')->numeric()->required()->columnSpan(3),
-                    TextInput::make('group_count')->label('Número de grupos')->numeric()->required()->columnSpan(3),
-
-                    Section::make('Horario estructurado')->columns(4)->schema([
-                        DateTimePicker::make('start_at')->label('Inicio')->required()->seconds(false),
-                        DateTimePicker::make('end_at')->label('Fin')->required()->seconds(false)->after('start_at'),
-                        ColorPicker::make('color')->label('Color')->default('#3b82f6'),
-                    ]),
+                    TextInput::make('title')
+                        ->label('Nombre de la práctica')
+                        ->required()
+                        ->columnSpan(6),
                 ]),
 
-            Section::make()
-                ->visible(fn($get) => ! $get('is_structured'))
-                ->columns(5)
+            Section::make('Participantes')
+                ->visible(fn($get) => $get('is_structured'))
+                ->columns(6)
                 ->schema([
-                    DateTimePicker::make('start_at')->label('Inicio')->required()->seconds(false),
-                    DateTimePicker::make('end_at')->label('Fin')->required()->seconds(false)->after('start_at'),
-                    ColorPicker::make('color')->label('Color')->default('#22c55e'),
+                    TextInput::make('student_count')
+                        ->label('Número de estudiantes')
+                        ->numeric()
+                        ->required()
+                        ->columnSpan(3),
+
+                    TextInput::make('group_count')
+                        ->label('Número de grupos')
+                        ->numeric()
+                        ->required()
+                        ->columnSpan(3),
                 ]),
 
-            Section::make('Recurrencia')->columns(2)->schema([
-                Toggle::make('is_recurring')->label('Evento recurrente')->reactive(),
-                CheckboxList::make('recurrence_days')->label('Días de la semana')->options([
-                    '1' => 'Lunes',
-                    '2' => 'Martes',
-                    '3' => 'Miércoles',
-                    '4' => 'Jueves',
-                    '5' => 'Viernes',
-                ])->columns(6)->visible(fn($get) => $get('is_recurring')),
-                DatePicker::make('recurrence_until')
-                    ->label('Repetir hasta')
-                    ->minDate(fn($get) => $get('start_at') ? Carbon::parse($get('start_at'))->addDay() : null)
-                    ->visible(fn($get) => $get('is_recurring')),
-            ]),
+            Section::make('Horario estructurado')
+                ->visible(fn($get) => $get('is_structured'))
+                ->columns(3)
+                ->schema([
+                    DateTimePicker::make('start_at')
+                        ->label('Inicio')
+                        ->required()
+                        ->seconds(false),
+
+                    DateTimePicker::make('end_at')
+                        ->label('Fin')
+                        ->required()
+                        ->seconds(false)
+                        ->after('start_at'),
+
+                    ColorPicker::make('color')
+                        ->label('Color')
+                        ->default('#3b82f6'),
+                ]),
+
+            /* ───────────────────────────────────────────────────────────────
+         |  PRÁCTICA NO ESTRUCTURADA
+         ─────────────────────────────────────────────────────────────── */
+            Section::make('Reserva libre')
+                ->visible(fn($get) => ! $get('is_structured'))
+                ->columns(3)
+                ->schema([
+                    DateTimePicker::make('start_at')
+                        ->label('Inicio')
+                        ->required()
+                        ->seconds(false),
+
+                    DateTimePicker::make('end_at')
+                        ->label('Fin')
+                        ->required()
+                        ->seconds(false)
+                        ->after('start_at'),
+
+                    ColorPicker::make('color')
+                        ->label('Color')
+                        ->default('#22c55e'),
+                ]),
+
+            /* ───────────────────────────────────────────────────────────────
+         |  Recurrencia
+         ─────────────────────────────────────────────────────────────── */
+            Section::make('Recurrencia')
+                ->columns(6)
+                ->schema([
+                    Toggle::make('is_recurring')
+                        ->label('Evento recurrente')
+                        ->reactive()
+                        ->inline(false)
+                        ->columnSpan(6),
+
+                    CheckboxList::make('recurrence_days')
+                        ->label('Días de la semana')
+                        ->options([
+                            '1' => 'Lunes',
+                            '2' => 'Martes',
+                            '3' => 'Miércoles',
+                            '4' => 'Jueves',
+                            '5' => 'Viernes',
+                        ])
+                        ->columns(5)
+                        ->visible(fn($get) => $get('is_recurring'))
+                        ->columnSpan(4),
+
+                    DatePicker::make('recurrence_until')
+                        ->label('Repetir hasta')
+                        ->minDate(
+                            fn($get) =>
+                            $get('start_at') ? Carbon::parse($get('start_at'))->addDay() : null
+                        )
+                        ->visible(fn($get) => $get('is_recurring'))
+                        ->columnSpan(2),
+                ]),
         ];
     }
 }

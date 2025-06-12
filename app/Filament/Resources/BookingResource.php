@@ -105,7 +105,7 @@ class BookingResource extends Resource
                                 ->required(),
 
                             TextInput::make('applicants')
-                                ->label('Solicitantes')
+                                ->label('Nombre de los solicitantes')
                                 ->required(),
 
                             TextInput::make('research_name')
@@ -113,7 +113,7 @@ class BookingResource extends Resource
                                 ->required(),
 
                             TextInput::make('advisor')
-                                ->label('Asesor')
+                                ->label('Nombre del asesor')
                                 ->required(),
                         ]),
 

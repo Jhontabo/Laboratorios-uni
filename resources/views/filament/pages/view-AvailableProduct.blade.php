@@ -1,20 +1,20 @@
 <x-filament-panels::page>
     <div class="space-y-6">
-        <!-- Header -->
+        <!-- Encabezado -->
         <div class="flex justify-between items-center">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                Product Details
+                Detalles del producto
             </h2>
         </div>
 
-        <!-- Information Card -->
+        <!-- Tarjeta de información -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                <!-- Column 1: Image and Basic Information -->
+                <!-- Columna 1: Imagen e información básica -->
                 <div class="md:col-span-1">
                     <div class="flex flex-col items-center space-y-4">
                         @if ($product->image)
-                            <img src="{{ Storage::url($product->image) }}" alt="Product Image"
+                            <img src="{{ Storage::url($product->image) }}" alt="Imagen del producto"
                                 class="w-48 h-48 rounded-lg object-cover border border-gray-200 dark:border-gray-700">
                         @else
                             <div
@@ -32,33 +32,33 @@
                                 {{ $product->name }}
                             </h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ $product->product_type }}
+                                {{ $product->product_type == 'equipment' ? 'Equipo' : ($product->product_type == 'supply' ? 'Insumo' : ucfirst($product->product_type)) }}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Column 2: Main Details -->
+                <!-- Columna 2: Detalles principales -->
                 <div class="md:col-span-2 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
-                            <p class="text-gray-900 dark:text-white">{{ $product->description ?? 'N/A' }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Descripción</p>
+                            <p class="text-gray-900 dark:text-white">{{ $product->description ?? 'No disponible' }}</p>
                         </div>
 
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Condition</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</p>
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                 @if ($product->status == 'new') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                                 @elseif($product->status == 'used') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                                 @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 @endif">
-                                {{ ucfirst($product->status) }}
+                                {{ $product->status == 'new' ? 'Nuevo' : ($product->status == 'used' ? 'Usado' : ucfirst($product->status)) }}
                             </span>
                         </div>
 
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Available Stock</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Cantidad disponible</p>
                             <p class="text-gray-900 dark:text-white flex items-center">
                                 {{ $product->available_quantity }}
                                 @if ($product->available_quantity > 10)
@@ -84,23 +84,23 @@
                         </div>
 
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Price</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Precio</p>
                             <p class="text-gray-900 dark:text-white">
                                 {{ number_format($product->unit_cost, 2, ',', '.') }} COP</p>
                         </div>
 
                         <div class="space-y-1">
-                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Serial Number</p>
-                            <p class="text-gray-900 dark:text-white font-mono">{{ $product->serial_number ?? 'N/A' }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de serie</p>
+                            <p class="text-gray-900 dark:text-white font-mono">{{ $product->serial_number ?? 'No disponible' }}</p>
                         </div>
                     </div>
 
-                    <!-- Additional Information -->
+                    <!-- Información adicional -->
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-1">
-                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Location</p>
-                                <p class="text-gray-900 dark:text-white">{{ $product->laboratory->location ?? 'N/A' }}
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ubicación</p>
+                                <p class="text-gray-900 dark:text-white">{{ $product->laboratory->location ?? 'No disponible' }}
                                 </p>
                             </div>
 

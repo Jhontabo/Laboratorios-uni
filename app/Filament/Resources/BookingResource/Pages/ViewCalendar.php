@@ -10,4 +10,5 @@ class ViewCalendar extends Page
     protected static string $resource = BookingResource::class;
     // Blade que renderiza SOLO el calendario
     protected static string $view = 'filament.pages.booking-calendar';
+    protected static ?string $title = 'Vista de calendario';
 }

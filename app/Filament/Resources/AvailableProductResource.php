@@ -19,7 +19,7 @@ class AvailableProductResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-m-shopping-cart';
     protected static ?string $navigationGroup = 'Prestamos';
     protected static ?string $navigationLabel = 'Solicitar préstamo';
-    protected static ?string $modelLabel = 'producto';
+    protected static ?string $modelLabel = 'Producto';
     protected static ?string $pluralLabel = 'Productos para préstamos';
 
     public static function getEloquentQuery(): Builder
@@ -34,9 +34,10 @@ class AvailableProductResource extends Resource
     {
         $user = auth()->user();
         return $user &&
-            !$user->hasRole('LABORATORISTA') &&
-            !$user->hasRole('COORDINADOR');
+            ! $user->hasRole('LABORATORISTA') &&
+            ! $user->hasRole('COORDINADOR');
     }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -67,10 +68,14 @@ class AvailableProductResource extends Resource
                     ->badge()
                     ->color(fn($state) => match ($state) {
                         'equipment' => 'info',
-                        'supply' => 'primary',
-                        default => 'gray',
+                        'supply'    => 'primary',
+                        default      => 'gray',
                     })
-                    ->formatStateUsing(fn($state) => ucfirst($state))
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'equipment' => 'Equipo',
+                        'supply'    => 'Insumo',
+                        default      => ucfirst($state),
+                    })
                     ->sortable(),
 
                 TextColumn::make('laboratory.name')
@@ -86,11 +91,7 @@ class AvailableProductResource extends Resource
                     ->modalHeading(fn($record) => "Detalles del producto: {$record->name}")
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Cerrar')
-                    ->modalContent(function ($record) {
-                        return view('filament.pages.view-AvailableProduct', [
-                            'product' => $record
-                        ]);
-                    }),
+                    ->modalContent(fn($record) => view('filament.pages.view-AvailableProduct', ['product' => $record])),
 
                 Tables\Actions\Action::make('requestLoan')
                     ->label('Solicitar')
@@ -106,6 +107,7 @@ class AvailableProductResource extends Resource
                                 ->body('Debe haber al menos 5 unidades disponibles para solicitar este producto.')
                                 ->danger()
                                 ->send();
+
                             return;
                         }
 
@@ -123,16 +125,6 @@ class AvailableProductResource extends Resource
                             ->send();
                     }),
             ])
-            ->headerActions([
-                Tables\Actions\Action::make('infoSelection')
-                    ->label('Cómo pedir un producto')
-                    ->color('gray')
-                    ->icon('heroicon-o-question-mark-circle')
-                    ->modalContent(view('filament.pages.instructions-request'))
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Entendido'),
-            ])
-            // Sin bulkActions
             ->emptyState(view('filament.pages.empty-state-products'))
             ->persistFiltersInSession()
             ->persistSearchInSession();

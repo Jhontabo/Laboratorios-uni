@@ -32,9 +32,13 @@ class CalendarWidget extends FullCalendarWidget
 {
     public Model|string|null $model = Schedule::class;
 
-    /* -----------------------------------------------------------------
-     |  VISIBILIDAD
-     |-----------------------------------------------------------------*/
+    public ?int $laboratoryId = null;
+
+    public function mount(): void
+    {
+        $this->laboratoryId = session('lab');   // ya lo pusiste en ScheduleCalendar
+    }
+
     public static function canView(): bool
     {
         if (request()->routeIs('filament.admin.pages.dashboard')) {
@@ -44,9 +48,6 @@ class CalendarWidget extends FullCalendarWidget
         return Auth::check() && Auth::user()->hasAnyRole(['ADMIN', 'COORDINADOR']);
     }
 
-    /* -----------------------------------------------------------------
-     |  CONFIGURACIÓN DE FULLCALENDAR
-     |-----------------------------------------------------------------*/
     public function config(): array
     {
         return [
@@ -64,15 +65,17 @@ class CalendarWidget extends FullCalendarWidget
         ];
     }
 
-    /* -----------------------------------------------------------------
-     |  CARGA DE EVENTOS SIN CÁLCULO AUTOMÁTICO DE HUECOS
-     |-----------------------------------------------------------------*/
     public function fetchEvents(array $fetchInfo): array
     {
         $start = Carbon::parse($fetchInfo['start']);
         $end   = Carbon::parse($fetchInfo['end']);
 
         $events = Schedule::query()
+
+            ->when(
+                $this->laboratoryId,                       // ← aplica el filtro solo si no es null
+                fn($q) => $q->where('laboratory_id', $this->laboratoryId)
+            )
             ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('start_at', [$start, $end])
                     ->orWhere(

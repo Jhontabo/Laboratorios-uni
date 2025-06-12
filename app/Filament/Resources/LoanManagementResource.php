@@ -143,7 +143,7 @@ class LoanManagementResource extends Resource
             ])
             ->actions([
                 Tables\Actions\Action::make('approve')
-                    ->label('Aprovado')
+                    ->label('Aprobar')
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->form([
@@ -184,7 +184,7 @@ class LoanManagementResource extends Resource
 
                             Notification::make()
                                 ->success()
-                                ->title('Prestamo aprovado')
+                                ->title('Prestamo aprobado')
                                 ->body($message)
                                 ->send();
                         });

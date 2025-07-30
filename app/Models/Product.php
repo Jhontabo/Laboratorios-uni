@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -85,6 +86,13 @@ class Product extends Model
         'min_voltage'           => 'float',
         'max_voltage'           => 'float',
     ];
+
+    public function bookings(): BelongsToMany
+{
+    return $this->belongsToMany(Booking::class)
+        ->withPivot(['start_at', 'end_at', 'status'])
+        ->withTimestamps();
+}
 
     // Relaciones
     public function schedules()

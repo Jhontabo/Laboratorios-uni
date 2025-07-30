@@ -8,6 +8,11 @@ use Filament\Widgets\ChartWidget;
 
 class BookingByLaboratoryChart extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['ADMIN','COORDINADOR','LABORATORISTA']);
+    }
+
     protected static ?string $heading = 'Reservas por laboratorio';
     protected static ?string $maxHeight = '300px';
     protected static ?int $sort = 3;

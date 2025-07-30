@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class BookingStatusDonutChart extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['ADMIN','COORDINADOR','LABORATORISTA']);
+    }
+
     protected static ?string $heading = 'Reservas por estado';
     protected static ?string $maxHeight = '300px';
     protected static ?int $sort = 2;
@@ -23,7 +28,7 @@ class BookingStatusDonutChart extends ChartWidget
         $totalBookings = $data->sum('total');
 
         return [
-            'labels' => $data->pluck('status')->map(fn($status) => strtoupper($status))->toArray(),
+            'labels' => $data->pluck('status')->map(fn ($status) => strtoupper($status))->toArray(),
             'datasets' => [
                 [
                     'label' => 'Total Bookings',

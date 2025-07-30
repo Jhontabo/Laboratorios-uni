@@ -6,7 +6,6 @@ use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 
 class ReadOnlyCalendarWidget extends CalendarWidget
 {
-
     public static function canView(): bool
     {
         // 1) Si estamos en la ruta del dashboard, no mostrar

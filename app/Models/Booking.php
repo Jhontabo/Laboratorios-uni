@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Booking extends Model
 {
@@ -83,4 +84,13 @@ class Booking extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+
+    public function products(): BelongsToMany
+{
+    return $this->belongsToMany(Product::class)
+        ->withPivot(['start_at', 'end_at', 'status'])
+        ->using(BookingProduct::class) // Opcional: modelo pivote personalizado
+        ->withTimestamps();
+}
 }

@@ -15,6 +15,10 @@ class StatsOverview extends BaseWidget
     protected ?string $description = 'Metricas clave del sistema';
     protected static ?int $sort = 1;
 
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['ADMIN','COORDINADOR','LABORATORISTA']);
+    }
     protected function getStats(): array
     {
         return [

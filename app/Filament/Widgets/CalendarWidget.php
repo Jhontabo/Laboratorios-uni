@@ -74,12 +74,12 @@ class CalendarWidget extends FullCalendarWidget
 
             ->when(
                 $this->laboratoryId,                       // ← aplica el filtro solo si no es null
-                fn($q) => $q->where('laboratory_id', $this->laboratoryId)
+                fn ($q) => $q->where('laboratory_id', $this->laboratoryId)
             )
             ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('start_at', [$start, $end])
                     ->orWhere(
-                        fn($q2) => $q2
+                        fn ($q2) => $q2
                             ->whereNotNull('recurrence_until')
                             ->where('recurrence_until', '>=', $start)
                             ->where('start_at', '<=', $end)
@@ -169,7 +169,7 @@ class CalendarWidget extends FullCalendarWidget
             }
 
             $dayEvents = $structuredEvents
-                ->filter(fn($e) => Carbon::parse($e['start'])->isSameDay($day))
+                ->filter(fn ($e) => Carbon::parse($e['start'])->isSameDay($day))
                 ->sortBy('start')
                 ->values();
 
@@ -270,7 +270,7 @@ class CalendarWidget extends FullCalendarWidget
                 ]);
             })
             ->form($this->getFormSchema())
-            ->using(fn(array $data) => $this->persistSchedule($data));
+            ->using(fn (array $data) => $this->persistSchedule($data));
     }
 
     private function persistSchedule(array $data): ?Schedule
@@ -333,7 +333,7 @@ class CalendarWidget extends FullCalendarWidget
                 DatePicker::make('start_range')->label('Desde')->required(),
                 DatePicker::make('end_range')->label('Hasta')->required()->after('start_range'),
             ])
-            ->action(fn(array $data) => $this->generateAndPersistFreeSlots($data));
+            ->action(fn (array $data) => $this->generateAndPersistFreeSlots($data));
     }
 
     private function makeClearFreeSlotsAction(): Action
@@ -363,7 +363,7 @@ class CalendarWidget extends FullCalendarWidget
             ->where(function ($q) use ($rangeStart, $rangeEnd) {
                 $q->whereBetween('start_at', [$rangeStart, $rangeEnd])
                     ->orWhere(
-                        fn($q2) => $q2
+                        fn ($q2) => $q2
                             ->whereNotNull('recurrence_until')
                             ->where('recurrence_until', '>=', $rangeStart)
                             ->where('start_at', '<=', $rangeEnd)
@@ -371,7 +371,7 @@ class CalendarWidget extends FullCalendarWidget
             })
             ->get()
             ->flatMap(
-                fn(Schedule $s) =>
+                fn (Schedule $s) =>
                 $s->recurrence_days
                     ? $this->generateRecurringEvents($s, $rangeStart, $rangeEnd)
                     : [$this->formatEvent($s)]
@@ -384,7 +384,7 @@ class CalendarWidget extends FullCalendarWidget
         foreach ($freeSlots as $slot) {
             $exists = Schedule::where('type', 'unstructured')
                 ->where('start_at', Carbon::parse($slot['start']))
-                ->where('end_at',   Carbon::parse($slot['end']))
+                ->where('end_at', Carbon::parse($slot['end']))
                 ->exists();
 
             if (! $exists) {
@@ -423,7 +423,7 @@ class CalendarWidget extends FullCalendarWidget
     {
         return EditAction::make()
             ->label('Editar')
-            ->visible(fn(?Schedule $r) => $r instanceof Schedule)
+            ->visible(fn (?Schedule $r) => $r instanceof Schedule)
             ->mountUsing(function (Schedule $record, Form $form, array $arguments): void {
                 $form->fill($this->mapRecordToFormData($record, $arguments));
             })
@@ -480,7 +480,7 @@ class CalendarWidget extends FullCalendarWidget
     {
         return DeleteAction::make()
             ->label('Eliminar')
-            ->visible(fn(?Schedule $r) => $r instanceof Schedule)
+            ->visible(fn (?Schedule $r) => $r instanceof Schedule)
             ->before(function (Schedule $record): void {
                 optional($record->{$record->type})->delete();
                 $record->delete();
@@ -527,7 +527,7 @@ class CalendarWidget extends FullCalendarWidget
          |  PRÁCTICA ESTRUCTURADA
          ─────────────────────────────────────────────────────────────── */
             Section::make('Datos generales')
-                ->visible(fn($get) => $get('is_structured'))
+                ->visible(fn ($get) => $get('is_structured'))
                 ->columns([
                     'sm' => 6,  // pantallas ≥640 px
                     'xl' => 6,  // pantallas ≥1280 px
@@ -572,7 +572,7 @@ class CalendarWidget extends FullCalendarWidget
                 ]),
 
             Section::make('Participantes')
-                ->visible(fn($get) => $get('is_structured'))
+                ->visible(fn ($get) => $get('is_structured'))
                 ->columns(6)
                 ->schema([
                     TextInput::make('student_count')
@@ -589,7 +589,7 @@ class CalendarWidget extends FullCalendarWidget
                 ]),
 
             Section::make('Horario estructurado')
-                ->visible(fn($get) => $get('is_structured'))
+                ->visible(fn ($get) => $get('is_structured'))
                 ->columns(3)
                 ->schema([
                     DateTimePicker::make('start_at')
@@ -612,7 +612,7 @@ class CalendarWidget extends FullCalendarWidget
          |  PRÁCTICA NO ESTRUCTURADA
          ─────────────────────────────────────────────────────────────── */
             Section::make('Reserva libre')
-                ->visible(fn($get) => ! $get('is_structured'))
+                ->visible(fn ($get) => ! $get('is_structured'))
                 ->columns(3)
                 ->schema([
                     DateTimePicker::make('start_at')
@@ -653,16 +653,16 @@ class CalendarWidget extends FullCalendarWidget
                             '5' => 'Viernes',
                         ])
                         ->columns(5)
-                        ->visible(fn($get) => $get('is_recurring'))
+                        ->visible(fn ($get) => $get('is_recurring'))
                         ->columnSpan(4),
 
                     DatePicker::make('recurrence_until')
                         ->label('Repetir hasta')
                         ->minDate(
-                            fn($get) =>
+                            fn ($get) =>
                             $get('start_at') ? Carbon::parse($get('start_at'))->addDay() : null
                         )
-                        ->visible(fn($get) => $get('is_recurring'))
+                        ->visible(fn ($get) => $get('is_recurring'))
                         ->columnSpan(2),
                 ]),
         ];

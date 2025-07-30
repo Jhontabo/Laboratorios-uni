@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Laboratory extends Model
 {
@@ -38,5 +39,10 @@ class Laboratory extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'laboratory_id'); // 'id_laboratory' es la clave foránea en la tabla schedules
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
     }
 }

@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\DB;
 
 class BookingTrendsAreaChart extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['ADMIN','COORDINADOR','LABORATORISTA']);
+    }
+
+
     protected static ?string $heading = 'Tendecias de reservas Mensuales';
     protected static ?string $maxHeight = '350px';
     protected static ?int $sort = 4;
@@ -29,7 +35,7 @@ class BookingTrendsAreaChart extends ChartWidget
         $data = $query->get();
 
         return [
-            'labels' => $data->pluck('date')->map(fn($date) => $this->formatDate($date))->toArray(),
+            'labels' => $data->pluck('date')->map(fn ($date) => $this->formatDate($date))->toArray(),
             'datasets' => [
                 [
                     'label' => 'Reservas',

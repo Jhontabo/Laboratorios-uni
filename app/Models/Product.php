@@ -88,11 +88,11 @@ class Product extends Model
     ];
 
     public function bookings(): BelongsToMany
-{
-    return $this->belongsToMany(Booking::class)
-        ->withPivot(['start_at', 'end_at', 'status'])
-        ->withTimestamps();
-}
+    {
+        return $this->belongsToMany(Booking::class)
+            ->withPivot(['start_at', 'end_at', 'status'])
+            ->withTimestamps();
+    }
 
     // Relaciones
     public function schedules()
@@ -124,5 +124,10 @@ class Product extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function equipmentDecommissions()
+    {
+        return $this->hasMany(EquipmentDecommission::class, 'product_id');
     }
 }

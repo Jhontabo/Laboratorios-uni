@@ -190,6 +190,10 @@ class ProductResource extends Resource
                                     'semestral' => 'Semestral',
                                     'anual' => 'Anual',
                                 ]),
+
+                            Toggle::make('available_for_loan')
+                                ->label('Disponible para Préstamo')
+                                ->default(true),
                         ]),
                     ]),
 
@@ -299,9 +303,6 @@ class ProductResource extends Resource
                                 ->displayFormat('d/m/Y')
                                 ->maxDate(now()),
 
-                            Toggle::make('available_for_loan')
-                                ->label('Disponible para Préstamo')
-                                ->default(true),
                         ]),
 
                         FileUpload::make('image')

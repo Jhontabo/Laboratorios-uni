@@ -49,8 +49,8 @@ class UsersSeeder extends Seeder
             ],
             [
                 'email' => 'laboratorista@ejemplo.com',
-                'name' => 'Laura',
-                'last_name' => 'García',
+                'name' => 'Estefany',
+                'last_name' => 'Lopez',
                 'phone' => '321654987',
                 'address' => 'Calle Laboratorio 789',
                 'role' => 'LABORATORISTA',
@@ -58,6 +58,80 @@ class UsersSeeder extends Seeder
 
 
             ],
+
+            [
+                'email' => 'laboratorista1@ejemplo.com',
+                'name' => 'Hugo',
+                'last_name' => 'Espinoza',
+                'phone' => '321654987',
+                'address' => 'Calle Laboratorio 789',
+                'role' => 'LABORATORISTA',
+                'document_number' => '123456789',
+
+
+            ],
+
+            [
+                'email' => 'laboratorista2@ejemplo.com',
+                'name' => 'Edith',
+                'last_name' => 'Santacruz',
+                'phone' => '321654987',
+                'address' => 'Calle Laboratorio 789',
+                'role' => 'LABORATORISTA',
+                'document_number' => '123456789',
+
+
+            ],
+
+            [
+                'email' => 'laboratorista3@ejemplo.com',
+                'name' => 'harol',
+                'last_name' => 'santacruz',
+                'phone' => '321654987',
+                'address' => 'calle laboratorio 789',
+                'role' => 'LABORATORISTA',
+                'document_number' => '123456789',
+
+
+            ],
+
+            [
+                'email' => 'laboratorista4@ejemplo.com',
+                'name' => 'Martin',
+                'last_name' => 'Moncayo',
+                'phone' => '321654987',
+                'address' => 'calle laboratorio 789',
+                'role' => 'LABORATORISTA',
+                'document_number' => '123456789',
+
+
+            ],
+
+
+            [
+                'email' => 'laboratorista5@ejemplo.com',
+                'name' => 'Jhon fredy',
+                'last_name' => 'Moncayo',
+                'phone' => '321654987',
+                'address' => 'calle laboratorio 789',
+                'role' => 'LABORATORISTA',
+                'document_number' => '123456789',
+
+
+            ],
+
+            [
+                'email' => 'laboratorista6@ejemplo.com',
+                'name' => 'Julian',
+                'last_name' => 'Reina',
+                'phone' => '321654987',
+                'address' => 'calle laboratorio 789',
+                'role' => 'LABORATORISTA',
+                'document_number' => '123456789',
+
+
+            ],
+
             [
                 'email' => 'estudiante@ejemplo.com',
                 'name' => 'Carlos',
@@ -69,28 +143,7 @@ class UsersSeeder extends Seeder
 
 
             ],
-            [
-                'email' => 'danielf.zapata221@umariana.edu.co',
-                'name' => 'Daniel',
-                'last_name' => 'Zapata',
-                'phone' => '741258963',
-                'address' => 'Avenida Docente 123',
-                'role' => 'DOCENTE',
-                'document_number' => '123456789',
 
-
-            ],
-            [
-                'email' => 'ivanda.martinez@umariana.edu.co',
-                'name' => 'Iván Darío',
-                'last_name' => 'Martínez',
-                'phone' => '852963741',
-                'address' => 'Calle Campus 789',
-                'role' => 'ESTUDIANTE',
-                'document_number' => '123456789',
-
-
-            ],
         ];
 
         foreach ($users as $data) {

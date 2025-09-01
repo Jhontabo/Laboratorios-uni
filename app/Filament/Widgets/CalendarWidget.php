@@ -74,12 +74,12 @@ class CalendarWidget extends FullCalendarWidget
 
             ->when(
                 $this->laboratoryId,                       // ← aplica el filtro solo si no es null
-                fn ($q) => $q->where('laboratory_id', $this->laboratoryId)
+                fn($q) => $q->where('laboratory_id', $this->laboratoryId)
             )
             ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('start_at', [$start, $end])
                     ->orWhere(
-                        fn ($q2) => $q2
+                        fn($q2) => $q2
                             ->whereNotNull('recurrence_until')
                             ->where('recurrence_until', '>=', $start)
                             ->where('start_at', '<=', $end)
@@ -169,7 +169,7 @@ class CalendarWidget extends FullCalendarWidget
             }
 
             $dayEvents = $structuredEvents
-                ->filter(fn ($e) => Carbon::parse($e['start'])->isSameDay($day))
+                ->filter(fn($e) => Carbon::parse($e['start'])->isSameDay($day))
                 ->sortBy('start')
                 ->values();
 
@@ -270,7 +270,7 @@ class CalendarWidget extends FullCalendarWidget
                 ]);
             })
             ->form($this->getFormSchema())
-            ->using(fn (array $data) => $this->persistSchedule($data));
+            ->using(fn(array $data) => $this->persistSchedule($data));
     }
 
     private function persistSchedule(array $data): ?Schedule
@@ -283,7 +283,7 @@ class CalendarWidget extends FullCalendarWidget
             return null;
         }
 
-        if ($end->lte($start) || $end->hour >= 16) {
+        if ($end->lte($start) || $end->hour > 16) {
             Notification::make()->title('Horario inválido')->body('Revisa rango y límite de hora.')->danger()->send();
             return null;
         }
@@ -333,7 +333,7 @@ class CalendarWidget extends FullCalendarWidget
                 DatePicker::make('start_range')->label('Desde')->required(),
                 DatePicker::make('end_range')->label('Hasta')->required()->after('start_range'),
             ])
-            ->action(fn (array $data) => $this->generateAndPersistFreeSlots($data));
+            ->action(fn(array $data) => $this->generateAndPersistFreeSlots($data));
     }
 
     private function makeClearFreeSlotsAction(): Action
@@ -363,7 +363,7 @@ class CalendarWidget extends FullCalendarWidget
             ->where(function ($q) use ($rangeStart, $rangeEnd) {
                 $q->whereBetween('start_at', [$rangeStart, $rangeEnd])
                     ->orWhere(
-                        fn ($q2) => $q2
+                        fn($q2) => $q2
                             ->whereNotNull('recurrence_until')
                             ->where('recurrence_until', '>=', $rangeStart)
                             ->where('start_at', '<=', $rangeEnd)
@@ -371,7 +371,7 @@ class CalendarWidget extends FullCalendarWidget
             })
             ->get()
             ->flatMap(
-                fn (Schedule $s) =>
+                fn(Schedule $s) =>
                 $s->recurrence_days
                     ? $this->generateRecurringEvents($s, $rangeStart, $rangeEnd)
                     : [$this->formatEvent($s)]
@@ -423,7 +423,7 @@ class CalendarWidget extends FullCalendarWidget
     {
         return EditAction::make()
             ->label('Editar')
-            ->visible(fn (?Schedule $r) => $r instanceof Schedule)
+            ->visible(fn(?Schedule $r) => $r instanceof Schedule)
             ->mountUsing(function (Schedule $record, Form $form, array $arguments): void {
                 $form->fill($this->mapRecordToFormData($record, $arguments));
             })
@@ -432,7 +432,7 @@ class CalendarWidget extends FullCalendarWidget
                 $start = Carbon::parse($data['start_at']);
                 $end   = Carbon::parse($data['end_at']);
 
-                if ($end->lte($start) || $end->hour >= 16) {
+                if ($end->lte($start) || $end->hour > 16) {
                     Notification::make()->title('Horario inválido')->body('Revisa hora de fin.')->danger()->send();
                     return;
                 }
@@ -480,7 +480,7 @@ class CalendarWidget extends FullCalendarWidget
     {
         return DeleteAction::make()
             ->label('Eliminar')
-            ->visible(fn (?Schedule $r) => $r instanceof Schedule)
+            ->visible(fn(?Schedule $r) => $r instanceof Schedule)
             ->before(function (Schedule $record): void {
                 optional($record->{$record->type})->delete();
                 $record->delete();
@@ -527,7 +527,7 @@ class CalendarWidget extends FullCalendarWidget
          |  PRÁCTICA ESTRUCTURADA
          ─────────────────────────────────────────────────────────────── */
             Section::make('Datos generales')
-                ->visible(fn ($get) => $get('is_structured'))
+                ->visible(fn($get) => $get('is_structured'))
                 ->columns([
                     'sm' => 6,  // pantallas ≥640 px
                     'xl' => 6,  // pantallas ≥1280 px
@@ -535,12 +535,38 @@ class CalendarWidget extends FullCalendarWidget
                 ->schema([
                     Select::make('academic_program_name')
                         ->label('Programa académico')
+
                         ->options([
-                            'Ingeniería de Sistemas'     => 'Ingeniería de Sistemas',
-                            'Ingeniería Industrial'      => 'Ingeniería Industrial',
-                            'Contaduría Pública'         => 'Contaduría Pública',
-                            'Administración de Empresas' => 'Administración de Empresas',
+                            // Facultad de Humanidades y Ciencias Sociales
+                            'Derecho'             => 'Derecho',
+                            'Trabajo Social'      => 'Trabajo Social',
+                            'Comunicación Social' => 'Comunicación Social',
+                            'Psicología'          => 'Psicología',
+
+                            // Facultad de Ciencias Contables, Económicas y Administrativas
+                            'Mercadeo'                           => 'Mercadeo',
+                            'Contaduría Pública'                 => 'Contaduría Pública',
+                            'Administración de Negocios Internacionales' => 'Administración de Negocios Internacionales',
+
+                            // Facultad de Educación
+                            'Licenciatura en Teología - NUEVO'   => 'Licenciatura en Teología - NUEVO',
+                            'Licenciatura en Educación Infantil' => 'Licenciatura en Educación Infantil',
+                            'Licenciatura en Educación Básica Primaria' => 'Licenciatura en Educación Básica Primaria',
+
+                            // Facultad de Ciencias de la Salud
+                            'Enfermería'           => 'Enfermería',
+                            'Terapia Ocupacional'  => 'Terapia Ocupacional',
+                            'Fisioterapia'         => 'Fisioterapia',
+                            'Nutrición y Dietética' => 'Nutrición y Dietética',
+
+                            // Facultad de Ingeniería
+                            'Ingeniería Mecatrónica' => 'Ingeniería Mecatrónica',
+                            'Ingeniería Civil'       => 'Ingeniería Civil',
+                            'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
+                            'Ingeniería Ambiental'   => 'Ingeniería Ambiental',
+                            'Ingeniería de Procesos' => 'Ingeniería de Procesos',
                         ])
+
                         ->required()
                         ->columnSpan([
                             'sm' => 6,   // fila completa en móviles
@@ -572,7 +598,7 @@ class CalendarWidget extends FullCalendarWidget
                 ]),
 
             Section::make('Participantes')
-                ->visible(fn ($get) => $get('is_structured'))
+                ->visible(fn($get) => $get('is_structured'))
                 ->columns(6)
                 ->schema([
                     TextInput::make('student_count')
@@ -589,7 +615,7 @@ class CalendarWidget extends FullCalendarWidget
                 ]),
 
             Section::make('Horario estructurado')
-                ->visible(fn ($get) => $get('is_structured'))
+                ->visible(fn($get) => $get('is_structured'))
                 ->columns(3)
                 ->schema([
                     DateTimePicker::make('start_at')
@@ -612,7 +638,7 @@ class CalendarWidget extends FullCalendarWidget
          |  PRÁCTICA NO ESTRUCTURADA
          ─────────────────────────────────────────────────────────────── */
             Section::make('Reserva libre')
-                ->visible(fn ($get) => ! $get('is_structured'))
+                ->visible(fn($get) => ! $get('is_structured'))
                 ->columns(3)
                 ->schema([
                     DateTimePicker::make('start_at')
@@ -653,16 +679,16 @@ class CalendarWidget extends FullCalendarWidget
                             '5' => 'Viernes',
                         ])
                         ->columns(5)
-                        ->visible(fn ($get) => $get('is_recurring'))
+                        ->visible(fn($get) => $get('is_recurring'))
                         ->columnSpan(4),
 
                     DatePicker::make('recurrence_until')
                         ->label('Repetir hasta')
                         ->minDate(
-                            fn ($get) =>
+                            fn($get) =>
                             $get('start_at') ? Carbon::parse($get('start_at'))->addDay() : null
                         )
-                        ->visible(fn ($get) => $get('is_recurring'))
+                        ->visible(fn($get) => $get('is_recurring'))
                         ->columnSpan(2),
                 ]),
         ];

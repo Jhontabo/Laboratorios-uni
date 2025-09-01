@@ -18,21 +18,24 @@ class LaboratoriesSeeder extends Seeder
         }
 
         $labNames = [
-            'Química',
-            'Física',
+            'Analisis Ambiental',
+            'Analisis Instrumental',
             'Biología y Biotecnología',
-            'Análisis Instrumental',
-            'Operaciones Unitarias',
-            'Máquinas y Herramientas',
-            'Electrónica',
-            'Automatización',
-            'Fluidos',
-            'Procesos y Plantas Piloto',
-            'Materiales',
+            'Calidad de aire',
+            'Electronica',
+            'Fisica',
             'Geotecnia',
-            'Vías y Pavimentos',
-            'Robótica y Control',
-            'Análisis Ambiental',
+            'Ingenieria Hidraulica',
+            'Materiales',
+            'Maquinas y Herramientas',
+            'Mecanica de Fluidos',
+            'Procesos fisicos Quimicos y Biologicos',
+            'Procesos y Planta piloto',
+            'Quimica',
+            'Ciencia,Tecnologia,Ingenieria,Artes y Matematicas -STEAM',
+            'Topografia y Cartografia',
+            'Vias y Pavimentos',
+            'Automatizacion'
         ];
 
         foreach ($labNames as $name) {

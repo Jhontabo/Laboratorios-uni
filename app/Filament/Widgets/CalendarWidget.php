@@ -45,7 +45,7 @@ class CalendarWidget extends FullCalendarWidget
       return false;
     }
 
-    return Auth::check() && Auth::user()->hasAnyRole(['ADMIN', 'COORDINADOR']);
+    return Auth::check() && Auth::user()->hasAnyRole(['ADMIN', 'COORDINADOR', 'LABORATORISTA']);
   }
 
   public function config(): array

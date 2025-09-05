@@ -676,11 +676,11 @@ class CalendarWidget extends FullCalendarWidget
           CheckboxList::make('recurrence_days')
             ->label('Días de la semana')
             ->options([
-              '2' => 'Lunes',
-              '3' => 'Martes',
-              '4' => 'Miércoles',
-              '5' => 'Jueves',
-              '6' => 'Viernes',
+              '1' => 'Lunes',
+              '2' => 'Martes',
+              '3' => 'Miércoles',
+              '4' => 'Jueves',
+              '5' => 'Viernes',
             ])
             ->columns(8)
             ->visible(fn($get) => $get('is_recurring'))

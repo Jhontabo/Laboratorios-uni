@@ -532,10 +532,7 @@ class CalendarWidget extends FullCalendarWidget
          ─────────────────────────────────────────────────────────────── */
       Section::make('Datos generales')
         ->visible(fn($get) => $get('is_structured'))
-        ->columns([
-          'sm' => 9,  // pantallas ≥640 px
-          'xl' => 9,  // pantallas ≥1280 px
-        ])
+        ->columns(9)
         ->schema([
           Select::make('academic_program_name')
             ->label('Programa académico')
@@ -570,30 +567,21 @@ class CalendarWidget extends FullCalendarWidget
               'Ingeniería Ambiental'   => 'Ingeniería Ambiental',
               'Ingeniería de Procesos' => 'Ingeniería de Procesos',
             ])
-
             ->required()
-            ->columnSpan([
-              'sm' => 9,   // fila completa en móviles
-              'xl' => 7,   // 4 / 6 en escritorio
-            ]),
+            ->columnSpan(3),
 
           Select::make('laboratory_id')
             ->label('Espacio académico')
             ->options(Laboratory::pluck('name', 'id'))
             ->required()
-            ->columnSpan([
-              'sm' => 9,
-              'xl' => 5,
-            ]),
+            ->columnSpan(3),
+
 
           Select::make('semester')
             ->label('Semestre')
             ->options(array_combine(range(1, 10), range(1, 10)))
             ->required()
-            ->columnSpan([
-              'sm' => 9,
-              'xl' => 5,
-            ]),
+            ->columnSpan(3),
 
           TextInput::make('title')
             ->label('Nombre de la práctica')
@@ -609,18 +597,18 @@ class CalendarWidget extends FullCalendarWidget
             ->label('Número de estudiantes')
             ->numeric()
             ->required()
-            ->columnSpan(6),
+            ->columnSpan(4),
 
           TextInput::make('group_count')
             ->label('Número de grupos')
             ->numeric()
             ->required()
-            ->columnSpan(6),
+            ->columnSpan(4),
         ]),
 
       Section::make('Horario estructurado')
         ->visible(fn($get) => $get('is_structured'))
-        ->columns(6)
+        ->columns(3)
         ->schema([
           DateTimePicker::make('start_at')
             ->label('Inicio')
@@ -665,13 +653,13 @@ class CalendarWidget extends FullCalendarWidget
          |  Recurrencia
          ─────────────────────────────────────────────────────────────── */
       Section::make('Recurrencia')
-        ->columns(9)
+        ->columns(12)
         ->schema([
           Toggle::make('is_recurring')
             ->label('Evento recurrente')
             ->reactive()
             ->inline(false)
-            ->columnSpan(9),
+            ->columnSpan(12),
 
           CheckboxList::make('recurrence_days')
             ->label('Días de la semana')
@@ -682,7 +670,7 @@ class CalendarWidget extends FullCalendarWidget
               '4' => 'Jueves',
               '5' => 'Viernes',
             ])
-            ->columns(8)
+            ->columns(5)
             ->visible(fn($get) => $get('is_recurring'))
             ->columnSpan(7),
 

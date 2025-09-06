@@ -329,8 +329,9 @@ class CalendarWidget extends FullCalendarWidget
       ->icon('heroicon-o-sparkles')
       ->color('success')
       ->form([
-        DatePicker::make('start_range')->label('Desde')->required(),
-        DatePicker::make('end_range')->label('Hasta')->required()->after('start_range'),
+        DatePicker::make('start_range')->label('Desde')->displayFormat('d/m/Y')->format('d/m/Y')->required(),
+        DatePicker::make('end_range')->label('Hasta')->displayFormat('d/m/Y')->format('d/m/Y')->required()->after('start_range'),
+
       ])
       ->action(fn(array $data) => $this->generateAndPersistFreeSlots($data));
   }
@@ -680,6 +681,7 @@ class CalendarWidget extends FullCalendarWidget
               fn($get) =>
               $get('start_at') ? Carbon::parse($get('start_at'))->addDay() : null
             )
+            ->displayFormat('d/m/Y')
             ->visible(fn($get) => $get('is_recurring'))
             ->columnSpan(5),
         ]),

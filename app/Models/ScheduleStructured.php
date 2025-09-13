@@ -7,20 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class ScheduleStructured extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $table = 'schedule_structured';
+  protected $table = 'schedule_structured';
 
-    protected $fillable = [
-        'schedule_id',
-        'academic_program_name', // reemplazo
-        'semester',
-        'student_count',
-        'group_count',
-    ];
+  protected $fillable = [
+    'schedule_id',
+    'academic_program_name', // reemplazo
+    'semester',
+    'student_count',
+    'group_count',
+  ];
 
-    public function schedule()
-    {
-        return $this->belongsTo(Schedule::class, 'schedule_id'); // Especifica la clave foránea
-    }
+  public function schedule()
+  {
+    return $this->belongsTo(Schedule::class, 'schedule_id'); // Especifica la clave foránea
+  }
 }

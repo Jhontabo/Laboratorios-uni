@@ -40,10 +40,10 @@ class UsersSeeder extends Seeder
         'email' => 'jonathanc.burbano221@umariana.edu.co',
         'name' => 'Jonathan',
         'last_name' => 'Burbano',
-        'phone' => '987654321',
-        'address' => 'Calle Real 456',
+        'phone' => '987654322',
+        'address' => 'Calle Real 457',
         'role' => 'ADMIN',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -51,10 +51,10 @@ class UsersSeeder extends Seeder
         'email' => 'laboratorista@ejemplo.com',
         'name' => 'Estefany',
         'last_name' => 'Lopez',
-        'phone' => '321654987',
-        'address' => 'Calle Laboratorio 789',
+        'phone' => '321654988',
+        'address' => 'Calle Laboratorio 790',
         'role' => 'LABORATORISTA',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -63,10 +63,10 @@ class UsersSeeder extends Seeder
         'email' => 'hespinosa@umariana.edu.co',
         'name' => 'Hugo',
         'last_name' => 'Espinoza',
-        'phone' => '321654987',
-        'address' => 'Calle Laboratorio 789',
+        'phone' => '321654988',
+        'address' => 'Calle Laboratorio 790',
         'role' => 'LABORATORISTA',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -75,10 +75,10 @@ class UsersSeeder extends Seeder
         'email' => 'esantacruz@umariana.edu.co',
         'name' => 'Edith',
         'last_name' => 'Santacruz',
-        'phone' => '321654987',
-        'address' => 'Calle Laboratorio 789',
+        'phone' => '321654988',
+        'address' => 'Calle Laboratorio 790',
         'role' => 'LABORATORISTA',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -87,10 +87,10 @@ class UsersSeeder extends Seeder
         'email' => 'hgsantacruz@umariana.edu.co',
         'name' => 'harol',
         'last_name' => 'santacruz',
-        'phone' => '321654987',
-        'address' => 'calle laboratorio 789',
+        'phone' => '321654988',
+        'address' => 'calle laboratorio 790',
         'role' => 'LABORATORISTA',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -99,10 +99,10 @@ class UsersSeeder extends Seeder
         'email' => 'mmoncayo@umariana.edu.co',
         'name' => 'Martin',
         'last_name' => 'Moncayo',
-        'phone' => '321654987',
-        'address' => 'calle laboratorio 789',
+        'phone' => '321654988',
+        'address' => 'calle laboratorio 790',
         'role' => 'LABORATORISTA',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -112,10 +112,10 @@ class UsersSeeder extends Seeder
         'email' => 'Jhonperez@umariana.edu.co',
         'name' => 'Jhon fredy',
         'last_name' => 'Moncayo',
-        'phone' => '321654987',
-        'address' => 'calle laboratorio 789',
+        'phone' => '321654988',
+        'address' => 'calle laboratorio 790',
         'role' => 'LABORATORISTA',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -124,10 +124,10 @@ class UsersSeeder extends Seeder
         'email' => 'julireina@umariana.edu.co',
         'name' => 'Julian',
         'last_name' => 'Reina',
-        'phone' => '321654987',
-        'address' => 'calle laboratorio 789',
+        'phone' => '321654988',
+        'address' => 'calle laboratorio 790',
         'role' => 'LABORATORISTA',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -136,10 +136,10 @@ class UsersSeeder extends Seeder
         'email' => 'coordlabing@umariana.edu.co',
         'name' => 'admin',
         'last_name' => 'laboratorios',
-        'phone' => '654987321',
-        'address' => 'Avenida Universidad 456',
+        'phone' => '654987322',
+        'address' => 'Avenida Universidad 457',
         'role' => 'COORDINADOR',
-        'document_number' => '123456789',
+        'document_number' => '123456790',
 
 
       ],
@@ -155,7 +155,7 @@ class UsersSeeder extends Seeder
           'phone' => $data['phone'],
           'address' => $data['address'],
           'status' => 'active',
-          'document_number' => '110005671'
+          'document_number' => '110005672'
         ]
       );
 

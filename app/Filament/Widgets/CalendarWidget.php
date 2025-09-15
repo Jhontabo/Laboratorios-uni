@@ -355,9 +355,8 @@ class CalendarWidget extends FullCalendarWidget
 
   private function generateAndPersistFreeSlots(array $data): void
   {
-    $rangeStart = Carbon::parse($data['start_range'])->startOfDay();
-    $rangeEnd   = Carbon::parse($data['end_range'])->endOfDay();
-
+    $rangeStart = Carbon::createFromFormat('d/m/Y', $data['start_range'])->startOfDay();
+    $rangeEnd   = Carbon::createFromFormat('d/m/Y', $data['end_range'])->endOfDay();
 
     $structuredEvents = Schedule::query()
       ->where('type', 'structured')

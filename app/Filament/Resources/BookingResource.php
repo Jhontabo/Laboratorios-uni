@@ -237,7 +237,6 @@ class BookingResource extends Resource
           ->label('Ver Calendario')
           ->icon('heroicon-o-calendar')
           ->url(static::getUrl('calendar'))
-          ->openUrlInNewTab(),
       ]);
   }
 

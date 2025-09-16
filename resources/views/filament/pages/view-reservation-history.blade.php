@@ -59,24 +59,42 @@
                     <p>{{ $record->advisor ?? 'No especificado' }}</p>
                 </div>
             </div>
-            <div class="mt-4">
-                <p class="font-medium mb-1">Equipos, materiales e insumos solicitados:</p>
-                @php
-                    $nombresProductos = [];
-                    if (!empty($record->products)) {
-                        $nombresProductos = \App\Models\Product::whereIn('id', $record->products)->pluck('name')->toArray();
-                    }
-                @endphp
-                @if (count($nombresProductos))
-                    <ul class="list-disc ml-6">
-                        @foreach ($nombresProductos as $nombre)
-                            <li>{{ $nombre }}</li>
-                        @endforeach
-                    </ul>
-                @else
-                    <p>No se especificaron equipos, materiales ni insumos.</p>
-                @endif
-            </div>
+            
+<div class="mt-4">
+    <p class="font-medium mb-1">Equipos, materiales e insumos solicitados:</p>
+    @php
+        $nombresProductos = [];
+
+        if (!empty($record->products)) {
+            // Si es string en formato JSON → lo decodificamos
+            if (is_string($record->products) && str_starts_with(trim($record->products), '[')) {
+                $productosIds = json_decode($record->products, true);
+            }
+            // Si es string de IDs separados por coma → lo convertimos en array
+            elseif (is_string($record->products)) {
+                $productosIds = array_map('trim', explode(',', $record->products));
+            }
+            // Si ya es array
+            else {
+                $productosIds = $record->products;
+            }
+
+            if (!empty($productosIds) && is_array($productosIds)) {
+                $nombresProductos = \App\Models\Product::whereIn('id', $productosIds)->pluck('name')->toArray();
+            }
+        }
+    @endphp
+
+    @if (!empty($nombresProductos))
+        <ul class="list-disc ml-6">
+            @foreach ($nombresProductos as $nombre)
+                <li>{{ $nombre }}</li>
+            @endforeach
+        </ul>
+    @else
+        <p>No se especificaron equipos, materiales ni insumos.</p>
+    @endif
+</div>
         </x-filament::card>
 
         <!-- Información del Laboratorio y Horario -->

@@ -8,6 +8,7 @@ use App\Filament\Widgets\CalendarWidget;
 use App\Models\Booking;
 use App\Models\Product;
 use App\Models\Schedule;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\{
   DateTimePicker,
@@ -52,10 +53,9 @@ class BookingResource extends Resource
         Schedule::where('type', 'unstructured')
           ->whereBetween('start_at', [$today, $limit])
           ->orderBy('start_at')
-          ->with('laboratory') // Cargar la relación laboratory
+          ->with('laboratory')
       )
       ->columns([
-        // Mostrar el nombre del laboratorio en lugar del título
         TextColumn::make('laboratory.name')
           ->label('Espacio Académico')
           ->sortable()
@@ -71,11 +71,10 @@ class BookingResource extends Resource
           ->sortable()
           ->dateTime('d/m/Y H:i'),
 
-        // Opcional: mantener el título si es necesario
         TextColumn::make('title')
           ->label('Título/Descripción')
           ->sortable()
-          ->toggleable(isToggledHiddenByDefault: true), // Oculto por defecto
+          ->toggleable(isToggledHiddenByDefault: true),
       ])
       ->actions([
         TableAction::make('reservar')
@@ -94,12 +93,10 @@ class BookingResource extends Resource
                 ->columns(2)
                 ->required(),
 
-              // Mostrar el nombre del laboratorio (solo lectura)
               Placeholder::make('laboratory_display')
                 ->label('Espacio académico')
                 ->content(fn(Schedule $record) => $record->laboratory->name ?? 'No asignado'),
 
-              // Campo oculto para enviar el laboratory_id
               Hidden::make('laboratory_id')
                 ->default(fn(Schedule $record) => $record->laboratory_id)
                 ->required(),
@@ -108,7 +105,7 @@ class BookingResource extends Resource
                 ->label('Programa académico')
                 ->options([
                   'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
-                  'Ingeniería Industrial' => 'Ingeniería Industrial',
+                  'Ingeniería Industrial' => 'Ingeniería de Industrial',
                   'Contaduría Pública' => 'Contaduría Pública',
                   'Administración de Empresas' => 'Administración de Empresas',
                 ])
@@ -119,16 +116,55 @@ class BookingResource extends Resource
                 ->options(array_combine(range(1, 10), range(1, 10)))
                 ->required(),
 
-              TextInput::make('applicants')
+              Select::make('applicants')
                 ->label('Nombre de los solicitantes')
+                ->multiple()
+                ->searchable()
+                ->options(function () {
+                  return User::all()
+                    ->mapWithKeys(fn($user) => [
+                      $user->id => "{$user->name} {$user->last_name} - {$user->email}"
+                    ])
+                    ->toArray();
+                })
+                ->getSearchResultsUsing(function (string $search) {
+                  return User::where('name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->limit(10)
+                    ->get()
+                    ->mapWithKeys(fn($user) => [
+                      $user->id => "{$user->name} {$user->last_name} - {$user->email}"
+                    ])
+                    ->toArray();
+                })
                 ->required(),
 
               TextInput::make('research_name')
                 ->label('Nombre de la investigación')
                 ->required(),
 
-              TextInput::make('advisor')
+              Select::make('advisor')
                 ->label('Nombre del asesor')
+                ->searchable()
+                ->options(function () {
+                  return User::all()
+                    ->mapWithKeys(fn($user) => [
+                      $user->id => "{$user->name} {$user->last_name} - {$user->email}"
+                    ])
+                    ->toArray();
+                })
+                ->getSearchResultsUsing(function (string $search) {
+                  return User::where('name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->limit(10)
+                    ->get()
+                    ->mapWithKeys(fn($user) => [
+                      $user->id => "{$user->name} {$user->last_name} - {$user->email}"
+                    ])
+                    ->toArray();
+                })
                 ->required(),
             ]),
 
@@ -138,8 +174,7 @@ class BookingResource extends Resource
                 ->multiple()
                 ->searchable()
                 ->options(
-                  fn(Schedule $record) => Product::with('laboratory')
-                    ->where('laboratory_id', $record->laboratory_id)
+                  fn() => Product::with('laboratory')
                     ->get()
                     ->mapWithKeys(fn($p) => [
                       $p->id => "{$p->name} — {$p->laboratory->name}",
@@ -164,20 +199,32 @@ class BookingResource extends Resource
           ->action(function (Schedule $record, array $data, TableAction $action): void {
             $user = Auth::user();
 
+            // Obtener nombres de usuarios seleccionados
+            $applicantNames = User::whereIn('id', $data['applicants'])
+              ->get()
+              ->map(fn($user) => "{$user->name} {$user->last_name}")
+              ->implode(', ');
+
+            $advisorUser = User::find($data['advisor']);
+            $advisorName = $advisorUser ? "{$advisorUser->name} {$advisorUser->last_name}" : '';
+
+            // Convertir array de productos a JSON
+            $productsJson = json_encode($data['products']);
+
             Booking::create([
               'schedule_id' => $record->id,
               'user_id' => $user->id,
-              'first_name' => $user->first_name ?? $user->name,
-              'last_name' => $user->last_name ?? null,
+              'name' => $user->name,                    // Cambiado: name en lugar de first_name
+              'last_name' => $user->last_name,
               'email' => $user->email,
               'project_type' => $data['project_type'],
               'laboratory_id' => $data['laboratory_id'],
               'academic_program' => $data['academic_program'],
               'semester' => $data['semester'],
-              'applicants' => $data['applicants'],
+              'applicants' => $applicantNames,          // Solo texto, no IDs
               'research_name' => $data['research_name'],
-              'advisor' => $data['advisor'],
-              'products' => $data['products'],
+              'advisor' => $advisorName,                // Solo nombre, no ID
+              'products' => $productsJson,              // JSON encoded
               'start_at' => $data['start_at'],
               'end_at' => $data['end_at'],
               'status' => Booking::STATUS_PENDING,

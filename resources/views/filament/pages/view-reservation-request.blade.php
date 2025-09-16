@@ -69,24 +69,32 @@
                     </p>
                 </div>
             </div>
-            <div class="mt-4">
-                <p class="font-medium mb-1">Equipos, materiales e insumos solicitados:</p>
-                @php
-                    $nombresProductos = [];
-                    if (!empty($record->products)) {
-                        $nombresProductos = \App\Models\Product::whereIn('id', $record->products)->pluck('name')->toArray();
-                    }
-                @endphp
-                @if (count($nombresProductos))
-                    <ul class="list-disc ml-6">
-                        @foreach ($nombresProductos as $nombre)
-                            <li>{{ $nombre }}</li>
-                        @endforeach
-                    </ul>
-                @else
-                    <p>No se especificaron equipos, materiales ni insumos.</p>
-                @endif
-            </div>
+            
+<div class="mt-4">
+    <p class="font-medium mb-1">Equipos, materiales e insumos solicitados:</p>
+    @php
+        $nombresProductos = [];
+
+        if (!empty($record->products)) {
+            // Convertir string separado por comas a array si es necesario
+            $ids = is_array($record->products)
+                ? $record->products
+                : explode(',', $record->products);
+
+            $nombresProductos = \App\Models\Product::whereIn('id', $ids)->pluck('name')->toArray();
+        }
+    @endphp
+
+    @if (!empty($nombresProductos))
+        <ul class="list-disc ml-6">
+            @foreach ($nombresProductos as $nombre)
+                <li>{{ $nombre }}</li>
+            @endforeach
+        </ul>
+    @else
+        <p>No se especificaron equipos, materiales ni insumos.</p>
+    @endif
+</div>
         </x-filament::card>
 
         <!-- Información del Laboratorio y Horario -->

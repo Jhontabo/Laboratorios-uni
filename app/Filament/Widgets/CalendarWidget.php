@@ -152,7 +152,7 @@ class CalendarWidget extends FullCalendarWidget
   }
 
   /**
-   * Genera los espacios libres entre 09 y 16 h para cada día.
+   * Genera los espacios libres entre 07 y 16 h para cada día.
    */
   protected function generateFreeSlots(
     \Illuminate\Support\Collection $structuredEvents,
@@ -172,7 +172,7 @@ class CalendarWidget extends FullCalendarWidget
         ->sortBy('start')
         ->values();
 
-      $dayStart = $day->copy()->setTime(9, 0);
+      $dayStart = $day->copy()->setTime(7, 0);
       $dayEnd   = $day->copy()->setTime(18, 0);
       $cursor   = $dayStart->copy();
 
@@ -333,7 +333,19 @@ class CalendarWidget extends FullCalendarWidget
         DatePicker::make('end_range')->label('Hasta')->displayFormat('d/m/Y')->format('d/m/Y')->required()->after('start_range'),
 
       ])
-      ->action(fn(array $data) => $this->generateAndPersistFreeSlots($data));
+      ->modalWidth('sm')
+      ->action(function (array $data) {
+        foreach (Laboratory::all() as $lab) {
+          $this->laboratoryId = $lab->id;
+          $this->generateAndPersistFreeSlots($data);
+        }
+      })
+      ->action(function (array $data) {
+        foreach (Laboratory::all() as $lab) {
+          $this->laboratoryId = $lab->id;
+          $this->generateAndPersistFreeSlots($data);
+        }
+      });
   }
 
   private function makeClearFreeSlotsAction(): Action
@@ -353,21 +365,24 @@ class CalendarWidget extends FullCalendarWidget
       });
   }
 
+
   private function generateAndPersistFreeSlots(array $data): void
   {
-    $rangeStart = Carbon::createFromFormat('d/m/Y', $data['start_range'])->startOfDay();
-    $rangeEnd   = Carbon::createFromFormat('d/m/Y', $data['end_range'])->endOfDay();
+
+
+    $rangeStart = Carbon::createFromFormat('d/m/Y', $data['start_range'])->setTime(7, 0, 0);
+    $rangeEnd   = Carbon::createFromFormat('d/m/Y', $data['end_range'])->setTime(16, 0, 0);
 
     $structuredEvents = Schedule::query()
       ->where('type', 'structured')
       ->when(
         $this->laboratoryId,
-        fn($q) => $q->where('laboratory_id', $this->laboratoryId) // <- filtro por laboratorio
+        fn($q) => $q->where('laboratory_id', $this->laboratoryId) // filtro por laboratorio
       )
       ->where(function ($q) use ($rangeStart, $rangeEnd) {
         $q->whereBetween('start_at', [$rangeStart, $rangeEnd])
-          ->orWhere(function ($q5) use ($rangeStart, $rangeEnd) {
-            $q5->whereNotNull('recurrence_until')
+          ->orWhere(function ($q8) use ($rangeStart, $rangeEnd) {
+            $q8->whereNotNull('recurrence_until')
               ->where('recurrence_until', '>=', $rangeStart)
               ->where('start_at', '<=', $rangeEnd);
           });
@@ -381,14 +396,14 @@ class CalendarWidget extends FullCalendarWidget
       )
       ->values();
 
-
     $freeSlots = $this->generateFreeSlots($structuredEvents, $rangeStart, $rangeEnd);
 
-    $created = 4;
+    $created = 1;
     foreach ($freeSlots as $slot) {
       $exists = Schedule::where('type', 'unstructured')
         ->where('start_at', Carbon::parse($slot['start']))
         ->where('end_at', Carbon::parse($slot['end']))
+        ->where('laboratory_id', $this->laboratoryId) // 🔑 importante
         ->exists();
 
       if (! $exists) {
@@ -397,7 +412,7 @@ class CalendarWidget extends FullCalendarWidget
           'title'         => 'Disponible',
           'start_at'      => Carbon::parse($slot['start']),
           'end_at'        => Carbon::parse($slot['end']),
-          'color'         => '#26c55e',
+          'color'         => '#29c55e',
           'user_id'       => Auth::id(),
           'laboratory_id' => $this->laboratoryId,
         ]);
@@ -436,7 +451,7 @@ class CalendarWidget extends FullCalendarWidget
         $start = Carbon::parse($data['start_at']);
         $end   = Carbon::parse($data['end_at']);
 
-        if ($end->lte($start) || $end->hour > 20) {
+        if ($end->lte($start) || $end->hour > 23) {
           Notification::make()->title('Horario inválido')->body('Revisa hora de fin.')->danger()->send();
           return;
         }
@@ -532,7 +547,7 @@ class CalendarWidget extends FullCalendarWidget
          ─────────────────────────────────────────────────────────────── */
       Section::make('Datos generales')
         ->visible(fn($get) => $get('is_structured'))
-        ->columns(10)
+        ->columns(13)
         ->schema([
           Select::make('academic_program_name')
             ->label('Programa académico')
@@ -568,69 +583,46 @@ class CalendarWidget extends FullCalendarWidget
               'Ingeniería de Procesos' => 'Ingeniería de Procesos',
             ])
             ->required()
-            ->columnSpan(4),
+            ->columnSpan(7),
 
           Select::make('laboratory_id')
             ->label('Espacio académico')
             ->options(Laboratory::pluck('name', 'id'))
             ->required()
-            ->columnSpan(4),
+            ->columnSpan(7),
 
 
           Select::make('semester')
             ->label('Semestre')
             ->options(array_combine(range(1, 10), range(1, 10)))
             ->required()
-            ->columnSpan(4),
+            ->columnSpan(7),
 
           TextInput::make('title')
             ->label('Nombre de la práctica')
             ->required()
-            ->columnSpan(10),
+            ->columnSpan(13),
         ]),
 
       Section::make('Participantes')
         ->visible(fn($get) => $get('is_structured'))
-        ->columns(10)
+        ->columns(13)
         ->schema([
           TextInput::make('student_count')
             ->label('Número de estudiantes')
             ->numeric()
             ->required()
-            ->columnSpan(5),
+            ->columnSpan(8),
 
           TextInput::make('group_count')
             ->label('Número de grupos')
             ->numeric()
             ->required()
-            ->columnSpan(5),
+            ->columnSpan(8),
         ]),
 
       Section::make('Horario estructurado')
         ->visible(fn($get) => $get('is_structured'))
-        ->columns(4)
-        ->schema([
-          DateTimePicker::make('start_at')
-            ->label('Inicio')
-            ->required()
-            ->seconds(false),
-
-          DateTimePicker::make('end_at')
-            ->label('Fin')
-            ->required()
-            ->seconds(false)
-            ->after('start_at'),
-
-          ColorPicker::make('color')
-            ->label('Color')
-            ->default('#7b82f6'),
-        ]),
-
-      /* ───────────────────────────────────────────────────────────────
-         |  PRÁCTICA NO ESTRUCTURADA
-         ─────────────────────────────────────────────────────────────── */
-      Section::make('Reserva libre')
-        ->visible(fn($get) => ! $get('is_structured'))
         ->columns(7)
         ->schema([
           DateTimePicker::make('start_at')
@@ -646,34 +638,57 @@ class CalendarWidget extends FullCalendarWidget
 
           ColorPicker::make('color')
             ->label('Color')
-            ->default('#26c55e'),
+            ->default('#10b82f6'),
+        ]),
+
+      /* ───────────────────────────────────────────────────────────────
+         |  PRÁCTICA NO ESTRUCTURADA
+         ─────────────────────────────────────────────────────────────── */
+      Section::make('Reserva libre')
+        ->visible(fn($get) => ! $get('is_structured'))
+        ->columns(10)
+        ->schema([
+          DateTimePicker::make('start_at')
+            ->label('Inicio')
+            ->required()
+            ->seconds(false),
+
+          DateTimePicker::make('end_at')
+            ->label('Fin')
+            ->required()
+            ->seconds(false)
+            ->after('start_at'),
+
+          ColorPicker::make('color')
+            ->label('Color')
+            ->default('#29c55e'),
         ]),
 
       /* ───────────────────────────────────────────────────────────────
          |  Recurrencia
          ─────────────────────────────────────────────────────────────── */
       Section::make('Recurrencia')
-        ->columns(13)
+        ->columns(16)
         ->schema([
           Toggle::make('is_recurring')
             ->label('Evento recurrente')
             ->reactive()
             ->inline(false)
-            ->columnSpan(13),
+            ->columnSpan(16),
 
           CheckboxList::make('recurrence_days')
             ->label('Días de la semana')
             ->options([
-              '2' => 'Lunes',
-              '3' => 'Martes',
-              '4' => 'Miércoles',
-              '5' => 'Jueves',
-              '6' => 'Viernes',
-              '7' => 'Sabados'
+              '5' => 'Lunes',
+              '6' => 'Martes',
+              '7' => 'Miércoles',
+              '8' => 'Jueves',
+              '9' => 'Viernes',
+              '10' => 'Sabados'
             ])
-            ->columns(6)
+            ->columns(9)
             ->visible(fn($get) => $get('is_recurring'))
-            ->columnSpan(8),
+            ->columnSpan(11),
 
           DatePicker::make('recurrence_until')
             ->label('Repetir hasta')
@@ -683,7 +698,7 @@ class CalendarWidget extends FullCalendarWidget
             )
             ->displayFormat('d/m/Y')
             ->visible(fn($get) => $get('is_recurring'))
-            ->columnSpan(6),
+            ->columnSpan(9),
         ]),
     ];
   }

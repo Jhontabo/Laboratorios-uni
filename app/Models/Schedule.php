@@ -76,7 +76,7 @@ class Schedule extends Model
     return $this->belongsTo(Laboratory::class);
   }
 
-  public function bookings()
+  public function booking()
   {
     return $this->hasMany(Booking::class, 'schedule_id');
   }

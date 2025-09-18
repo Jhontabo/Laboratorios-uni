@@ -77,6 +77,7 @@ class CalendarWidget extends FullCalendarWidget
         fn($q) => $q->where('laboratory_id', $this->laboratoryId)
       )
       ->where(function ($q) use ($start, $end) {
+        // Esta parte para las fechas está bien, la dejamos igual
         $q->whereBetween('start_at', [$start, $end])
           ->orWhere(function ($q2) use ($start, $end) {
             $q2->whereNotNull('recurrence_until')
@@ -84,7 +85,18 @@ class CalendarWidget extends FullCalendarWidget
               ->where('start_at', '<=', $end);
           });
       })
-      ->get()
+      ->where(function ($query) { // <-- INICIA EL NUEVO FILTRO
+        // Condición 1: Tráeme todos los horarios de clases (estructurados)
+        $query->where('type', 'structured')
+          // Condición 2: O...
+          ->orWhere(function ($subQuery) {
+            // Tráeme los horarios disponibles (no estructurados)
+            $subQuery->where('type', 'unstructured')
+              // PERO SOLO si NO tienen una reserva asociada.
+              ->whereDoesntHave('booking');
+          });
+      }) // <-- TERMINA EL NUEVO FILTRO
+      ->get() // Ahora el ->get() recibe los datos ya filtrados.
       ->flatMap(function (Schedule $s) use ($start, $end) {
         return $s->recurrence_days
           ? $this->generateRecurringEvents($s, $start, $end)

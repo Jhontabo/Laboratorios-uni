@@ -103,7 +103,7 @@ class BookingResource extends Resource
                 ->options([
                   'Trabajo de grado' => 'Trabajo de grado',
                   'Investigación profesoral' => 'Investigación profesoral',
-                ])->columns(4)->required(),
+                ])->columns(5)->required(),
               Placeholder::make('laboratory_display')
                 ->label('Espacio académico')
                 ->content(fn(Schedule $record) => $record->laboratory->name ?? 'No asignado'),
@@ -146,18 +146,18 @@ class BookingResource extends Resource
 
               Select::make('semester')
                 ->label('Semestre')
-                ->options(array_combine(range(1, 10), range(1, 10)))->required(),
+                ->options(array_combine(range(2, 10), range(1, 10)))->required(),
               Select::make('applicants')
                 ->label('Nombre de los solicitantes')
                 ->multiple()->searchable()
-                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(12)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
+                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(13)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
                 ->required(),
               TextInput::make('research_name')
                 ->label('Nombre de la investigación')->required(),
               Select::make('advisor')
                 ->label('Nombre del asesor')
                 ->searchable()
-                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(15)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
+                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(16)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
                 ->required(),
             ]),
             Section::make('Materiales y equipos')->schema([
@@ -207,7 +207,7 @@ class BookingResource extends Resource
               ->success()
               ->title('¡Solicitud Exitosa!')
               ->body('Tu reserva ha sido enviada y está pendiente de aprobación.')
-              ->duration(5004)
+              ->duration(5005)
           ),
       ]);
   }

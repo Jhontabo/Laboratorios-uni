@@ -17,7 +17,7 @@ use Filament\Forms\Components\{
   Select,
   TextInput
 };
-use Filament\Notifications\Notification; // Importante para la notificación
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
@@ -50,32 +50,49 @@ class BookingResource extends Resource
       ->query(
         Schedule::where('type', 'unstructured')
           ->whereBetween('start_at', [$today, $limit])
-          ->whereDoesntHave('booking')
           ->orderBy('start_at')
-          ->with('laboratory')
+          ->with(['laboratory', 'booking']) // 👈 carga también las reservas
       )
       ->columns([
         TextColumn::make('laboratory.name')
           ->label('Espacio Académico')
           ->sortable()
-          ->searchable(),
+          ->searchable()
+          ->badge()
+          ->color(
+            fn(Schedule $record): string =>
+            $record->booking && $record->booking->isNotEmpty() ? 'gray' : 'success'
+          )
+          ->formatStateUsing(
+            fn(Schedule $record) =>
+            $record->laboratory->name .
+              ($record->booking && $record->booking->isNotEmpty() ? ' (Ocupado)' : ' (Libre)')
+          ),
+
         TextColumn::make('start_at')
           ->label('Inicio')
           ->sortable()
-          ->formatStateUsing(fn(string $state): string => Carbon::parse($state)->locale('es')->translatedFormat('l, d \d\e F \d\e Y - g:i A')),
+          ->formatStateUsing(
+            fn(string $state): string =>
+            Carbon::parse($state)->locale('es')->translatedFormat('l, d \d\e F \d\e Y - g:i A')
+          ),
+
         TextColumn::make('end_at')
           ->label('Fin')
           ->sortable()
-          ->formatStateUsing(fn(string $state): string => Carbon::parse($state)->locale('es')->translatedFormat('l, d \d\e F \d\e Y - g:i A')),
-        TextColumn::make('title')
-          ->label('Título/Descripción')
-          ->sortable()
-          ->toggleable(isToggledHiddenByDefault: true),
+          ->formatStateUsing(
+            fn(string $state): string =>
+            Carbon::parse($state)->locale('es')->translatedFormat('l, d \d\e F \d\e Y - g:i A')
+          ),
       ])
       ->actions([
         TableAction::make('reservar')
           ->label('Reservar')
           ->button()
+          ->disabled(
+            fn(Schedule $record): bool =>
+            $record->booking && $record->booking->isNotEmpty()
+          )
           ->modalHeading('Solicitud de Reserva')
           ->modalWidth('lg')
           ->form([
@@ -86,34 +103,61 @@ class BookingResource extends Resource
                 ->options([
                   'Trabajo de grado' => 'Trabajo de grado',
                   'Investigación profesoral' => 'Investigación profesoral',
-                ])->columns(2)->required(),
+                ])->columns(4)->required(),
               Placeholder::make('laboratory_display')
                 ->label('Espacio académico')
                 ->content(fn(Schedule $record) => $record->laboratory->name ?? 'No asignado'),
               Hidden::make('laboratory_id')
                 ->default(fn(Schedule $record) => $record->laboratory_id)->required(),
+
               Select::make('academic_program')
                 ->label('Programa académico')
                 ->options([
-                  'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
-                  'Ingeniería Industrial' => 'Ingeniería de Industrial',
+                  // Facultad de Humanidades y Ciencias Sociales
+                  'Derecho' => 'Derecho',
+                  'Trabajo Social' => 'Trabajo Social',
+                  'Comunicación Social' => 'Comunicación Social',
+                  'Psicología' => 'Psicología',
+
+                  // Facultad de Ciencias Contables, Económicas y Administrativas
+                  'Mercadeo' => 'Mercadeo',
                   'Contaduría Pública' => 'Contaduría Pública',
-                  'Administración de Empresas' => 'Administración de Empresas',
-                ])->required(),
+                  'Administración de Negocios Internacionales' => 'Administración de Negocios Internacionales',
+
+                  // Facultad de Educación
+                  'Licenciatura en Teología' => 'Licenciatura en Teología',
+                  'Licenciatura en Educación Infantil' => 'Licenciatura en Educación Infantil',
+                  'Licenciatura en Educación Básica Primaria' => 'Licenciatura en Educación Básica Primaria',
+
+                  // Facultad de Ciencias de la Salud
+                  'Enfermería' => 'Enfermería',
+                  'Terapia Ocupacional' => 'Terapia Ocupacional',
+                  'Fisioterapia' => 'Fisioterapia',
+                  'Nutrición y Dietética' => 'Nutrición y Dietética',
+
+                  // Facultad de Ingeniería
+                  'Ingeniería Mecatrónica' => 'Ingeniería Mecatrónica',
+                  'Ingeniería Civil' => 'Ingeniería Civil',
+                  'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
+                  'Ingeniería Ambiental' => 'Ingeniería Ambiental',
+                  'Ingeniería de Procesos' => 'Ingeniería de Procesos',
+                ])
+                ->required(),
+
               Select::make('semester')
                 ->label('Semestre')
                 ->options(array_combine(range(1, 10), range(1, 10)))->required(),
               Select::make('applicants')
                 ->label('Nombre de los solicitantes')
                 ->multiple()->searchable()
-                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(10)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
+                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(12)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
                 ->required(),
               TextInput::make('research_name')
                 ->label('Nombre de la investigación')->required(),
               Select::make('advisor')
                 ->label('Nombre del asesor')
                 ->searchable()
-                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(10)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
+                ->getSearchResultsUsing(fn(string $search) => User::where('name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")->limit(15)->get()->mapWithKeys(fn($user) => [$user->id => "{$user->name} {$user->last_name} - {$user->email}"]))
                 ->required(),
             ]),
             Section::make('Materiales y equipos')->schema([
@@ -163,7 +207,7 @@ class BookingResource extends Resource
               ->success()
               ->title('¡Solicitud Exitosa!')
               ->body('Tu reserva ha sido enviada y está pendiente de aprobación.')
-              ->duration(5000)
+              ->duration(5004)
           ),
       ]);
   }

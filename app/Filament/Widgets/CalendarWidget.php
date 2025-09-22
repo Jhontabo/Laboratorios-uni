@@ -105,7 +105,7 @@ class CalendarWidget extends FullCalendarWidget
     if ($schedule->type === 'unstructured') {
 
       // CAMBIAMOS LA CONDICIÓN AQUÍ
-      if ($schedule->booking->isNotEmpty()) { // Usamos isNotEmpty() para verificar si la colección de reservas no está vacía
+      if ($schedule->booking->where('status', 'approved')->isNotEmpty()) { // Usamos isNotEmpty() para verificar si la colección de reservas no está vacía
         return [
           'id'            => $schedule->id,
           'title'         => 'Reservado', // <-- Título cambiado

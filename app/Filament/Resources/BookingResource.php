@@ -59,14 +59,16 @@ class BookingResource extends Resource
           ->sortable()
           ->searchable()
           ->badge()
+          // ✅ CAMBIO 1: El color ahora depende del estado 'approved'
           ->color(
             fn(Schedule $record): string =>
-            $record->booking && $record->booking->isNotEmpty() ? 'gray' : 'success'
+            $record->booking->where('status', 'approved')->isNotEmpty() ? 'gray' : 'success'
           )
+          // ✅ CAMBIO 2: El texto (Ocupado/Libre) también depende del estado 'approved'
           ->formatStateUsing(
             fn(Schedule $record) =>
             $record->laboratory->name .
-              ($record->booking && $record->booking->isNotEmpty() ? ' (Ocupado)' : ' (Libre)')
+              ($record->booking->where('status', 'approved')->isNotEmpty() ? ' (Ocupado)' : ' (Libre)')
           ),
 
         TextColumn::make('start_at')
@@ -89,9 +91,10 @@ class BookingResource extends Resource
         TableAction::make('reservar')
           ->label('Reservar')
           ->button()
+          // ✅ CAMBIO 3: El botón solo se desactiva si hay una reserva 'approved'
           ->disabled(
             fn(Schedule $record): bool =>
-            $record->booking && $record->booking->isNotEmpty()
+            $record->booking->where('status', 'approved')->isNotEmpty()
           )
           ->modalHeading('Solicitud de Reserva')
           ->modalWidth('lg')
@@ -113,29 +116,20 @@ class BookingResource extends Resource
               Select::make('academic_program')
                 ->label('Programa académico')
                 ->options([
-                  // Facultad de Humanidades y Ciencias Sociales
                   'Derecho' => 'Derecho',
                   'Trabajo Social' => 'Trabajo Social',
                   'Comunicación Social' => 'Comunicación Social',
                   'Psicología' => 'Psicología',
-
-                  // Facultad de Ciencias Contables, Económicas y Administrativas
                   'Mercadeo' => 'Mercadeo',
                   'Contaduría Pública' => 'Contaduría Pública',
                   'Administración de Negocios Internacionales' => 'Administración de Negocios Internacionales',
-
-                  // Facultad de Educación
                   'Licenciatura en Teología' => 'Licenciatura en Teología',
                   'Licenciatura en Educación Infantil' => 'Licenciatura en Educación Infantil',
                   'Licenciatura en Educación Básica Primaria' => 'Licenciatura en Educación Básica Primaria',
-
-                  // Facultad de Ciencias de la Salud
                   'Enfermería' => 'Enfermería',
                   'Terapia Ocupacional' => 'Terapia Ocupacional',
                   'Fisioterapia' => 'Fisioterapia',
                   'Nutrición y Dietética' => 'Nutrición y Dietética',
-
-                  // Facultad de Ingeniería
                   'Ingeniería Mecatrónica' => 'Ingeniería Mecatrónica',
                   'Ingeniería Civil' => 'Ingeniería Civil',
                   'Ingeniería de Sistemas' => 'Ingeniería de Sistemas',
@@ -146,7 +140,7 @@ class BookingResource extends Resource
 
               Select::make('semester')
                 ->label('Semestre')
-                ->options(array_combine(range(2, 10), range(1, 10)))->required(),
+                ->options(array_combine(range(1, 10), range(1, 10)))->required(),
               Select::make('applicants')
                 ->label('Nombre de los solicitantes')
                 ->multiple()->searchable()
@@ -201,7 +195,7 @@ class BookingResource extends Resource
               'status' => Booking::STATUS_PENDING,
             ]);
           })
-          ->successRedirectUrl(url()->previous()) // Refresca la tabla a su estado anterior
+          ->successRedirectUrl(url()->previous())
           ->successNotification(
             Notification::make()
               ->success()

@@ -656,22 +656,26 @@ class CalendarWidget extends FullCalendarWidget
 
       Section::make('Horario estructurado')
         ->visible(fn($get) => $get('is_structured'))
-        ->columns(8)
+        ->columns(12)
         ->schema([
           DateTimePicker::make('start_at')
             ->label('Inicio')
             ->required()
-            ->seconds(false),
+            ->seconds(false)
+            ->columnSpan(5),
 
           DateTimePicker::make('end_at')
             ->label('Fin')
             ->required()
             ->seconds(false)
-            ->after('start_at'),
+            ->after('start_at')
+            ->columnSpan(5),
+
 
           ColorPicker::make('color')
             ->label('Color')
-            ->default('#11b82f6'),
+            ->default('#11b82f6')
+            ->columnSpan(5),
         ]),
 
       /* ───────────────────────────────────────────────────────────────
@@ -679,22 +683,28 @@ class CalendarWidget extends FullCalendarWidget
          ─────────────────────────────────────────────────────────────── */
       Section::make('Reserva libre')
         ->visible(fn($get) => ! $get('is_structured'))
-        ->columns(11)
+        ->columns(12)
         ->schema([
           DateTimePicker::make('start_at')
             ->label('Inicio')
             ->required()
-            ->seconds(false),
+            ->seconds(false)
+            ->columnSpan(5),
+
 
           DateTimePicker::make('end_at')
             ->label('Fin')
             ->required()
             ->seconds(false)
-            ->after('start_at'),
+            ->after('start_at')
+            ->columnSpan(5),
 
           ColorPicker::make('color')
             ->label('Color')
-            ->default('#30c55e'),
+            ->default('#30c55e')
+            ->columnSpan(2),
+
+
         ]),
 
       /* ───────────────────────────────────────────────────────────────

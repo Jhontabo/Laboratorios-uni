@@ -36,7 +36,7 @@ class CalendarWidget extends FullCalendarWidget
 
   public function mount(): void
   {
-    $this->laboratoryId = session('lab');   // ya lo pusiste en ScheduleCalendar
+    $this->laboratoryId = session('lab');
   }
 
   public static function canView(): bool
@@ -72,7 +72,7 @@ class CalendarWidget extends FullCalendarWidget
     $end   = Carbon::parse($fetchInfo['end']);
 
     $events = Schedule::query()
-      ->with('booking') // <-- AÑADIMOS ESTO para eficiencia
+      ->with('booking')
       ->when(
         $this->laboratoryId,
         fn($q) => $q->where('laboratory_id', $this->laboratoryId)
@@ -85,7 +85,7 @@ class CalendarWidget extends FullCalendarWidget
               ->where('start_at', '<=', $end);
           });
       })
-      // HEMOS ELIMINADO EL FILTRO whereDoesntHave DE AQUÍ
+
       ->get()
       ->flatMap(function (Schedule $s) use ($start, $end) {
         return $s->recurrence_days
@@ -466,9 +466,40 @@ class CalendarWidget extends FullCalendarWidget
   protected function modalActions(): array
   {
     return [
+      $this->makeFreeUpSlotAction(),
       $this->makeEditAction(),
       $this->makeDeleteAction(),
     ];
+  }
+
+  private function makeFreeUpSlotAction(): Action
+  {
+    return Action::make('freeUpSlot')
+      ->label('Liberar Horario')
+      ->icon('heroicon-o-lock-open')
+      ->color('success')
+      // El botón solo será visible si el horario tiene una reserva aprobada.
+      ->visible(function (?Schedule $record): bool {
+        if (!$record) {
+          return false;
+        }
+        // Reutilizamos la misma lógica que muestra el evento como "Reservado"
+        return $record->booking()->where('status', 'approved')->exists();
+      })
+      ->requiresConfirmation() // Pide confirmación antes de ejecutar
+      ->modalHeading('¿Liberar este horario?')
+      ->modalDescription('Esta acción eliminará la reserva actual y el espacio volverá a estar disponible. Esta acción no se puede deshacer.')
+      ->action(function (Schedule $record): void {
+        // Busca y elimina la reserva aprobada asociada a este horario
+        $record->booking()->where('status', 'approved')->delete();
+
+        // Notifica al usuario que la acción fue exitosa
+        Notification::make()
+          ->title('Horario Liberado')
+          ->body('El espacio ahora está disponible para nuevas reservas.')
+          ->success()
+          ->send();
+      });
   }
 
   private function makeEditAction(): EditAction

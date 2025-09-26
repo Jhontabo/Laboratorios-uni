@@ -51,7 +51,7 @@
                     <p>
                         {{
                             $record->applicant_name
-                                ?? trim(($record->first_name ?? '') . ' ' . ($record->last_name ?? ''))
+                                ?? trim(($record->name ?? '') . ' ' . ($record->last_name ?? ''))
                                 ?? 'No especificado'
                         }}
                     </p>
@@ -153,7 +153,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <p class="font-medium">Nombre:</p>
-                    <p>{{ $record->first_name }}</p>
+                    <p>{{ $record->name }}</p>
                 </div>
                 <div>
                     <p class="font-medium">Apellido:</p>
